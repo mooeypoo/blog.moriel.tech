@@ -4,12 +4,55 @@
       v-if="display.xs"
       v-model="navdrawer"
     >
+      <v-list>
+        <v-list-item>
+          <template #prepend>
+            <v-avatar>
+              <v-img
+                alt="Moriel Schottlender"
+                src="/gravatar.jpg"
+              />
+            </v-avatar>
+          </template>
+        </v-list-item>
+        <v-list-item
+          href="#"
+          @click="$router.push({ path: '/', query: { era: $route.query.era } }); $event.preventDefault()"
+        >
+          <v-list-item-title class="text-h6">
+            Moriel Schottlender
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            Human-centered software
+          </v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
+
+      <v-divider />
+
       <v-list density="compact" active-color="pink-accent-3">
         <v-list-item to="/posts" @click="navdrawer = false">
           <v-list-item-title>Posts</v-list-item-title>
         </v-list-item>
         <v-list-item to="/tags" @click="navdrawer = false">
           <v-list-item-title>Tags</v-list-item-title>
+        </v-list-item>
+        <v-divider class="my-2" />
+        <v-list-item
+          :href="mainSiteUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          @click="navdrawer = false"
+        >
+          <v-list-item-title>About me</v-list-item-title>
+        </v-list-item>
+        <v-list-item
+          :href="contactUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          @click="navdrawer = false"
+        >
+          <v-list-item-title>Contact</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -44,6 +87,29 @@
           Tags
         </v-btn>
       </v-btn-toggle>
+      <v-spacer />
+      <v-btn
+        v-if="!display.xs"
+        variant="text"
+        :href="mainSiteUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        size="small"
+        append-icon="mdi-open-in-new"
+      >
+        About me
+      </v-btn>
+      <v-btn
+        v-if="!display.xs"
+        variant="text"
+        :href="contactUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        size="small"
+        append-icon="mdi-open-in-new"
+      >
+        Contact
+      </v-btn>
       <v-spacer />
       <v-switch
         v-model="isDark"
@@ -84,6 +150,8 @@ import { useDisplaySSRSafe } from '~/composables/useDisplaySSRSafe'
 import Footer from '~/components/Footer.vue'
 
 const title = 'Moriel Writes Tech'
+const mainSiteUrl = 'https://moriel.tech'
+const contactUrl = 'https://moriel.tech/contact'
 const route = useRoute()
 const { display } = useDisplaySSRSafe()
 const navdrawer = ref(false)

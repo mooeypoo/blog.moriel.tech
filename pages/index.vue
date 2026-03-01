@@ -11,11 +11,11 @@
           />
         </v-avatar>
         <div class="home-intro">
-          <h1 class="text-h4 text-md-h3 font-weight-medium mb-3">
-            Welcome
-          </h1>
+          <h2 class="text-h4 text-md-h3 font-weight-medium mb-3">
+            Hi, I'm Moriel
+          </h2>
           <p class="text-body1 text-medium-emphasis">
-            This is my tech blog. I write about software, tools, and things I’m working on.
+            I create human-centered software. This is where I write about my experiences, thoughts, and learnings.
           </p>
         </div>
       </div>
