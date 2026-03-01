@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <h1 class="text-h4 mb-4">Latest posts</h1>
+  <div class="py-8">
+    <h1 class="text-h5 mb-6">Latest posts</h1>
+    <v-divider class="mb-4" />
     <v-list v-if="posts && posts.length">
       <v-list-item
         v-for="post in posts"
@@ -19,7 +20,8 @@
       No posts yet.
     </p>
     <p v-else>Loading…</p>
-    <v-btn v-if="posts && posts.length" to="/posts" variant="text" class="mt-4">
+    <v-divider v-if="posts && posts.length" class="my-4" />
+    <v-btn v-if="posts && posts.length" to="/posts" variant="text" class="mt-2">
       All posts →
     </v-btn>
   </div>
