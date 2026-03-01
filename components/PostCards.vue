@@ -33,7 +33,7 @@
         </v-card-actions>
       </v-card>
     </div>
-    <v-btn to="/posts" variant="text" class="mt-4">
+    <v-btn v-if="showAllPostsLink" to="/posts" variant="text" class="mt-4">
       All posts →
     </v-btn>
   </div>
@@ -53,6 +53,10 @@ const props = defineProps({
   pending: {
     type: Boolean,
     default: false
+  },
+  showAllPostsLink: {
+    type: Boolean,
+    default: true
   }
 })
 

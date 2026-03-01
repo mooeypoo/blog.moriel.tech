@@ -1,43 +1,58 @@
 <template>
   <div>
     <h1 class="text-h4 mb-4">All posts</h1>
-    <v-list v-if="posts && posts.length">
-      <v-list-item
-        v-for="post in posts"
-        :key="post._path"
-        :to="postLink(post)"
-        class="mb-2"
-      >
-        <template #title>{{ post.title }}</template>
-        <template #subtitle>
-          <span v-if="post.date">{{ formatDate(post.date) }}</span>
-          <span v-if="post.description"> — {{ post.description }}</span>
-        </template>
-      </v-list-item>
-    </v-list>
-    <p v-else-if="!pending" class="text-medium-emphasis">
-      No posts yet.
-    </p>
-    <p v-else>Loading…</p>
+    <PostCards
+      :posts="posts ?? []"
+      :pending="pending"
+      :show-all-posts-link="false"
+    />
+    <div v-if="totalPages > 1" class="d-flex justify-center mt-6">
+      <v-pagination
+        :length="totalPages"
+        :model-value="page"
+        :total-visible="7"
+        show-first-last-page
+        @update:model-value="goToPage"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-const { data: posts, pending } = await useAsyncData('all-posts', () =>
+const route = useRoute()
+const router = useRouter()
+
+const pageSize = 10
+const page = computed(() => Math.max(1, parseInt(route.query.page, 10) || 1))
+
+const { data: posts, pending } = await useAsyncData(
+  () => `posts-page-${page.value}`,
+  () =>
+    queryContent('posts')
+      .where({ draft: { $ne: true } })
+      .sort({ date: -1 })
+      .skip((page.value - 1) * pageSize)
+      .limit(pageSize)
+      .find()
+)
+
+const { data: totalPostsList } = await useAsyncData('posts-total', () =>
   queryContent('posts')
     .where({ draft: { $ne: true } })
-    .sort({ date: -1 })
+    .only(['_path'])
     .find()
 )
 
-function postLink (post) {
-  const path = post._path || ''
-  return path.startsWith('/') ? path : `/posts/${path}`
-}
+const totalPosts = computed(() => totalPostsList.value?.length ?? 0)
+const totalPages = computed(() => Math.ceil(totalPosts.value / pageSize))
 
-function formatDate (d) {
-  if (!d) return ''
-  const date = new Date(d)
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+function goToPage (newPage) {
+  const query = { ...route.query }
+  if (newPage === 1) {
+    delete query.page
+  } else {
+    query.page = String(newPage)
+  }
+  router.push({ path: '/posts', query })
 }
 </script>
