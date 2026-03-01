@@ -65,12 +65,12 @@
         @click="goTo('/')"
       />
       <v-app-bar-title
-        v-if="!display.xs"
+        class="app-bar-title"
         @click="goTo('/')"
       >
         {{ title }}
       </v-app-bar-title>
-      <v-spacer v-if="!display.xs" />
+      <v-spacer />
       <v-btn-toggle
         v-if="!display.xs"
         v-model="navMenu"
@@ -109,6 +109,17 @@
         append-icon="mdi-open-in-new"
       >
         Contact
+      </v-btn>
+      <v-btn
+        v-if="!display.xs"
+        variant="text"
+        href="https://www.youtube.com/@MorielTech"
+        target="_blank"
+        rel="noopener noreferrer"
+        size="small"
+        append-icon="mdi-open-in-new"
+      >
+        YouTube
       </v-btn>
       <v-spacer />
       <v-switch
@@ -175,6 +186,22 @@ const isDark = computed({
 </script>
 
 <style scoped>
+.app-bar-title {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@media (max-width: 599px) {
+  .app-bar-title {
+    font-size: 0.75rem;
+  }
+}
+.app-bar-title :deep(*) {
+  overflow: visible;
+  text-overflow: clip;
+}
+
 .layout-sticky-footer {
   min-height: 100vh;
   min-height: 100dvh;

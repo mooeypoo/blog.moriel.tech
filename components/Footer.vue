@@ -22,8 +22,9 @@
               color="white"
               variant="text"
               rounded
-              class="mx-2"
               size="small"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <v-icon
                 color="pink"
@@ -84,7 +85,19 @@ const links = [
     text: 'LinkedIn',
     icon: 'linkedin',
     href: 'https://www.linkedin.com/in/moriel/'
-  }
+  },
+  {
+    name: 'instagram',
+    text: 'Instagram',
+    icon: 'instagram',
+    href: 'https://www.instagram.com/morieltech/'
+  },
+  {
+    name: 'youtube',
+    text: 'YouTube',
+    icon: 'youtube',
+    href: 'https://www.youtube.com/@MorielTech'
+  },
 ]
 </script>
 
