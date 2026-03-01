@@ -39,7 +39,7 @@
   </div>
 
   <p v-else-if="!pending" class="text-medium-emphasis">
-    No posts yet.
+    {{ emptyMessage }}
   </p>
   <p v-else>Loading…</p>
 </template>
@@ -57,6 +57,10 @@ const props = defineProps({
   showAllPostsLink: {
     type: Boolean,
     default: true
+  },
+  emptyMessage: {
+    type: String,
+    default: 'No posts yet.'
   }
 })
 

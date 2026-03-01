@@ -1,7 +1,27 @@
 <template>
-  <div v-if="post">
-    <h1 class="text-h4 mb-2">{{ post.title }}</h1>
-    <p v-if="post.date" class="text-medium-emphasis mb-4">{{ formatDate(post.date) }}</p>
+  <div v-if="post" class="post-page">
+    <v-container class="h-100 d-flex align-center justify-center mb-10">
+      <div class="w-100 w-md-50 text-center">
+        <h1 class="text-h4 text-md-h2 font-weight-bold my-2">
+          {{ post.title }}
+        </h1>
+
+        <div v-if="post.date" class="text-subtitle-2 mb-2">
+          {{ formatDate(post.date) }}
+        </div>
+        <div v-if="post.description" class="text-body-1 text-medium-emphasis mb-4">
+          {{ post.description }}
+        </div>
+
+        <div class="d-flex ga-4 justify-center">
+          <v-chip v-for="tag in post.tags" :key="tag" size="small" variant="outlined" prepend-icon="mdi-pound">
+            {{ tag }}
+          </v-chip>
+        </div>
+      </div>
+    </v-container>
+    <!-- <h1 class="text-h4 mb-2">{{ post.title }}</h1>
+    <p v-if="post.date" class="text-medium-emphasis mb-4">{{ formatDate(post.date) }}</p> -->
     <div v-if="post.body" class="blog-prose">
       <ContentRenderer :value="post" />
     </div>
@@ -34,3 +54,13 @@ function formatDate (d) {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 </script>
+
+<style scoped>
+.post-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+</style>
