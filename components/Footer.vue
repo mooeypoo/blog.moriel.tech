@@ -47,50 +47,45 @@
   </v-footer>
 </template>
 
-<script>
-import { useDisplaySSRSafe } from '~/composables/useDisplaySSRSafe'
+<script setup>
 import { computed } from 'vue'
 import { useTheme } from 'vuetify'
+import { useDisplaySSRSafe } from '~/composables/useDisplaySSRSafe'
 
-export default {
-  name: 'Footer',
-  setup () {
-    const { display } = useDisplaySSRSafe()
-    const theme = useTheme()
-    const isDark = computed(() => theme.global.name.value === 'dark')
-    return { display, isDark }
+defineOptions({ name: 'Footer' })
+
+const { display } = useDisplaySSRSafe()
+const theme = useTheme()
+const isDark = computed(() => theme.global.name.value === 'dark')
+
+const links = [
+  {
+    name: 'twitter',
+    text: 'Twitter',
+    showText: false,
+    icon: 'twitter',
+    href: 'https://x.com/mooeypoo'
   },
-  data: () => ({
-    links: [
-      {
-        name: 'twitter',
-        text: 'Twitter',
-        showText: false,
-        icon: 'twitter',
-        href: 'https://x.com/mooeypoo'
-      },
-      {
-        name: 'mastodon',
-        text: 'Mastodon',
-        icon: 'account-circle',
-        rel: 'me',
-        href: 'https://notacult.social/@mooeypoo'
-      },
-      {
-        name: 'github',
-        text: 'Github',
-        icon: 'github',
-        href: 'https://www.github.com/mooeypoo'
-      },
-      {
-        name: 'linkedin',
-        text: 'LinkedIn',
-        icon: 'linkedin',
-        href: 'https://www.linkedin.com/in/moriel/'
-      },
-    ]
-  }),
-}
+  {
+    name: 'mastodon',
+    text: 'Mastodon',
+    icon: 'account-circle',
+    rel: 'me',
+    href: 'https://notacult.social/@mooeypoo'
+  },
+  {
+    name: 'github',
+    text: 'Github',
+    icon: 'github',
+    href: 'https://www.github.com/mooeypoo'
+  },
+  {
+    name: 'linkedin',
+    text: 'LinkedIn',
+    icon: 'linkedin',
+    href: 'https://www.linkedin.com/in/moriel/'
+  }
+]
 </script>
 
 <style lang="scss">
