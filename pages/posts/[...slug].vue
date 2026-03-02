@@ -14,7 +14,15 @@
         </div>
 
         <div class="d-flex ga-4 justify-center">
-          <v-chip v-for="tag in post.tags" :key="tag" size="small" variant="outlined" prepend-icon="mdi-pound">
+          <v-chip
+            v-for="tag in post.tags"
+            :key="tag"
+            size="small"
+            variant="outlined"
+            color="primary"
+            prepend-icon="mdi-pound"
+            :to="`/tags/${encodeURIComponent(tag)}`"
+          >
             {{ tag }}
           </v-chip>
         </div>
