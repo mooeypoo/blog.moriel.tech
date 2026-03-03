@@ -32,6 +32,22 @@
     <p v-if="post.date" class="text-medium-emphasis mb-4">{{ formatDate(post.date) }}</p> -->
     <div v-if="post.body" class="blog-prose">
       <ContentRenderer :value="post" />
+      <Giscus
+        id="comments"
+        repo="mooeypoo/blog.moriel.tech-discussion"
+        repo-id="R_kgDORdwSNA"
+        category="Announcements"
+        category-id="DIC_kwDORdwSNM4C3oOm"
+        mapping="pathname"
+        strict="0"
+        reactions-enabled="1"
+        emit-metadata="1"
+        input-position="top"
+        theme="preferred_color_scheme"
+        lang="en"
+        loading="lazy"
+        crossorigin="anonymous"
+      />
     </div>
   </div>
   <div v-else-if="!pending">
@@ -45,6 +61,7 @@
 <script setup>
 const route = useRoute()
 const slug = computed(() => Array.isArray(route.params.slug) ? route.params.slug.join('/') : (route.params.slug || ''))
+import Giscus from '@giscus/vue'
 
 const { data: post, pending } = await useAsyncData(
   () => `post-${slug.value}`,
