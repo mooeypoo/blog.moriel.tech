@@ -60,7 +60,7 @@
     <v-app-bar class="pr-4">
       <v-avatar
         size="36"
-        class="mr-5"
+        class="mr-5 app-bar-avatar"
         image="/moriel-320px.jpg"
         @click="goTo('/')"
       />
@@ -191,15 +191,20 @@ const isDark = computed({
   text-overflow: clip;
   white-space: nowrap;
   flex-shrink: 0;
-}
-@media (max-width: 599px) {
-  .app-bar-title {
+  cursor: pointer;
+
+  @media (max-width: 599px) {
     font-size: 0.75rem;
   }
 }
+
 .app-bar-title :deep(*) {
   overflow: visible;
   text-overflow: clip;
+}
+
+.app-bar-avatar {
+  cursor: pointer;
 }
 
 .layout-sticky-footer {
