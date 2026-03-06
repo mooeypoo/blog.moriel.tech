@@ -14,6 +14,9 @@
             <span></span>
           </span>
         </button>
+        <a href="/" class="avatar-link" aria-label="Go to homepage">
+          <img src="/moriel-320px.jpg" alt="Moriel Schottlender" class="avatar-image" />
+        </a>
         <a href="/" class="site-title">Moriel Writes Tech</a>
       </div>
 
@@ -22,6 +25,9 @@
           <li><a href="/">Home</a></li>
           <li><a href="/posts">Posts</a></li>
           <li><a href="/tags">Tags</a></li>
+          <li><a href="https://moriel.tech">About</a></li>
+          <li><a href="https://moriel.tech/contact">Contact</a></li>
+          
         </ul>
       </nav>
 
@@ -54,6 +60,8 @@
         <li><a href="/">Home</a></li>
         <li><a href="/posts">Posts</a></li>
         <li><a href="/tags">Tags</a></li>
+        <li><a href="https://moriel.tech">About</a></li>
+        <li><a href="https://moriel.tech/contact">Contact</a></li>
       </ul>
     </nav>
   </header>
@@ -200,6 +208,23 @@ function applyTheme() {
   display: flex;
   gap: 1rem;
   align-items: center;
+  margin-left: 1em;
+}
+
+.avatar-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.avatar-image {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid var(--outline);
 }
 
 .theme-toggle {

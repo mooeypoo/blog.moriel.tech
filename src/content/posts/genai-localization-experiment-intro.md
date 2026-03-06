@@ -95,7 +95,7 @@ By the end prompt, when I requested to "*improve dynamic text so that messages f
 
 **Observation: Early decisions feel light – until they aren't. And sometimes we don't recognize that shift, and risk drifting into space.**
 
-![Comparison of Copilot and Sonnet's interpretation of user preference modeling and translation approach](/posts/step5-comparison.png)
+![Comparison of Copilot and Sonnet's interpretation of user preference modeling and translation approach](/images/posts/step5-comparison.png)
 *Copilot's choice to model pronouns early led to a more robust i18n architecture using vue-i18n. Sonnet's custom approach meant that by the end, it underestimated the complexity of gendered languages.*
 
 ### The user you didn't model still exists
@@ -116,7 +116,7 @@ The implicit expectation that was initially made here was that users will have n
 
 **Observation: If you don't define who your users are, your system quietly defines them for you.**
 
-![Example of Hebrew display name producing empty or fallback username](/posts/agents-rtl-username.png)
+![Example of Hebrew display name producing empty or fallback username](/images/posts/agents-rtl-username.png)
 *When neither agent revisited assumptions about ASCII-based names, RTL language users ended up with broken or generic usernames.*
 
 ### Adding context later – ripples
@@ -154,7 +154,7 @@ It's about lived reality. You can follow best practices and still miss what it f
 
 **Observation: AI can simulate best practices. It cannot simulate lived experience, or lived friction.**
 
-![Example of non-isolated LTR content in RTL context, causing layout misalignment](/posts/rtl-nonbdi.png)
+![Example of non-isolated LTR content in RTL context, causing layout misalignment](/images/posts/rtl-nonbdi.png)
 *While technical RTL support was implemented, user-generated content displayed in RTL contexts created visual misalignment. This illustrates the gap between following best practices and actual user experience.*
 
 ## This Isn't an AI Problem
