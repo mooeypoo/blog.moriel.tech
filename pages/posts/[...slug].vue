@@ -63,20 +63,24 @@
 <script setup>
 const route = useRoute()
 const slug = computed(() => Array.isArray(route.params.slug) ? route.params.slug.join('/') : (route.params.slug || ''))
+const postPath = computed(() => {
+  const normalized = (route.path || '').replace(/\/+$/, '')
+  return normalized || '/posts'
+})
 import Giscus from '@giscus/vue'
 
 const { data: post, pending } = await useAsyncData(
-  `post-${slug.value}`,
+  'post-by-path',
   () => {
-    if (!slug.value) return null
-    const path = `posts/${slug.value}`
-    return queryContent(path)
+    if (!postPath.value.startsWith('/posts/')) return null
+    return queryContent(postPath.value)
       .where({ draft: { $ne: true } })
       .findOne()
   },
   {
     server: true,
-    lazy: false
+    lazy: false,
+    watch: [postPath]
   }
 )
 
