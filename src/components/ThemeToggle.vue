@@ -101,8 +101,9 @@ function applyTheme() {
 
 <style scoped>
 .site-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(18, 18, 18, 0.8);
+  border-bottom: 1px solid var(--outline);
+  background: var(--surface);
+  color: var(--text);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
@@ -201,7 +202,7 @@ function applyTheme() {
 }
 
 .header-nav a:hover {
-  color: #90caf9;
+  color: var(--primary);
 }
 
 .header-right {
@@ -240,13 +241,14 @@ function applyTheme() {
 }
 
 .theme-toggle:hover {
-  color: #90caf9;
+  color: var(--primary);
 }
 
 .mobile-drawer {
   display: none;
   padding: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--outline);
+  background: var(--surface);
 }
 
 .mobile-drawer ul {
