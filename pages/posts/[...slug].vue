@@ -1,8 +1,8 @@
 <template>
   <div v-if="post" class="post-page">
     <v-container class="h-100 d-flex align-center justify-center mb-10">
-      <div class="w-100 w-md-50 text-center">
-        <h1 class="text-h4 text-md-h2 font-weight-bold my-2">
+      <div class="w-100 text-center">
+        <h1 class="text-h4 text-md-h3 font-weight-bold my-2">
           {{ post.title }}
         </h1>
 
@@ -28,10 +28,12 @@
         </div>
       </div>
     </v-container>
-    <!-- <h1 class="text-h4 mb-2">{{ post.title }}</h1>
-    <p v-if="post.date" class="text-medium-emphasis mb-4">{{ formatDate(post.date) }}</p> -->
     <div v-if="post.body" class="blog-prose">
-      <ContentRenderer :value="post" />
+      <ContentRenderer :value="post">
+        <template #empty>
+          <p class="text-body-1 text-medium-emphasis">No post content yet.</p>
+        </template>
+      </ContentRenderer>
       <Giscus
         id="comments"
         repo="mooeypoo/blog.moriel.tech-discussion"
