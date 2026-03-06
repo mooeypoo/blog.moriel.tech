@@ -14,7 +14,7 @@ export async function getStaticPaths() {
   }
 
   return Array.from(tags).map((tag) => ({
-    params: { tag: encodeURIComponent(tag) },
+    params: { tag },
     props: { tag, posts },
   }))
 }
@@ -25,17 +25,16 @@ interface Props {
 }
 
 const { tag, posts } = Astro.props
-const decodedTag = decodeURIComponent(tag)
-const filteredPosts = posts.filter((p) => (p.data.tags || []).includes(decodedTag))
+const filteredPosts = posts.filter((p) => (p.data.tags || []).includes(tag))
 
-const canonical = `${SITE_URL}/tags/${tag}`
-const title = `Posts tagged with "${decodedTag}"`
-const description = `All posts tagged with ${decodedTag} on Moriel's Blog.`
+const canonical = `${SITE_URL}/tags/${encodeURIComponent(tag)}`
+const title = `Posts tagged with "${tag}"`
+const description = `All posts tagged with ${tag} on Moriel's Blog.`
 ---
 
 <BaseLayout title={title} description={description} canonical={canonical}>
   <section class="tag-posts-container">
-    <h1>Posts tagged <em>#{decodedTag}</em></h1>
+    <h1>Posts tagged <em>#{tag}</em></h1>
 
     {filteredPosts.length > 0 ? (
       <div class="posts-grid">
