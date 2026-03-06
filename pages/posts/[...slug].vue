@@ -66,7 +66,7 @@ const slug = computed(() => Array.isArray(route.params.slug) ? route.params.slug
 import Giscus from '@giscus/vue'
 
 const { data: post, pending } = await useAsyncData(
-  () => `post-${slug.value}`,
+  `post-${slug.value}`,
   () => {
     const path = slug.value ? `posts/${slug.value}` : 'posts'
     return queryContent(path)
