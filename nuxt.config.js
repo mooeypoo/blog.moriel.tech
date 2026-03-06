@@ -22,10 +22,11 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com' },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Arimo:wght@400;600&family=Inconsolata:wght@400;600;700&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Arimo:wght@400;600&family=Inconsolata:wght@400;600;700&family=Merriweather:wght@700&family=Roboto:wght@400;500;700&display=swap',
         },
       ],
     },

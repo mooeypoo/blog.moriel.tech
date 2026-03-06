@@ -1,8 +1,8 @@
 <template>
   <div v-if="post" class="post-page">
     <v-container class="h-100 d-flex align-center justify-center mb-10">
-      <div class="w-100 text-center">
-        <h1 class="text-h4 text-md-h3 font-weight-bold my-2">
+      <div class="w-md-75 w-100 text-center">
+        <h1 class="text-h4 text-md-h3nuxt font-weight-bold my-2">
           {{ post.title }}
         </h1>
 
