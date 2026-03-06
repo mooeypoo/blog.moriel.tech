@@ -68,10 +68,15 @@ import Giscus from '@giscus/vue'
 const { data: post, pending } = await useAsyncData(
   `post-${slug.value}`,
   () => {
-    const path = slug.value ? `posts/${slug.value}` : 'posts'
+    if (!slug.value) return null
+    const path = `posts/${slug.value}`
     return queryContent(path)
       .where({ draft: { $ne: true } })
       .findOne()
+  },
+  {
+    watch: [slug],
+    getCachedData: (key) => useNuxtApp().payload.data[key] || useNuxtApp().static.data[key]
   }
 )
 
