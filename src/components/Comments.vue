@@ -3,7 +3,29 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
+
+const GISCUS_ORIGIN = 'https://giscus.app'
+
+let themeObserver: MutationObserver | null = null
+
+function getGiscusTheme() {
+  return document.documentElement.classList.contains('light-theme') ? 'light' : 'dark'
+}
+
+function syncGiscusTheme() {
+  const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame')
+  iframe?.contentWindow?.postMessage(
+    {
+      giscus: {
+        setConfig: {
+          theme: getGiscusTheme(),
+        },
+      },
+    },
+    GISCUS_ORIGIN
+  )
+}
 
 onMounted(() => {
   const script = document.createElement('script')
@@ -19,14 +41,35 @@ onMounted(() => {
   script.setAttribute('data-reactions-enabled', '1')
   script.setAttribute('data-emit-metadata', '1')
   script.setAttribute('data-input-position', 'top')
-  script.setAttribute('data-theme', 'preferred_color_scheme')
+  script.setAttribute('data-theme', getGiscusTheme())
   script.setAttribute('data-lang', 'en')
   script.setAttribute('data-loading', 'lazy')
+  script.addEventListener('load', () => {
+    requestAnimationFrame(syncGiscusTheme)
+  })
 
   const container = document.getElementById('giscus-comments')
   if (container) {
     container.appendChild(script)
   }
+
+  themeObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        syncGiscusTheme()
+      }
+    }
+  })
+
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  })
+})
+
+onUnmounted(() => {
+  themeObserver?.disconnect()
+  themeObserver = null
 })
 </script>
 
