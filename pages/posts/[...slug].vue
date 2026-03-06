@@ -75,8 +75,8 @@ const { data: post, pending } = await useAsyncData(
       .findOne()
   },
   {
-    watch: [slug],
-    getCachedData: (key) => useNuxtApp().payload.data[key] || useNuxtApp().static.data[key]
+    server: true,
+    lazy: false
   }
 )
 
