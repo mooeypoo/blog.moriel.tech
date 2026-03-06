@@ -1,0 +1,74 @@
+---
+---
+
+<footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <p>&copy; 2026 Moriel Schottlender. All rights reserved.</p>
+      <p>A blog about human-centered software development, experiences, thoughts, and learnings.</p>
+    </div>
+    <div class="footer-links">
+      <a href="https://twitter.com/mooeypoo" target="_blank" rel="noopener noreferrer">Twitter</a>
+      <a href="https://github.com/mooeypoo" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(18, 18, 18, 0.5);
+    margin-top: 4rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-content {
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .footer-content p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    white-space: nowrap;
+  }
+
+  .footer-links a {
+    text-decoration: none;
+    color: #90caf9;
+    transition: opacity 0.2s;
+  }
+
+  .footer-links a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
+    .footer-container {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .footer-links {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
