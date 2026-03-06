@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getPublishedPosts } from '../lib/content'
+import { SITE_URL } from '../lib/seo'
+
+const allPosts = await getPublishedPosts()
+const recentPosts = allPosts.slice(0, 5)
+---
+
+<BaseLayout
+  title="Moriel Writes Tech"
+  description="A blog about human-centered software development, experiences, thoughts, and learnings."
+  canonical={SITE_URL}
+>
+  <section class="home-container">
+    <div class="hero">
+      <h1>Moriel Writes Tech</h1>
+      <p>A blog about human-centered software development, experiences, thoughts, and learnings.</p>
+    </div>
+
+    {recentPosts.length > 0 && (
+      <section class="recent-posts">
+        <h2>Recent posts</h2>
+        <div class="posts-grid">
+          {recentPosts.map((post) => (
+            <article class="post-card" key={post.slug}>
+              <h3 class="post-title">
+                <a href={`/posts/${post.slug}`}>{post.data.title}</a>
+              </h3>
+              {post.data.date && (
+                <p class="post-date">{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+              )}
+              {post.data.description && (
+                <p class="post-desc">{post.data.description}</p>
+              )}
+              <p>
+                <a href={`/posts/${post.slug}`} class="read-more">Read more →</a>
+              </p>
+            </article>
+          ))}
+        </div>
+        <p class="all-posts-link">
+          <a href="/posts">View all posts →</a>
+        </p>
+      </section>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .home-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .recent-posts h2 {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .post-card {
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .post-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+  }
+
+  .post-title a {
+    text-decoration: none;
+  }
+
+  .post-title a:hover {
+    text-decoration: underline;
+  }
+
+  .post-date {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+
+  .post-desc {
+    margin: 0.75rem 0 1rem 0;
+    line-height: 1.6;
+  }
+
+  .read-more {
+    text-decoration: none;
+  }
+
+  .read-more:hover {
+    text-decoration: underline;
+  }
+
+  .all-posts-link {
+    text-align: center;
+    font-size: 1.1rem;
+  }
+
+  .all-posts-link a {
+    text-decoration: none;
+  }
+
+  .all-posts-link a:hover {
+    text-decoration: underline;
+  }
+</style>

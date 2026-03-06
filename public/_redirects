@@ -1,0 +1,4 @@
+# Redirect old pagination query parameter format to new URL structure
+/posts?page=:page  /posts/page/:page  301
+
+# Catch-all (optional, for any additional future redirects)

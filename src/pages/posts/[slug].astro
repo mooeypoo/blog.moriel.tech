@@ -1,0 +1,257 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Comments from '../../components/Comments.vue'
+import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => data.draft !== true)
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }))
+}
+
+interface Props {
+  post: typeof import('astro:content').getCollection extends (
+    arg: any,
+    arg2?: any
+  ) => Promise<infer T>
+    ? T extends Array<infer U>
+      ? U
+      : never
+    : never
+}
+
+const { post } = Astro.props
+const { Content } = await post.render()
+
+const canonical = `${SITE_URL}/posts/${post.slug}`
+const title = post.data.title
+const description = post.data.description
+const author = 'Moriel Schottlender'
+const publishedTime = post.data.date?.toISOString()
+
+const jsonLd = generateBlogPostingSchema({
+  title,
+  description,
+  url: canonical,
+  datePublished: post.data.date || new Date(),
+  image: post.data.image,
+  tags: post.data.tags,
+})
+
+function formatDate(d: Date | undefined) {
+  if (!d) return ''
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+
+<BaseLayout title={title} description={description} canonical={canonical}>
+  <article class="post-detail">
+    <header class="post-header">
+      <h1>{title}</h1>
+      {post.data.date && <p class="post-date">{formatDate(post.data.date)}</p>}
+      {post.data.description && <p class="post-description">{post.data.description}</p>}
+      {post.data.tags && post.data.tags.length > 0 && (
+        <div class="post-tags">
+          {post.data.tags.map((tag: string) => (
+            <a href={`/tags/${encodeURIComponent(tag)}`} class="tag">#{tag}</a>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="post-content blog-prose">
+      <Content />
+    </div>
+
+    <footer class="post-footer">
+      <a href="/posts">← Back to all posts</a>
+    </footer>
+
+    <Comments client:load />
+  </article>
+</BaseLayout>
+
+<style>
+  .post-detail {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .post-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .post-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+  }
+
+  .post-date {
+    margin: 0.5rem 0;
+    opacity: 0.7;
+    font-size: 0.95rem;
+  }
+
+  .post-description {
+    margin: 1rem 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .post-tags {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .tag:hover {
+    background: var(--primary);
+    color: #000;
+  }
+
+  .post-content {
+    margin: 3rem 0;
+  }
+
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .post-footer a {
+    text-decoration: none;
+  }
+
+  .post-footer a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<style is:global>
+  .blog-prose {
+    font-family: 'Roboto', 'Arimo', sans-serif;
+    line-height: 1.7;
+    max-width: 65ch;
+  }
+
+  .blog-prose h1,
+  .blog-prose h2,
+  .blog-prose h3,
+  .blog-prose h4,
+  .blog-prose h5,
+  .blog-prose h6 {
+    font-family: 'Merriweather', 'Roboto', serif;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .blog-prose h1 {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .blog-prose h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .blog-prose h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .blog-prose p {
+    margin-bottom: 1em;
+  }
+
+  .blog-prose ul,
+  .blog-prose ol {
+    margin-left: 2em;
+    margin-bottom: 1em;
+  }
+
+  .blog-prose li {
+    margin-bottom: 0.5em;
+  }
+
+  .blog-prose a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    transition: opacity 0.2s;
+  }
+
+  .blog-prose a:hover {
+    opacity: 0.8;
+  }
+
+  .blog-prose code {
+    font-family: 'Inconsolata', monospace;
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.92em;
+    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
+  }
+
+  .blog-prose pre {
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 0.75em;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .blog-prose pre code {
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+  }
+
+  .blog-prose img {
+    max-width: 100%;
+    display: block;
+    margin: 2em auto;
+    padding: 1.5em;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .blog-prose strong {
+    font-weight: 600;
+  }
+
+  .blog-prose em {
+    font-style: italic;
+  }
+
+  .blog-prose blockquote {
+    margin: 1.5em 0;
+    padding-left: 1rem;
+    border-left: 3px solid var(--primary);
+    opacity: 0.9;
+  }
+</style>

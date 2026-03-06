@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getPublishedPosts } from '../../lib/content'
+import { SITE_URL } from '../../lib/seo'
+
+const posts = await getPublishedPosts()
+const tags = new Set<string>()
+
+for (const post of posts) {
+  for (const tag of post.data.tags || []) {
+    tags.add(tag)
+  }
+}
+
+const sortedTags = Array.from(tags).sort((a, b) => a.localeCompare(b))
+
+const canonical = `${SITE_URL}/tags`
+const title = 'All Tags'
+const description = 'Browse posts by topic on Moriel\'s Blog.'
+---
+
+<BaseLayout title={title} description={description} canonical={canonical}>
+  <section class="tags-container">
+    <h1>All Tags</h1>
+
+    {sortedTags.length > 0 ? (
+      <div class="tags-grid">
+        {sortedTags.map((tag) => {
+          const postCount = posts.filter((p) => (p.data.tags || []).includes(tag)).length
+          return (
+            <a href={`/tags/${encodeURIComponent(tag)}`} class="tag-card" key={tag}>
+              <h3>#{tag}</h3>
+              <p>{postCount} {postCount === 1 ? 'post' : 'posts'}</p>
+            </a>
+          )
+        })}
+      </div>
+    ) : (
+      <p>No tags yet.</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .tags-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .tags-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .tag-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .tag-card:hover {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .tag-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    color: var(--primary);
+  }
+
+  .tag-card p {
+    margin: 0;
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+</style>

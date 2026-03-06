@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { getPublishedPosts, PAGE_SIZE } from '../../../lib/content'
+import { SITE_URL } from '../../../lib/seo'
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts()
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE))
+
+  return Array.from({ length: totalPages }, (_, i) => ({
+    params: { n: String(i + 1) },
+    props: { posts, currentPage: i + 1, totalPages },
+  }))
+}
+
+interface Props {
+  posts: Awaited<ReturnType<typeof getPublishedPosts>>
+  currentPage: number
+  totalPages: number
+}
+
+const { posts, currentPage, totalPages } = Astro.props
+
+const start = (currentPage - 1) * PAGE_SIZE
+const paginatedPosts = posts.slice(start, start + PAGE_SIZE)
+
+const canonical = currentPage === 1 ? `${SITE_URL}/posts` : `${SITE_URL}/posts/page/${currentPage}`
+const title = currentPage === 1 ? 'All Posts' : `All Posts - Page ${currentPage}`
+const description = 'Browse all blog posts on Moriel\'s Blog about human-centered software development, experiences, thoughts, and learnings.'
+---
+
+<BaseLayout title={title} description={description} canonical={canonical}>
+  <section class="posts-container">
+    <h1>All posts</h1>
+
+    {paginatedPosts.length > 0 ? (
+      <div class="posts-grid">
+        {paginatedPosts.map((post) => (
+          <article class="post-card" key={post.slug}>
+            <h2 class="post-title">
+              <a href={`/posts/${post.slug}`}>{post.data.title}</a>
+            </h2>
+            {post.data.date && (
+              <p class="post-date">{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+            )}
+            {post.data.description && (
+              <p class="post-desc">{post.data.description}</p>
+            )}
+            <p>
+              <a href={`/posts/${post.slug}`} class="read-more">Read more →</a>
+            </p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p>No posts yet.</p>
+    )}
+
+    {totalPages > 1 && (
+      <nav class="pagination" aria-label="Post pagination">
+        <ul>
+          {currentPage > 1 && (
+            <li>
+              <a href="/posts">← Previous</a>
+            </li>
+          )}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <li key={p}>
+              {p === currentPage ? (
+                <span class="current">{p}</span>
+              ) : (
+                <a href={p === 1 ? '/posts' : `/posts/page/${p}`}>{p}</a>
+              )}
+            </li>
+          ))}
+          {currentPage < totalPages && (
+            <li>
+              <a href={`/posts/page/${currentPage + 1}`}>Next →</a>
+            </li>
+          )}
+        </ul>
+      </nav>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .posts-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .posts-grid {
+    display: grid;
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+
+  .post-card {
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .post-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+  }
+
+  .post-title a {
+    text-decoration: none;
+  }
+
+  .post-title a:hover {
+    text-decoration: underline;
+  }
+
+  .post-date {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+
+  .post-desc {
+    margin: 0 0 1rem 0;
+    line-height: 1.6;
+  }
+
+  .read-more {
+    text-decoration: none;
+  }
+
+  .read-more:hover {
+    text-decoration: underline;
+  }
+
+  .pagination {
+    margin: 3rem 0;
+    text-align: center;
+  }
+
+  .pagination ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .pagination li {
+    display: inline-block;
+  }
+
+  .pagination a,
+  .pagination .current {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .pagination a:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .pagination .current {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+  }
+</style>

@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://blog.moriel.tech/sitemap.xml
+Sitemap: https://blog.moriel.tech/sitemap-index.xml
