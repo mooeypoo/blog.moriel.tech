@@ -38,6 +38,42 @@ const { data: posts, pending } = await useAsyncData('home-posts', () =>
     .limit(10)
     .find()
 )
+
+// SEO Meta Tags
+const siteUrl = 'https://blog.moriel.tech'
+const title = 'Moriel\'s Blog'
+const description = 'A blog about human-centered software development, experiences, thoughts, and learnings by Moriel Schottlender.'
+
+useSeoMeta({
+  title: title,
+  description: description,
+  author: 'Moriel Schottlender',
+  
+  // Open Graph
+  ogType: 'website',
+  ogUrl: siteUrl,
+  ogTitle: title,
+  ogDescription: description,
+  ogImage: `${siteUrl}/moriel-320px.jpg`,
+  ogImageAlt: 'Moriel Schottlender',
+  ogSiteName: title,
+  ogLocale: 'en_US',
+  
+  // Twitter Card
+  twitterCard: 'summary',
+  twitterSite: '@mooeypoo',
+  twitterCreator: '@mooeypoo',
+  twitterTitle: title,
+  twitterDescription: description,
+  twitterImage: `${siteUrl}/moriel-320px.jpg`,
+  twitterImageAlt: 'Moriel Schottlender',
+})
+
+useHead({
+  link: [
+    { rel: 'canonical', href: siteUrl }
+  ]
+})
 </script>
 
 <style scoped>

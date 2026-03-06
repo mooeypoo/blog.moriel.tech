@@ -38,4 +38,28 @@ const tagCounts = computed(() => {
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => b.count - a.count)
 })
+
+// SEO Meta Tags
+const siteUrl = 'https://blog.moriel.tech'
+const url = `${siteUrl}/tags`
+const title = 'Tags'
+const description = 'Browse all tags on Moriel\'s Blog.'
+
+useSeoMeta({
+  title: title,
+  description: description,
+  ogType: 'website',
+  ogUrl: url,
+  ogTitle: title,
+  ogDescription: description,
+  twitterCard: 'summary',
+  twitterTitle: title,
+  twitterDescription: description,
+})
+
+useHead({
+  link: [
+    { rel: 'canonical', href: url }
+  ]
+})
 </script>

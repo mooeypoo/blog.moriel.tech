@@ -55,4 +55,31 @@ function goToPage (newPage) {
   }
   router.push({ path: '/posts', query })
 }
+
+// SEO Meta Tags
+const siteUrl = 'https://blog.moriel.tech'
+watchEffect(() => {
+  const currentPage = page.value
+  const url = currentPage === 1 ? `${siteUrl}/posts` : `${siteUrl}/posts?page=${currentPage}`
+  const title = currentPage === 1 ? 'All Posts' : `All Posts - Page ${currentPage}`
+  const description = 'Browse all blog posts on Moriel\'s Blog about human-centered software development, experiences, thoughts, and learnings.'
+  
+  useSeoMeta({
+    title: title,
+    description: description,
+    ogType: 'website',
+    ogUrl: url,
+    ogTitle: title,
+    ogDescription: description,
+    twitterCard: 'summary',
+    twitterTitle: title,
+    twitterDescription: description,
+  })
+  
+  useHead({
+    link: [
+      { rel: 'canonical', href: url }
+    ]
+  })
+})
 </script>

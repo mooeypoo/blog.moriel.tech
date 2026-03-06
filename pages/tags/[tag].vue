@@ -34,4 +34,31 @@ const posts = computed(() => {
     return tags.includes(t)
   })
 })
+
+// SEO Meta Tags
+const siteUrl = 'https://blog.moriel.tech'
+watchEffect(() => {
+  const tagName = tag.value
+  const url = `${siteUrl}/tags/${encodeURIComponent(tagName)}`
+  const title = `Posts tagged "${tagName}"`
+  const description = `Browse all posts tagged with "${tagName}" on Moriel's Blog.`
+  
+  useSeoMeta({
+    title: title,
+    description: description,
+    ogType: 'website',
+    ogUrl: url,
+    ogTitle: title,
+    ogDescription: description,
+    twitterCard: 'summary',
+    twitterTitle: title,
+    twitterDescription: description,
+  })
+  
+  useHead({
+    link: [
+      { rel: 'canonical', href: url }
+    ]
+  })
+})
 </script>

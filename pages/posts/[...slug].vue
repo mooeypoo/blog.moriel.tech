@@ -75,6 +75,91 @@ const { data: post, pending } = await useAsyncData(
   }
 )
 
+// SEO Meta Tags
+const siteUrl = 'https://blog.moriel.tech'
+const author = 'Moriel Schottlender'
+
+watchEffect(() => {
+  if (post.value) {
+    const url = `${siteUrl}/posts/${slug.value}`
+    const title = post.value.title || 'Blog Post'
+    const description = post.value.description || 'A blog post by Moriel Schottlender'
+    const imageUrl = post.value.image 
+      ? `${siteUrl}${post.value.image}` 
+      : `${siteUrl}/moriel-320px.jpg`
+    const publishedTime = post.value.date ? new Date(post.value.date).toISOString() : null
+    
+    useSeoMeta({
+      title: title,
+      description: description,
+      author: author,
+      
+      // Open Graph
+      ogType: 'article',
+      ogUrl: url,
+      ogTitle: title,
+      ogDescription: description,
+      ogImage: imageUrl,
+      ogImageAlt: title,
+      ogSiteName: 'Moriel\'s Blog',
+      ogLocale: 'en_US',
+      articleAuthor: author,
+      articlePublishedTime: publishedTime,
+      articleTag: post.value.tags,
+      
+      // Twitter Card
+      twitterCard: 'summary_large_image',
+      twitterSite: '@mooeypoo',
+      twitterCreator: '@mooeypoo',
+      twitterTitle: title,
+      twitterDescription: description,
+      twitterImage: imageUrl,
+      twitterImageAlt: title,
+    })
+    
+    // Structured Data (JSON-LD)
+    const structuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: title,
+      description: description,
+      image: imageUrl,
+      datePublished: publishedTime,
+      dateModified: publishedTime,
+      author: {
+        '@type': 'Person',
+        name: author,
+        url: siteUrl,
+      },
+      publisher: {
+        '@type': 'Person',
+        name: author,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${siteUrl}/moriel-320px.jpg`,
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': url,
+      },
+      keywords: post.value.tags?.join(', '),
+    }
+    
+    useHead({
+      link: [
+        { rel: 'canonical', href: url }
+      ],
+      script: [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(structuredData),
+        }
+      ]
+    })
+  }
+})
+
 function formatDate (d) {
   if (!d) return ''
   const date = new Date(d)

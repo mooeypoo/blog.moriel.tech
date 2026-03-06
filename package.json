@@ -18,6 +18,8 @@
     "vuetify": "^3.5.6"
   },
   "devDependencies": {
+    "@nuxtjs/sitemap": "^7.6.0",
+    "nuxt-simple-robots": "^3.1.10",
     "sass": "^1.81.0",
     "vite": "^6.0.3",
     "vite-plugin-vuetify": "^2.0.4"

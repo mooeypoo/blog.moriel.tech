@@ -1,0 +1,6 @@
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://blog.moriel.tech/sitemap.xml

@@ -1,7 +1,9 @@
 import vuetify from 'vite-plugin-vuetify'
 
-const description = 'Static blog built with Nuxt 3, Vuetify, and Nuxt Content.'
-const siteTitle = 'Blog'
+const description = 'A blog about human-centered software development, experiences, thoughts, and learnings.'
+const siteTitle = 'Moriel Writes Tech'
+const siteUrl = 'https://blog.moriel.tech'
+const author = 'Moriel Schottlender'
 
 export default defineNuxtConfig({
   ssr: true,
@@ -13,15 +15,37 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'en',
+      },
       titleTemplate: '%s - blog.moriel.tech',
       title: siteTitle,
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: description },
+        { name: 'author', content: author },
+        
+        // Open Graph
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: siteTitle },
+        { property: 'og:locale', content: 'en_US' },
+        { property: 'og:url', content: siteUrl },
+        { property: 'og:title', content: siteTitle },
+        { property: 'og:description', content: description },
+        { property: 'og:image', content: `${siteUrl}/moriel-320px.jpg` },
+        
+        // Twitter Card
+        { name: 'twitter:card', content: 'summary' },
+        { name: 'twitter:site', content: '@mooeypoo' },
+        { name: 'twitter:creator', content: '@mooeypoo' },
+        { name: 'twitter:title', content: siteTitle },
+        { name: 'twitter:description', content: description },
+        { name: 'twitter:image', content: `${siteUrl}/moriel-320px.jpg` },
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'canonical', href: siteUrl },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com' },
         {
@@ -41,6 +65,7 @@ export default defineNuxtConfig({
       })
     },
     '@nuxt/image',
+    '@nuxtjs/sitemap',
   ],
 
   vite: {
@@ -69,5 +94,15 @@ export default defineNuxtConfig({
 
   image: {
     dir: 'assets/images',
+  },
+
+  // Sitemap configuration
+  site: {
+    url: siteUrl,
+  },
+
+  sitemap: {
+    strictNuxtContentPaths: true,
+    exclude: [],
   },
 })
