@@ -39,6 +39,7 @@ export default defineNuxtConfig({
         config.plugins.push(vuetify({ autoImport: true }))
       })
     },
+    '@nuxt/image',
   ],
 
   vite: {
@@ -63,5 +64,9 @@ export default defineNuxtConfig({
     '/posts/**': { prerender: true },
     '/tags': { prerender: true },
     '/tags/**': { prerender: true },
+  },
+
+  image: {
+    dir: 'assets/images',
   },
 })
