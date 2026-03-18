@@ -24,6 +24,10 @@ And some get hard to fix and implement later.
 
 ... Like localization concerns. 
 
+<div class="youtube"><strong>Watch the full experiment here:</strong>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ehRD-ijK3aY?si=8sL3X-skrG-K_qBV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
 ## Experiment: Reviewing Gen AI iterative assumptions
 
 So, I ran a little experiment: I had a generative AI build an application piece by piece.
