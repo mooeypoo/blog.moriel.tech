@@ -1,6 +1,7 @@
 # blog.moriel.tech
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/47a58376-7a6a-4036-b71c-d1105dd89657/deploy-status)](https://app.netlify.com/projects/morieltechblog/deploys) [![Astro Build](https://github.com/moriel/blog.moriel.tech/actions/workflows/astro-build.yml/badge.svg)](https://github.com/moriel/blog.moriel.tech/actions/workflows/astro-build.yml)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/47a58376-7a6a-4036-b71c-d1105dd89657/deploy-status)](https://app.netlify.com/projects/morieltechblog/deploys) 
+[![Astro Build](https://github.com/mooeypoo/blog.moriel.tech/actions/workflows/astro-build.yml/badge.svg)](https://github.com/mooeypoo/blog.moriel.tech/actions/workflows/astro-build.yml)
 
 Welcome to the source code for [blog.moriel.tech](https://blog.moriel.tech)!
 
