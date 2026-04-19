@@ -143,6 +143,7 @@ html {
 
 .blog-prose img {
   max-width: 100%;
+  height: auto;
   display: block;
   margin: 2em auto;
   padding: 1.5em;
@@ -151,8 +152,8 @@ html {
   background: rgb(var(--v-theme-surface-variant), 0.3);
 }
 
-/* Image captions - styled as emphasized text following images */
-.blog-prose img + em {
+/* Image captions - when markdown renders <img> and <em> inside the same <p> */
+.blog-prose p > img + em {
   display: block;
   text-align: center;
   margin-top: -1.5em;
