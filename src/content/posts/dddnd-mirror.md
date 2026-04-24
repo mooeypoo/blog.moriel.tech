@@ -23,7 +23,7 @@ DDDnD is a game where you play a systems architect trying to keep a struggling c
 
 Here's what I mean.
 
-> New here? Before diving in, you might want to read the [launch post for the full picture of what DDDnD is and how it works](./ddddnd-intro.md). Or just keep reading — the mechanics explain themselves pretty quickly.
+> New here? Before diving in, you might want to read the [launch post for the full picture of what DDDnD is and how it works](/posts/ddddnd-intro). Or just keep reading — the mechanics explain themselves pretty quickly.
 
 ## The Cost That Doesn't Exist at the Point of Decision
 
@@ -158,6 +158,6 @@ The game is funny because it runs the defaults and shows you the output in real 
 
 ## Play It. Share It. Maybe Send It to Your Team.
 
-[Play DDDnD at dddnd.app](https://dddnd.app/). If you haven't read the launch post yet, [start there first](./ddddnd-intro.md) — it gives you the full picture before you start making very defensible bad decisions.
+[Play DDDnD at dddnd.app](https://dddnd.app/). If you haven't read the launch post yet, [start there first](/posts/ddddnd-intro) — it gives you the full picture before you start making very defensible bad decisions.
 
 Forward this to someone who has been in a "we'll fix it next quarter" meeting. They'll recognize every single card.
