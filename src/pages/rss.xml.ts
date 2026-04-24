@@ -23,6 +23,9 @@ export const GET: APIRoute = async () => {
     const title = escapeXml(post.data.title)
     const description = escapeXml(post.data.description || '')
     const pubDate = post.data.date.toUTCString()
+    const categories = (post.data.tags || []).map(
+      (tag: string) => `<category>${escapeXml(tag)}</category>`
+    )
 
     return [
       '<item>',
@@ -31,6 +34,7 @@ export const GET: APIRoute = async () => {
       `<link>${url}</link>`,
       `<guid>${url}</guid>`,
       `<pubDate>${pubDate}</pubDate>`,
+      ...categories,
       '</item>',
     ].join('\n')
   }).join('\n')
