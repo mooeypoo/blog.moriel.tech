@@ -5,6 +5,7 @@ tags:
   - Gen AI
   - Localization
 description: I asked AI to build an app step by step – and to document every assumption it made along the way. What emerged was a striking mirror of how real software teams drift into invisible defaults and expensive "later" fixes.
+image: ../../assets/images/posts/step5-comparison.png
 ---
 
 We usually think of software development as this super intentional process where every little choice – like field names, validation rules, or the UI layout – is completely deliberate. 

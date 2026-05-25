@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets'
+import type { PostImage } from '../lib/content'
+
+interface Props {
+  href: string
+  image?: PostImage
+}
+
+const { href, image } = Astro.props
+
+const imageSrc = typeof image === 'string' ? image : undefined
+const imageMeta = typeof image === 'string' ? undefined : image
+---
+
+{image && (
+  <a class="post-image-link" href={href} aria-hidden="true" tabindex="-1">
+    {imageMeta ? (
+      <Image
+        class="post-image"
+        src={imageMeta}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        widths={[480, 720, 960, 1280]}
+        sizes="(max-width: 800px) 100vw, 50vw"
+      />
+    ) : (
+      <img
+        class="post-image"
+        src={imageSrc}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    )}
+  </a>
+)}
+
+<style>
+  .post-image-link {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .post-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+</style>

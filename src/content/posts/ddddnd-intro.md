@@ -6,6 +6,7 @@ tags:
   - Side Project
   - DDDnD
 description: DDDnD is a satirical card game about the real tradeoffs of software architecture — where shipping the quick fix is tempting, debt amnesty is seductive, and the CTO goes quiet for a reason. Here's what it is, why I built it, and why the humor hits harder than it should.
+image: ../../assets/images/dddnd/dddnd-gamescreen.png
 ---
 
 I've been thinking about software development as an adventure for a long time.

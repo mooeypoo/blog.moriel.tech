@@ -2,6 +2,17 @@ export const SITE_URL = 'https://blog.moriel.tech'
 export const AUTHOR = 'Moriel Schottlender'
 export const SITE_TITLE = 'Moriel Writes Tech'
 export const SITE_DESCRIPTION = 'A blog about human-centered software development, experiences, thoughts, and learnings.'
+export const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/moriel-320px.jpg`
+
+export function toAbsoluteUrl(pathOrUrl?: string) {
+  if (!pathOrUrl) return undefined
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl
+  return pathOrUrl.startsWith('/') ? `${SITE_URL}${pathOrUrl}` : `${SITE_URL}/${pathOrUrl}`
+}
+
+export function resolveSocialImage(pathOrUrl?: string) {
+  return toAbsoluteUrl(pathOrUrl) || DEFAULT_SOCIAL_IMAGE
+}
 
 export interface SEOMeta {
   title: string
@@ -17,7 +28,7 @@ export function generateSEOMeta(meta: SEOMeta): SEOMeta & { titleTemplate: strin
     ...meta,
     titleTemplate: `${meta.title} - blog.moriel.tech`,
     ogType: meta.ogType || 'website',
-    ogImage: meta.ogImage || `${SITE_URL}/moriel-320px.jpg`,
+    ogImage: resolveSocialImage(meta.ogImage),
     twitterCard: meta.twitterCard || 'summary',
   }
 }
@@ -64,7 +75,7 @@ export function generateBlogPostingSchema(params: {
     '@type': 'BlogPosting',
     headline: params.title,
     description: params.description,
-    image: params.image ? `${SITE_URL}${params.image}` : `${SITE_URL}/moriel-320px.jpg`,
+    image: resolveSocialImage(params.image),
     datePublished: params.datePublished.toISOString(),
     dateModified: (params.dateModified || params.datePublished).toISOString(),
     author: {
@@ -77,7 +88,7 @@ export function generateBlogPostingSchema(params: {
       name: AUTHOR,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE_URL}/moriel-320px.jpg`,
+        url: DEFAULT_SOCIAL_IMAGE,
       },
     },
     mainEntityOfPage: {

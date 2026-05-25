@@ -19,12 +19,29 @@
     "description": {
       "type": "string"
     },
-    "image": {
-      "type": "string"
-    },
     "draft": {
       "default": false,
       "type": "boolean"
+    },
+    "image": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "display": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
     },
     "$schema": {
       "type": "string"
