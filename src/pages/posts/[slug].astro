@@ -2,7 +2,7 @@
 import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
-import { getPostSlug } from '../../lib/content'
+import { getPostDisplayImageUrl, getPostSlug } from '../../lib/content'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
@@ -31,13 +31,14 @@ const title = post.data.title
 const description = post.data.description
 const author = 'Moriel Schottlender'
 const publishedTime = post.data.date?.toISOString()
+const displayImage = getPostDisplayImageUrl(post)
 
 const jsonLd = generateBlogPostingSchema({
   title,
   description,
   url: canonical,
   datePublished: post.data.date || new Date(),
-  image: post.data.image,
+  image: displayImage,
   tags: post.data.tags,
 })
 
@@ -50,7 +51,7 @@ function formatDate(d: Date | undefined) {
 <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
 
-<BaseLayout title={title} description={description} canonical={canonical}>
+<BaseLayout title={title} description={description} canonical={canonical} ogImage={displayImage}>
   <article class="post-detail">
     <header class="post-header">
       <h1>{title}</h1>

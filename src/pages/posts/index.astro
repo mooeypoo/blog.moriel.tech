@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getPublishedPosts, getPostPath, PAGE_SIZE } from '../../lib/content'
+import PostPreviewImage from '../../components/PostPreviewImage.astro'
+import { getPostDisplayImage, getPublishedPosts, getPostPath, PAGE_SIZE } from '../../lib/content'
 import { SITE_URL } from '../../lib/seo'
 
 const posts = await getPublishedPosts()
@@ -23,7 +24,8 @@ const description = 'Browse all blog posts on Moriel\'s Blog about human-centere
     {paginatedPosts.length > 0 ? (
       <div class="posts-grid">
         {paginatedPosts.map((post) => (
-          <article class="post-card" key={post.id}>
+          <article class="post-card">
+            <PostPreviewImage href={getPostPath(post)} image={getPostDisplayImage(post)} />
             <h2 class="post-title">
               <a href={getPostPath(post)}>{post.data.title}</a>
             </h2>
@@ -52,7 +54,7 @@ const description = 'Browse all blog posts on Moriel\'s Blog about human-centere
             </li>
           )}
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <li key={p}>
+            <li>
               {p === page ? (
                 <span class="current">{p}</span>
               ) : (
@@ -84,6 +86,7 @@ const description = 'Browse all blog posts on Moriel\'s Blog about human-centere
   }
 
   .post-card {
+    overflow: hidden;
     padding: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;

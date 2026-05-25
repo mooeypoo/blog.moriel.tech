@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { getPublishedPosts, getPostPath } from '../lib/content'
+import { getPostDisplayImageUrl, getPublishedPosts, getPostPath } from '../lib/content'
 
 export const prerender = true
 
@@ -12,6 +12,7 @@ export const GET: APIRoute = async () => {
     description: post.data.description,
     date: post.data.date.toISOString(),
     url: `https://blog.moriel.tech${getPostPath(post)}`,
+    displayImage: getPostDisplayImageUrl(post),
     tags: post.data.tags || [],
   }))
 

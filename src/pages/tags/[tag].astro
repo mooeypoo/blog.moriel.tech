@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getPublishedPosts, getPostPath } from '../../lib/content'
+import PostPreviewImage from '../../components/PostPreviewImage.astro'
+import { getPostDisplayImage, getPublishedPosts, getPostPath } from '../../lib/content'
 import { SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
@@ -25,7 +26,7 @@ interface Props {
 }
 
 const { tag, posts } = Astro.props
-const filteredPosts = posts.filter((p) => (p.data.tags || []).includes(tag))
+const filteredPosts = posts.filter((p: (typeof posts)[number]) => (p.data.tags || []).includes(tag))
 
 const canonical = `${SITE_URL}/tags/${encodeURIComponent(tag)}`
 const title = `Posts tagged with "${tag}"`
@@ -38,8 +39,9 @@ const description = `All posts tagged with ${tag} on Moriel's Blog.`
 
     {filteredPosts.length > 0 ? (
       <div class="posts-grid">
-        {filteredPosts.map((post) => (
-          <article class="post-card" key={post.id}>
+        {filteredPosts.map((post: (typeof filteredPosts)[number]) => (
+          <article class="post-card">
+            <PostPreviewImage href={getPostPath(post)} image={getPostDisplayImage(post)} />
             <h2 class="post-title">
               <a href={getPostPath(post)}>{post.data.title}</a>
             </h2>
@@ -87,6 +89,7 @@ const description = `All posts tagged with ${tag} on Moriel's Blog.`
   }
 
   .post-card {
+    overflow: hidden;
     padding: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;

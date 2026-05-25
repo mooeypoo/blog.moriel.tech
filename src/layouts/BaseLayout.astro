@@ -1,18 +1,23 @@
 ---
 import ThemeToggle from '../components/ThemeToggle.vue'
 import Footer from '../components/Footer.astro'
+import { resolveSocialImage } from '../lib/seo'
 
 interface Props {
   title?: string
   description?: string
   canonical?: string
+  ogImage?: string
 }
 
 const {
   title = 'Moriel Writes Tech',
   description = 'A blog about human-centered software development, experiences, thoughts, and learnings.',
-  canonical = 'https://blog.moriel.tech'
+  canonical = 'https://blog.moriel.tech',
+  ogImage,
 } = Astro.props
+
+const resolvedOgImage = resolveSocialImage(ogImage)
 ---
 
 <!doctype html>
@@ -30,14 +35,14 @@ const {
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="https://blog.moriel.tech/moriel-320px.jpg" />
+    <meta property="og:image" content={resolvedOgImage} />
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@mooeypoo" />
     <meta name="twitter:creator" content="@mooeypoo" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="https://blog.moriel.tech/moriel-320px.jpg" />
+    <meta name="twitter:image" content={resolvedOgImage} />
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="canonical" href={canonical} />

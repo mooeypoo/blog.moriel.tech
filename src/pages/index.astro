@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { getPublishedPosts, getPostPath } from '../lib/content'
+import PostPreviewImage from '../components/PostPreviewImage.astro'
+import { getPostDisplayImage, getPublishedPosts, getPostPath } from '../lib/content'
 import { SITE_URL } from '../lib/seo'
 
 const allPosts = await getPublishedPosts()
@@ -23,7 +24,8 @@ const recentPosts = allPosts.slice(0, 5)
         <h2>Recent posts</h2>
         <div class="posts-grid">
           {recentPosts.map((post) => (
-            <article class="post-card" key={post.id}>
+            <article class="post-card">
+              <PostPreviewImage href={getPostPath(post)} image={getPostDisplayImage(post)} />
               <h3 class="post-title">
                 <a href={getPostPath(post)}>{post.data.title}</a>
               </h3>
@@ -83,6 +85,7 @@ const recentPosts = allPosts.slice(0, 5)
   }
 
   .post-card {
+    overflow: hidden;
     padding: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
