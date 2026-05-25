@@ -40,15 +40,14 @@ const imageMeta = typeof image === 'string' ? undefined : image
 <style>
   .post-image-link {
     display: block;
-    margin: -1.5rem -1.5rem 1rem;
+    flex-shrink: 0;
   }
 
   .post-image {
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
   }
 </style>
