@@ -1,3 +1,4 @@
+import { glob } from 'astro/loaders'
 import { defineCollection, z } from 'astro:content'
 
 export const sharedContentSchema = z.object({
@@ -10,7 +11,7 @@ export const sharedContentSchema = z.object({
 })
 
 const posts = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.md', base: './src/content/posts' }),
   schema: sharedContentSchema,
 })
 

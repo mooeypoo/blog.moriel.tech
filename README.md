@@ -7,6 +7,10 @@ Welcome to the source code for [blog.moriel.tech](https://blog.moriel.tech)!
 
 This is a personal blog built with Astro. If you want to see the live blog, visit [blog.moriel.tech](https://blog.moriel.tech).
 
+## Runtime Requirements
+
+- Node.js 22.12.0 or newer (Astro 6 requirement)
+
 ## 🧞 Commands
 
 All commands are run from the root of the project, from a terminal:

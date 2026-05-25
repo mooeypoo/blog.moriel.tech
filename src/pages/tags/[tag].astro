@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { getPublishedPosts } from '../../lib/content'
+import { getPublishedPosts, getPostPath } from '../../lib/content'
 import { SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
@@ -39,9 +39,9 @@ const description = `All posts tagged with ${tag} on Moriel's Blog.`
     {filteredPosts.length > 0 ? (
       <div class="posts-grid">
         {filteredPosts.map((post) => (
-          <article class="post-card" key={post.slug}>
+          <article class="post-card" key={post.id}>
             <h2 class="post-title">
-              <a href={`/posts/${post.slug}`}>{post.data.title}</a>
+              <a href={getPostPath(post)}>{post.data.title}</a>
             </h2>
             {post.data.date && (
               <p class="post-date">{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
@@ -50,7 +50,7 @@ const description = `All posts tagged with ${tag} on Moriel's Blog.`
               <p class="post-desc">{post.data.description}</p>
             )}
             <p>
-              <a href={`/posts/${post.slug}`} class="read-more">Read more →</a>
+              <a href={getPostPath(post)} class="read-more">Read more →</a>
             </p>
           </article>
         ))}
