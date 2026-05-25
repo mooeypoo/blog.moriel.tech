@@ -6,7 +6,7 @@ tags:
   - Side Project
   - DDDnD
 description: I built DDDnD as a lighthearted game about software teams. Then the mechanics started reflecting reality a little too accurately. Here's what the simulation taught me about how we actually deliver software.
-image: ../../assets/images/dddnd/dddnd-main-screen-intro.png
+image: ../../assets/images/dddnd/dddnd-stakeholder-states-avatars.png
 ---
 
 When I set out to build [DDDnD](https://dddnd.app), I wanted something lighthearted. A game that pokes fun at the stuff we all recognize — the tech debt, the stakeholder pressure, the architectural decisions that haunt you at 2am. Something you'd play and laugh and share with your team and go _yes, exactly, this._

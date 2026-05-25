@@ -2,7 +2,7 @@
 import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
-import { getPostDisplayImageUrl, getPostSlug } from '../../lib/content'
+import { getImageSrc, getPostDisplayImageUrl, getPostSlug } from '../../lib/content'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
@@ -32,6 +32,7 @@ const description = post.data.description
 const author = 'Moriel Schottlender'
 const publishedTime = post.data.date?.toISOString()
 const displayImage = getPostDisplayImageUrl(post)
+const heroImage = getImageSrc(post.data.image)
 
 const jsonLd = generateBlogPostingSchema({
   title,
@@ -53,17 +54,22 @@ function formatDate(d: Date | undefined) {
 
 <BaseLayout title={title} description={description} canonical={canonical} ogImage={displayImage}>
   <article class="post-detail">
-    <header class="post-header">
-      <h1>{title}</h1>
-      {post.data.date && <p class="post-date">{formatDate(post.data.date)}</p>}
-      {post.data.description && <p class="post-description">{post.data.description}</p>}
-      {post.data.tags && post.data.tags.length > 0 && (
-        <div class="post-tags">
-          {post.data.tags.map((tag: string) => (
-            <a href={`/tags/${encodeURIComponent(tag)}`} class="tag">#{tag}</a>
-          ))}
-        </div>
-      )}
+    <header
+      class:list={['post-header', { 'post-header--hero': Boolean(heroImage) }]}
+      style={heroImage ? `--post-hero-image: url("${heroImage}");` : undefined}
+    >
+      <div class="post-header-content">
+        <h1>{title}</h1>
+        {post.data.date && <p class="post-date">{formatDate(post.data.date)}</p>}
+        {post.data.description && <p class="post-description">{post.data.description}</p>}
+        {post.data.tags && post.data.tags.length > 0 && (
+          <div class="post-tags">
+            {post.data.tags.map((tag: string) => (
+              <a href={`/tags/${encodeURIComponent(tag)}`} class="tag">#{tag}</a>
+            ))}
+          </div>
+        )}
+      </div>
     </header>
 
     <div class="post-content blog-prose">
@@ -87,6 +93,35 @@ function formatDate(d: Date | undefined) {
   .post-header {
     margin-bottom: 3rem;
     text-align: center;
+  }
+
+  .post-header--hero {
+    background-image: var(--post-hero-image);
+    background-position: center;
+    background-size: cover;
+    border-radius: 0;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 3vw, 2rem);
+  }
+
+  .post-header-content {
+    width: 100%;
+  }
+
+  .post-header--hero .post-header-content {
+    max-width: 720px;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border-radius: 10px;
+    background: rgba(10, 10, 10, 0.68);
+    backdrop-filter: blur(2px);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
   }
 
   .post-header h1 {
@@ -129,6 +164,18 @@ function formatDate(d: Date | undefined) {
     color: #000;
   }
 
+  .post-header--hero .tag {
+    border-color: rgba(255, 255, 255, 0.8);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .post-header--hero .tag:hover {
+    background: #fff;
+    color: #111;
+    border-color: #fff;
+  }
+
   .post-content {
     margin: 3rem auto;
   }
@@ -146,9 +193,23 @@ function formatDate(d: Date | undefined) {
   .post-footer a:hover {
     text-decoration: underline;
   }
+
+  @media (max-width: 640px) {
+    .post-header--hero {
+      min-height: 280px;
+    }
+
+    .post-header--hero .post-header-content {
+      padding: 1rem;
+    }
+  }
 </style>
 
 <style is:global>
+  main.page-content {
+    padding-top: 0;
+  }
+
   .blog-prose {
     font-family: 'Roboto', 'Arimo', sans-serif;
     line-height: 1.7;
