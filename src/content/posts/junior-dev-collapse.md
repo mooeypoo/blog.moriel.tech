@@ -9,10 +9,6 @@ description: I'm worried about junior developers. Not because the field is dying
 image: ../../assets/images/posts/ai-junior-to-senior-broken-pipeline.png
 ---
 
-![The junior-to-Senior developer pipeline is broken](../../assets/images/posts/ai-junior-to-senior-broken-pipeline.png)
-*We broke the Junior-to-Senior pipeline, for all the wrong reasons*
-
-
 I'm worried about junior developers.
 
 Not in the abstract, industry-think-piece way. I mean the actual people – the ones who just finished a CS degree, or taught themselves, or came through a bootcamp, or switched careers because they loved building things. The ones who are just starting.
@@ -28,6 +24,9 @@ When you can ask AI to write the function, the temptation to skip understanding 
 The industry is quietly removing the entry point. Junior roles are collapsing – measurably, in the data, right now. The most common explanation is that AI can do what juniors used to do. That's not entirely wrong. But I think it's missing something important about what junior developers were actually *for*.
 
 These two things together are what worries me. Not because the field is dying – it isn't. But because we're setting a generation of developers up to fail in a specific, preventable way, and then pointing at the failure as proof they were never needed.
+
+![The junior-to-Senior developer pipeline is broken](../../assets/images/posts/ai-junior-to-senior-broken-pipeline.png)
+*We broke the Junior-to-Senior pipeline, for all the wrong reasons*
 
 ## The Numbers Aren't Subtle
 
