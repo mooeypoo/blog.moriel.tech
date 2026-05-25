@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { getPublishedPosts } from '../lib/content'
+import { getPublishedPosts, getPostPath } from '../lib/content'
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from '../lib/seo'
 
 export const prerender = true
@@ -19,7 +19,7 @@ export const GET: APIRoute = async () => {
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 
   const items = posts.map((post) => {
-    const url = `${SITE_URL}/posts/${post.slug}`
+    const url = `${SITE_URL}${getPostPath(post)}`
     const title = escapeXml(post.data.title)
     const description = escapeXml(post.data.description || '')
     const pubDate = post.data.date.toUTCString()

@@ -2,6 +2,14 @@ import { getCollection } from 'astro:content'
 
 export const PAGE_SIZE = 10
 
+export function getPostSlug(entry: { id: string; slug?: string }) {
+  return entry.slug ?? entry.id.replace(/\.(md|mdx)$/i, '')
+}
+
+export function getPostPath(entry: { id: string; slug?: string }) {
+  return `/posts/${getPostSlug(entry)}`
+}
+
 export async function getPublishedPosts() {
   const entries = await getCollection('posts', ({ data }) => data.draft !== true)
 

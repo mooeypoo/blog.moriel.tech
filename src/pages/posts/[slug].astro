@@ -1,32 +1,32 @@
 ---
-import { getCollection } from 'astro:content'
+import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
+import { getPostSlug } from '../../lib/content'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => data.draft !== true)
   return posts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
+    params: { slug: getPostSlug(post) },
+    props: { id: post.id },
   }))
 }
 
 interface Props {
-  post: typeof import('astro:content').getCollection extends (
-    arg: any,
-    arg2?: any
-  ) => Promise<infer T>
-    ? T extends Array<infer U>
-      ? U
-      : never
-    : never
+  id: string
 }
 
-const { post } = Astro.props
-const { Content } = await post.render()
+const { id } = Astro.props
+const post = await getEntry('posts', id)
 
-const canonical = `${SITE_URL}/posts/${post.slug}`
+if (!post) {
+  throw new Error(`Could not find post entry for id: ${id}`)
+}
+
+const { Content } = await render(post)
+
+const canonical = `${SITE_URL}/posts/${getPostSlug(post)}`
 const title = post.data.title
 const description = post.data.description
 const author = 'Moriel Schottlender'
