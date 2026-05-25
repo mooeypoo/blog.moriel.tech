@@ -2,7 +2,7 @@
 import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
-import { getImageSrc, getPostDisplayImageUrl, getPostSlug } from '../../lib/content'
+import { getImageSrc, getPostDisplayImage, getPostDisplayImageUrl, getPostSlug } from '../../lib/content'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
@@ -31,8 +31,12 @@ const title = post.data.title
 const description = post.data.description
 const author = 'Moriel Schottlender'
 const publishedTime = post.data.date?.toISOString()
+const displayImageAsset = getPostDisplayImage(post)
 const displayImage = getPostDisplayImageUrl(post)
 const heroImage = getImageSrc(post.data.image)
+const displayImageWidth = typeof displayImageAsset === 'object' ? displayImageAsset.width : undefined
+const displayImageHeight = typeof displayImageAsset === 'object' ? displayImageAsset.height : undefined
+const displayImageAlt = `${title} social preview image`
 
 const jsonLd = generateBlogPostingSchema({
   title,
@@ -49,10 +53,22 @@ function formatDate(d: Date | undefined) {
 }
 ---
 
-<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-
-
-<BaseLayout title={title} description={description} canonical={canonical} ogImage={displayImage}>
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  ogImage={displayImage}
+  ogType="article"
+  twitterCard="summary_large_image"
+  ogImageAlt={displayImageAlt}
+  ogImageWidth={displayImageWidth}
+  ogImageHeight={displayImageHeight}
+>
+  <Fragment slot="head">
+    <meta property="article:published_time" content={publishedTime} />
+    {post.data.tags.map((tag: string) => <meta property="article:tag" content={tag} />)}
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
   <article class="post-detail">
     <header
       class:list={['post-header', { 'post-header--hero': Boolean(heroImage) }]}
