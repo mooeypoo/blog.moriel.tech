@@ -1,6 +1,6 @@
 ---
 title: "Conservation of Software Complexity (The Physics of Software)"
-date: 2026-06-13
+date: 2026-06-19
 tags:
   - Architecture
   - Physics of Software
