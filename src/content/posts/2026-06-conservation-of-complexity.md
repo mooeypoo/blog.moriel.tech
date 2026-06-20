@@ -27,7 +27,7 @@ Roller coasters are basically a 90-second tour of this law. The first big drop h
 Here's a more interesting case, though: regenerative braking. A normal car converts the kinetic energy of braking into heat through friction, and that energy is just gone – wasted into the air as your brake pads complain. A hybrid or electric car doesn't throw it away. It converts that same kinetic energy back into electricity and tucks it into the battery for later. Same physical law, same starting energy, completely different outcome – one system wastes it, one system redirects it on purpose.
 
 ![Regenerative breaking: A car converts friction into usable energy stored in the battery](../../assets/images/posts/conservation-of-complexity-car-breaking.png)
-*Regenerative breaking utilizes conservation of energy to store conversion of energy in the battery*
+*Regenerative breaking utilizes conservation of energy to store the energy in the battery*
 
 And no matter how good the engineering gets, you'll never recapture all of it. Some always leaks out as friction, as heat, as the universe taking its cut. You can't get that to zero. What you *can* do is decide how much gets wasted versus how much gets put to good use. That decision is where the actual engineering happens – not the conservation law itself, which just sits there quietly being true.
 
@@ -91,6 +91,7 @@ A few questions that help:
 None of this is about writing more complex code, or less complex code. It's about being able to answer, for any given piece of complexity in your system: *I know where this lives, I know why it lives there, and that was a choice.*
 
 That's the whole law, really. You can't get rid of complexity any more than you can get rid of energy. But you can be the one who decides where it lives – instead of finding out the hard way, in production, at 2am, exactly where it ended up.
+
 
 ---
 
