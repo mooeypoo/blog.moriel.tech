@@ -2,43 +2,37 @@
 import { defineConfig } from 'astro/config'
 import sitemap from '@astrojs/sitemap'
 import vue from '@astrojs/vue'
+import { satteri } from '@astrojs/markdown-satteri'
 
-function openMarkdownLinksInNewTab() {
-  return (tree) => {
-    const visit = (node) => {
-      if (!node || typeof node !== 'object') {
-        return
-      }
+/** @type {import('satteri').HastPluginEntry} */
+const openMarkdownLinksInNewTab = {
+  name: 'open-links-in-new-tab',
+  element: {
+    filter: ['a'],
+    visit(node, ctx) {
+      const rel = node.properties?.rel
+      const relValues = Array.isArray(rel)
+        ? rel
+        : typeof rel === 'string'
+          ? rel.split(/\s+/).filter(Boolean)
+          : []
 
-      if (node.type === 'element' && node.tagName === 'a') {
-        node.properties ??= {}
-        node.properties.target = '_blank'
-
-        const rel = node.properties.rel
-        const relValues = Array.isArray(rel)
-          ? rel
-          : typeof rel === 'string'
-            ? rel.split(/\s+/).filter(Boolean)
-            : []
-
-        node.properties.rel = [...new Set([...relValues, 'noopener', 'noreferrer'])]
-      }
-
-      if (Array.isArray(node.children)) {
-        node.children.forEach(visit)
-      }
-    }
-
-    visit(tree)
-  }
+      ctx.setProperty(node, 'target', '_blank')
+      ctx.setProperty(node, 'rel', [...new Set([...relValues, 'noopener', 'noreferrer'])].join(' '))
+    },
+  },
 }
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://blog.moriel.tech',
   output: 'static',
+  // Astro 7 defaults to JSX-style whitespace stripping, which can glue inline words together.
+  compressHTML: true,
   markdown: {
-    rehypePlugins: [openMarkdownLinksInNewTab],
+    processor: satteri({
+      hastPlugins: [openMarkdownLinksInNewTab],
+    }),
   },
   integrations: [sitemap(), vue()],
 })
