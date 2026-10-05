@@ -25,10 +25,12 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D13 | The CSP allows inline `style` attributes (`style-src-attr 'unsafe-inline'`); `<style>` elements and all scripts stay hash-locked. | Shiki colors code blocks with style attributes. Style attributes can't run script, and only Moriel writes content, so this is negligible risk versus losing syntax highlighting or maintaining a Prism theme. |
 | D14 | Read-aloud is free and phased: browser speech first, then Kokoro-generated audio for flagship posts, optionally Moriel's own recordings. No paid text-to-speech service. | Browser speech costs nothing and ships quickly; pre-generated audio gives every reader the same good voice once there's a storage plan. See [Listen (read aloud)](#listen-read-aloud). |
 | D15 | Videos: frontmatter `video:` adds header buttons and a default top embed; a bare YouTube URL on its own line embeds in place (and replaces the top embed for the same video); `videoEmbed: false` skips the embed. Thumbnails are downloaded at build time. | Placement stays in plain Markdown, which still reads as a link anywhere else. No request reaches YouTube until a reader clicks play. |
+| D16 | Header nav links open in the same tab, including About and Contact on moriel.tech; the new-tab rule applies to links in content and the footer. | The nav moves between Moriel's own sites; opening a new tab there would feel like leaving rather than navigating. |
 
 ## Open questions
 
-- [ ] Section intros and the Physics of Software playlist URL (see PR 5).
+- [ ] Physics of Software playlist URL for the section's "Watch on YouTube" link (`src/content/sections/physics-of-software.md`).
+- [ ] Newsletter: provider and placement (decide before PR 11).
 
 ---
 
@@ -44,8 +46,8 @@ Ordered by urgency. PR 1 comes first because the comment mapping only stays free
 - [x] Stop tracking the generated `.astro/` folder; replace the leftover Nuxt `.gitignore` with one for Astro.
 - [x] Import `z` from `astro/zod` (the `astro:content` export is deprecated and removed in Astro 7).
 - [x] Giscus: `data-mapping="specific"`, `data-term` = post slug (overridable with an optional `commentsId` frontmatter field, so a renamed post keeps its thread), `data-strict="1"`. Strict matters: with fuzzy matching, `intro` could pick up the `dddnd-intro` thread.
-- [ ] Delete any empty discussions already auto-created in `mooeypoo/blog.moriel.tech-discussion` (as of 2026-10-05: #2, `posts/genai-localization-experiment-intro/`, empty).
-- [ ] Preview: old URLs redirect, each post loads its own (empty) thread, and posting a test comment creates a discussion titled with the slug (then delete it).
+- [x] Delete any empty discussions already auto-created in `mooeypoo/blog.moriel.tech-discussion` (as of 2026-10-05: #2, `posts/genai-localization-experiment-intro/`, empty).
+- [x] Preview: old URLs redirect, each post loads its own (empty) thread, and posting a test comment creates a discussion titled with the slug (then delete it).
 
 ### PR 2: Upgrade to Astro 7
 
@@ -57,7 +59,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 - [x] Bump `engines.node`, `.nvmrc`, `netlify.toml` and CI if Astro 7 needs a newer Node. (Not needed: Astro 7 requires Node ≥ 22.12.0, which is what we pin.)
 - [x] Markdown links: only external links open in a new tab, marked with an icon plus screen-reader text; links within the blog stay in the same tab.
 - [x] Approve esbuild's install script (npm `allowScripts`).
-- [ ] Preview: compare every page type against production (home, `/posts`, pagination, tags, a post with images, RSS, `latest-posts.json`, sitemap, theme toggle, comments).
+- [x] Preview: compare every page type against production (home, `/posts`, pagination, tags, a post with images, RSS, `latest-posts.json`, sitemap, theme toggle, comments).
 
 ### PR 3: Image performance
 
@@ -66,7 +68,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 - [x] Inline Markdown images: `srcset` via `image.layout: 'constrained'`, with `sizes` matching the 800px article column. Post images in `public/` moved to `src/assets` so they're optimized.
 - [x] Self-host fonts with Astro's Fonts API (same families and weights, upright only).
 - [x] Measure page weight and LCP before and after (headless Chrome, throttled to 150 ms RTT / 1.6 Mbps): Junior Developer Collapse 8.0 MB → 0.4 MB, LCP 39 s → 1.7 s on mobile.
-- [ ] Preview: hero, inline images and fonts look the same as production; share a post URL in a social preview tool to check the card image.
+- [x] Preview: hero, inline images and fonts look the same as production; share a post URL in a social preview tool to check the card image.
 
 ### PR 4: Security baseline
 
@@ -76,7 +78,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 - [x] CI uses `npm ci`, reads the Node version from `.nvmrc`, and runs with read-only repository permissions.
 - [x] `npm audit fix` (all findings were build/dev tooling; nothing ships to readers). Build output unchanged.
 - [x] No CSP violations in headless Chrome on home, `/posts`, pagination, tags, posts with comments and the YouTube embed, a code block, and RSS, with the theme toggled. Injected inline and unlisted-origin scripts are blocked.
-- [ ] Preview: same check on the Netlify deploy preview (Netlify's own preview toolbar may log violations there; production doesn't load it), and confirm the headers with `curl -I`.
+- [x] Preview: same check on the Netlify deploy preview (Netlify's own preview toolbar may log violations there; production doesn't load it), and confirm the headers with `curl -I`.
 - [x] **From now on, every PR that adds a third-party origin updates the CSP** (`security.csp` in `astro.config.mjs`).
 
 ### PR 5: Sections and landing pages
@@ -91,10 +93,11 @@ Before the image and sections work, so neither is built against APIs that are ab
 - [x] Nav lists only sections with at least one published post. Sections with no posts render a "coming soon" landing page.
 - [x] Build fails on: a section slug that clashes with a reserved route, a duplicate `order` within a section, or a section that doesn't exist (handled by `reference()`).
 - [x] Migration: Physics of Software post gets `section: physics-of-software`, the tag is removed, and a 301 redirect goes from `/tags/Physics%20of%20Software` to the landing page.
-- [ ] Moriel: add more tags to the Conservation of Complexity post if wanted (only `Architecture` is left), and set its `order` to its episode number.
+- [x] Moriel: add more tags to the Conservation of Complexity post if wanted (only `Architecture` is left), and set its `order` to its episode number.
 - [x] Delivery Engineering section file (ships as "coming soon", out of the nav until it has a post).
-- [ ] Moriel: review both section intros (drafted by Claude) and replace the Physics of Software YouTube link with the playlist URL.
-- [ ] Preview: both landing pages, prev/next links on the Physics of Software post, nav, RSS feeds, and the redirected tag URL.
+- [x] Moriel: review both section intros (drafted by Claude).
+- [ ] Moriel: replace the Physics of Software YouTube link with the playlist URL (tracked in Open questions).
+- [x] Preview: both landing pages, prev/next links on the Physics of Software post, nav, RSS feeds, and the redirected tag URL.
 
 ### PR 6: Reading time
 
@@ -113,25 +116,46 @@ See [Video embeds](#video-embeds) for how placement works (D15).
 - [x] `VideoObject` JSON-LD on posts with `video`.
 - [x] YouTube channel link in the footer.
 - [x] Update the CSP: `youtube-nocookie.com` replaces `youtube.com` in `frame-src`.
-- [ ] Preview: play both videos (Conservation at the top, localization in the body); check mobile tap-to-play.
+- [x] Preview: play both videos (Conservation at the top, localization in the body); check mobile tap-to-play.
+
+### PR 8: Performance polish
+
+- [ ] Long-lived caching for `/_astro/*` (hashed filenames): `Cache-Control: public, max-age=31536000, immutable`. Netlify otherwise revalidates every asset on every visit.
+- [ ] Post card images: AVIF with WebP fallback, and `sizes` matching the measured rendered widths (the home page loaded ~0.5 MB of card images on mobile).
+- [ ] Measure before/after bytes on the home page and `/posts` (same method as PR 3).
+
+### PR 9: Listen, phase 1 (browser speech)
+
+See [Listen (read aloud)](#listen-read-aloud) (D14).
+
+- [ ] **Listen** button in the post header; hidden where `speechSynthesis` isn't available.
+- [ ] Reads the title, then the article body one element at a time (paragraphs, headings, list items, quotes), splitting long paragraphs by sentence. Skips code blocks, video players, and screen-reader-only text.
+- [ ] Pause cancels and remembers the current element; resume restarts it (native pause is unreliable on Android). Stop resets. Speech stops when leaving the page.
+- [ ] Highlights the element being read and scrolls only when it leaves the screen.
+- [ ] No CSP change (nothing new is loaded).
+
+### PR 10: Consistent links
+
+- [ ] Footer: RSS opens in the same tab (it's this blog); social links keep a new tab and get the external-link icon and screen-reader text.
+- [ ] Header nav stays same-tab, including About and Contact on moriel.tech (D16).
+- [ ] Raw HTML `<a>` tags in posts: enable Sätteri's `rawHtml` parsing so the link plugin sees them, if the build output stays otherwise identical; if not, document "use Markdown links in posts" under Conventions instead.
+
+### PR 11: Newsletter (pending decision)
+
+- [ ] Decide provider and placement (see Open questions).
 
 ### Later (not yet split into PRs)
 
-- [ ] Post card images on list pages: add AVIF and tighten `sizes` (the home page still loads ~0.5 MB of card images on mobile).
-- [ ] Long-lived caching for hashed assets: `Cache-Control: public, max-age=31536000, immutable` on `/_astro/*` (Netlify currently revalidates every asset on every visit).
 - [ ] Real titles for in-body video players: the Markdown plugin is synchronous, so players placed in the body are labeled "Play video" instead of the video title (the top embed and JSON-LD use the real title).
 - [ ] Section hero images (`hero` on section files, rendered like the post hero).
 - [ ] Pagefind static search.
 - [ ] OG image generated per post at build time.
-- [ ] Listen, phase 1: a "Listen" button using the browser's built-in speech (see [Listen (read aloud)](#listen-read-aloud)).
-- [ ] Newsletter signup, starting on the Delivery Engineering "coming soon" page.
 - [ ] MDX for interactive Physics of Software diagrams.
 - [ ] Book home page (`layout: book` on the section).
 - [ ] Listen, phase 2: audio generated ahead of time with an open-source voice model (Kokoro) for flagship posts. Needs a storage plan first.
 - [ ] Listen, phase 3 (optional): Moriel's own recordings for selected posts, in the same player; possibly a podcast feed.
 - [ ] Re-evaluate comments (D2) if the audience outgrows Giscus.
 - [ ] Section page lists episodes that don't have posts yet (D10).
-- [ ] Apply the internal/external link rule beyond Markdown links: raw HTML `<a>` tags inside posts (the Markdown plugin doesn't see them) and template links (nav, footer, post cards).
 
 ---
 
