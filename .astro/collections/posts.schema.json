@@ -23,6 +23,12 @@
       "default": false,
       "type": "boolean"
     },
+    "slug": {
+      "type": "string"
+    },
+    "commentsId": {
+      "type": "string"
+    },
     "image": {
       "anyOf": [
         {
