@@ -174,13 +174,14 @@ See [docs/AUDIO.md](AUDIO.md) (D17, D18).
 - [x] CSP: `media-src` and `connect-src` allow `https://mooeypoo.github.io/blog.moriel.tech/`.
 - [x] Tested locally: Conservation generated (12.9 min of audio, 4.6 MB); in headless Chrome with the Pages URL served from that output, the player picks the audio, seeks, skips by paragraph with the highlight following, resumes in place, sets lock-screen metadata, falls back to browser speech when the hash is stale or the file fails, and has no CSP violations. Generator `--plan`, carry-over, and removal checked against a local stand-in for Pages.
 - [x] Per-paragraph regeneration: paragraphs are stored as segments named by what they sound like, and each post's MP3 is its segments joined (valid MP3 frames, no re-encoding), so an edit regenerates only the changed paragraphs. Tested: one edited paragraph regenerated 1 of 4 in 3 s; Chrome plays the joined file to the end with the exact manifest duration; carry-over from a published site is byte-identical.
-- [ ] After merge: the first workflow run generates all posts (~25 min each on GitHub's runners, about 2 hours); confirm audio plays on the live site.
+- [ ] After merge: the first workflow run generates all posts (about 3.5 hours: 375 paragraphs at ~35 s); confirm audio plays on the live site.
 - [x] `docs/FRONTMATTER.md`: every post and section field.
 
 ### PR 13: Audio heads-up and agent docs
 
-- [ ] PR check summary: which posts will get audio generated or regenerated after merge.
-- [ ] `AGENTS.md` (and `CLAUDE.md` pointing to it): repo conventions, the frontmatter reference, and the audio pipeline, so AI agents know what to keep in sync.
+- [x] PR check summary: which posts will get audio generated or regenerated after merge, with a time estimate (the build check runs the generator's `--plan` against the published audio).
+- [x] Resumable runs: generated paragraphs are saved to the Actions cache even when a run fails or times out; progress is logged per post. Timeout raised to 350 minutes (the first full run is ~375 paragraphs, about 3.5 hours).
+- [x] `AGENTS.md` (and `CLAUDE.md` pointing to it): repo conventions, the frontmatter reference, and the audio pipeline, so AI agents know what to keep in sync.
 
 ### PR 14: Newsletter (pending decision)
 
