@@ -12,12 +12,6 @@ export function normalizeImageUrl(image?: string) {
   return image.startsWith('/') ? image : `/${image}`
 }
 
-export function getImageSrc(image?: PostImage) {
-  if (!image) return undefined
-  if (typeof image === 'string') return normalizeImageUrl(image)
-  return image.src
-}
-
 export function getPostDisplayImage(entry: { data: { display?: PostImage; image?: PostImage } }) {
   return entry.data.display || entry.data.image
 }

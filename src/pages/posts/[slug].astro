@@ -1,8 +1,9 @@
 ---
+import { Picture } from 'astro:assets'
 import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
-import { getImageSrc, getPostSlug, getPostSocialImage } from '../../lib/content'
+import { getPostSlug, getPostSocialImage, normalizeImageUrl } from '../../lib/content'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
@@ -32,7 +33,11 @@ const description = post.data.description
 const author = 'Moriel Schottlender'
 const publishedTime = post.data.date?.toISOString()
 const socialImage = await getPostSocialImage(post)
-const heroImage = getImageSrc(post.data.image)
+const heroImage = post.data.image
+// The hero spans the viewport, so offer widths up to large screens, but never upscale.
+const heroWidths = typeof heroImage === 'object'
+  ? [640, 960, 1280, 1920, 2560].filter((width) => width < heroImage.width).concat(heroImage.width)
+  : []
 const displayImageAlt = `${title} social preview image`
 
 const jsonLd = generateBlogPostingSchema({
@@ -67,10 +72,23 @@ function formatDate(d: Date | undefined) {
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </Fragment>
   <article class="post-detail">
-    <header
-      class:list={['post-header', { 'post-header--hero': Boolean(heroImage) }]}
-      style={heroImage ? `--post-hero-image: url("${heroImage}");` : undefined}
-    >
+    <header class:list={['post-header', { 'post-header--hero': Boolean(heroImage) }]}>
+      {typeof heroImage === 'object' && (
+        <Picture
+          class="post-hero-image"
+          src={heroImage}
+          alt=""
+          formats={['avif']}
+          fallbackFormat="webp"
+          widths={heroWidths}
+          sizes="100vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+      )}
+      {typeof heroImage === 'string' && (
+        <img class="post-hero-image" src={normalizeImageUrl(heroImage)} alt="" fetchpriority="high" />
+      )}
       <div class="post-header-content">
         <h1>{title}</h1>
         {post.data.date && <p class="post-date">{formatDate(post.data.date)}</p>}
@@ -109,9 +127,9 @@ function formatDate(d: Date | undefined) {
   }
 
   .post-header--hero {
-    background-image: var(--post-hero-image);
-    background-position: center;
-    background-size: cover;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     border-radius: 0;
     width: 100vw;
     margin-left: calc(50% - 50vw);
@@ -221,6 +239,15 @@ function formatDate(d: Date | undefined) {
 <style is:global>
   main.page-content {
     padding-top: 0;
+  }
+
+  .post-header--hero .post-hero-image {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .blog-prose {
