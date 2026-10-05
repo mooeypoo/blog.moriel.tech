@@ -24,6 +24,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D12 | Post URLs carry no date. Dated filenames are fine; the date prefix is stripped from the slug. The already-published dated URLs get 301 redirects. | Uniqueness is enforced by a build check instead, and evergreen posts don't look dated. |
 | D13 | The CSP allows inline `style` attributes (`style-src-attr 'unsafe-inline'`); `<style>` elements and all scripts stay hash-locked. | Shiki colors code blocks with style attributes. Style attributes can't run script, and only Moriel writes content, so this is negligible risk versus losing syntax highlighting or maintaining a Prism theme. |
 | D14 | Read-aloud is free and phased: browser speech first, then Kokoro-generated audio for flagship posts, optionally Moriel's own recordings. No paid text-to-speech service. | Browser speech costs nothing and ships quickly; pre-generated audio gives every reader the same good voice once there's a storage plan. See [Listen (read aloud)](#listen-read-aloud). |
+| D15 | Videos: frontmatter `video:` adds header buttons and a default top embed; a bare YouTube URL on its own line embeds in place (and replaces the top embed for the same video); `videoEmbed: false` skips the embed. Thumbnails are downloaded at build time. | Placement stays in plain Markdown, which still reads as a link anywhere else. No request reaches YouTube until a reader clicks play. |
 
 ## Open questions
 
@@ -101,12 +102,17 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 ### PR 7: YouTube integration
 
-- [ ] Post frontmatter `video: <youtubeId>`: a click-to-load player at the top of the post (`youtube-nocookie`, no YouTube JS until clicked), plus "Watch on YouTube" and "Subscribe" links.
-- [ ] Remark plugin: a bare YouTube URL on its own line becomes the same click-to-load player.
+See [Video embeds](#video-embeds) for how placement works (D15).
+
+- [ ] Post frontmatter `video:` (a YouTube URL or ID) adds "Watch on YouTube" and "Subscribe" buttons to the post header and embeds the video at the top of the post body.
+- [ ] `videoEmbed: false` keeps the buttons but skips the embed (default `true`).
+- [ ] A bare YouTube URL on its own line in the Markdown becomes a player in place. If it's the frontmatter video, the top embed is dropped.
+- [ ] Click-to-load player: a thumbnail and play button until clicked, then the `youtube-nocookie.com` player. Works as a plain link without JavaScript.
+- [ ] Thumbnails downloaded at build time and served from this site (no YouTube request before clicking).
 - [ ] Replace the raw `<iframe>` in `genai-localization-experiment-intro.md`.
 - [ ] `VideoObject` JSON-LD on posts with `video`.
-- [ ] Channel link in the header and footer.
-- [ ] Update the CSP.
+- [ ] YouTube channel link in the footer.
+- [ ] Update the CSP: `youtube-nocookie.com` replaces `youtube.com` in `frame-src`.
 
 ### Later (not yet split into PRs)
 
@@ -183,6 +189,19 @@ Intro text, in Markdown…
 ```
 
 ---
+
+### Video embeds
+
+```yaml
+video: jA82t0UIvhM     # YouTube URL or ID: header buttons + embed
+videoEmbed: true       # false: buttons only, no embed
+```
+
+- **Default:** the video embeds at the top of the post body.
+- **Placed:** paste the YouTube URL on its own line where the video should go. It becomes a player there; if it's the frontmatter video, the top embed is dropped. Works for any video, with or without frontmatter, and a post can embed several.
+- **Inline links** (`[text](youtube-url)`) stay links. URLs inside code blocks are ignored.
+- **Player:** a thumbnail (downloaded at build time, served from this site) with a play button. Clicking loads `youtube-nocookie.com`, which sets no YouTube cookies until playback. Without JavaScript the thumbnail is a link to YouTube.
+- **JSON-LD:** posts with `video` get a `VideoObject` (title from YouTube's oEmbed at build time). It has no `uploadDate`, which Google needs for video rich results; add a `videoDate` field later if that matters.
 
 ### Listen (read aloud)
 
