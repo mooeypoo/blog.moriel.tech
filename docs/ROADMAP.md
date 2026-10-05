@@ -32,7 +32,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 
 ## Open questions
 
-- [ ] Physics of Software playlist URL for the section's "Watch on YouTube" link (`src/content/sections/physics-of-software.md`).
+- [x] Physics of Software playlist URL for the section's "Watch on YouTube" link (`src/content/sections/physics-of-software.md`).
 
 ---
 
@@ -98,7 +98,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 - [x] Moriel: add more tags to the Conservation of Complexity post if wanted (only `Architecture` is left), and set its `order` to its episode number.
 - [x] Delivery Engineering section file (ships as "coming soon", out of the nav until it has a post).
 - [x] Moriel: review both section intros (drafted by Claude).
-- [ ] Moriel: replace the Physics of Software YouTube link with the playlist URL (tracked in Open questions).
+- [x] Moriel: replace the Physics of Software YouTube link with the playlist URL (tracked in Open questions).
 - [x] Preview: both landing pages, prev/next links on the Physics of Software post, nav, RSS feeds, and the redirected tag URL.
 
 ### PR 6: Reading time
@@ -125,7 +125,7 @@ See [Video embeds](#video-embeds) for how placement works (D15).
 - [x] Long-lived caching for `/_astro/*` (hashed filenames): `Cache-Control: public, max-age=31536000, immutable`. Netlify otherwise revalidates every asset on every visit.
 - [x] Post card images: AVIF with WebP fallback, and `sizes` matching the measured rendered widths (the home page loaded ~0.5 MB of card images on mobile).
 - [x] Measure before/after bytes on the home page and `/posts` (same method as PR 3): card images 493 → 238 KB on mobile, 292 → 107 KB on desktop.
-- [ ] Preview: `curl -I` on a `/_astro/` file shows the immutable `Cache-Control`; cards look unchanged.
+- [x] Preview: `curl -I` on a `/_astro/` file shows the immutable `Cache-Control` (confirmed on the live site); cards look unchanged.
 
 ### PR 9: Listen, phase 1 (browser speech)
 
@@ -174,13 +174,13 @@ See [docs/AUDIO.md](AUDIO.md) (D17, D18).
 - [x] CSP: `media-src` and `connect-src` allow `https://mooeypoo.github.io/blog.moriel.tech/`.
 - [x] Tested locally: Conservation generated (12.9 min of audio, 4.6 MB); in headless Chrome with the Pages URL served from that output, the player picks the audio, seeks, skips by paragraph with the highlight following, resumes in place, sets lock-screen metadata, falls back to browser speech when the hash is stale or the file fails, and has no CSP violations. Generator `--plan`, carry-over, and removal checked against a local stand-in for Pages.
 - [x] Per-paragraph regeneration: paragraphs are stored as segments named by what they sound like, and each post's MP3 is its segments joined (valid MP3 frames, no re-encoding), so an edit regenerates only the changed paragraphs. Tested: one edited paragraph regenerated 1 of 4 in 3 s; Chrome plays the joined file to the end with the exact manifest duration; carry-over from a published site is byte-identical.
-- [ ] After merge: the first workflow run generates all posts (about 3.5 hours: 375 paragraphs at ~35 s); confirm audio plays on the live site.
+- [x] After merge: the first workflow run generated all five posts (375 paragraphs, 80 minutes of audio) in about 40 minutes; audio plays on the live site.
 - [x] `docs/FRONTMATTER.md`: every post and section field.
 
 ### PR 13: Audio heads-up and agent docs
 
 - [x] PR check summary: which posts will get audio generated or regenerated after merge, with a time estimate (the build check runs the generator's `--plan` against the published audio).
-- [x] Resumable runs: generated paragraphs are saved to the Actions cache even when a run fails or times out; progress is logged per post. Timeout raised to 350 minutes (the first full run is ~375 paragraphs, about 3.5 hours).
+- [x] Resumable runs: generated paragraphs are saved to the Actions cache even when a run fails or times out; progress is logged per post. Timeout raised to 350 minutes (the first full run turned out to take about 40 minutes).
 - [x] `AGENTS.md` (and `CLAUDE.md` pointing to it): repo conventions, the frontmatter reference, and the audio pipeline, so AI agents know what to keep in sync.
 
 ### PR 14: Social preview cards
