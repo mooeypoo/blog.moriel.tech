@@ -27,7 +27,7 @@ export const getStaticPaths = (async () => {
   }
   for (const tag of getUniqueTags(posts)) cards.push({ path: tagCardPath(tag), eyebrow: 'Posts tagged', title: `#${tag}` })
   for (const section of await getSections()) {
-    cards.push({ path: `sections/${section.id}`, title: section.data.title, description: section.data.description })
+    cards.push({ path: `sections/${section.id}`, title: section.data.title, description: section.data.description, image: section.data.hero })
   }
 
   return cards.map((card) => ({ params: { card: card.path }, props: { card } }))

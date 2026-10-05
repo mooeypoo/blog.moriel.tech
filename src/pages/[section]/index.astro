@@ -1,7 +1,9 @@
 ---
 import { render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import HeroImage from '../../components/HeroImage.astro'
 import PostListCard from '../../components/PostListCard.astro'
+import '../../styles/hero.css'
 import { getSectionPath, getSectionSequence, getSections } from '../../lib/sections'
 import { SITE_URL } from '../../lib/seo'
 import { getCardUrl } from '../../lib/social-cards'
@@ -31,24 +33,27 @@ const isExternal = (href: string) => new URL(href).hostname !== new URL(SITE_URL
   </Fragment>
 
   <section class="section-container">
-    <header class="section-header">
-      <h1>{section.data.title}</h1>
-      <p class="section-description">{section.data.description}</p>
-      {section.data.links.length > 0 && (
-        <ul class="section-links">
-          {section.data.links.map((link) => (
-            <li>
-              {isExternal(link.href) ? (
-                <a href={link.href} target="_blank" rel="noopener noreferrer" class="external-link">
-                  {link.label}<span class="sr-only"> (opens in a new tab)</span>
-                </a>
-              ) : (
-                <a href={link.href}>{link.label}</a>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+    <header class:list={['section-header', { hero: Boolean(section.data.hero) }]}>
+      {section.data.hero && <HeroImage image={section.data.hero} />}
+      <div class:list={['section-header-content', { 'hero-content': Boolean(section.data.hero) }]}>
+        <h1>{section.data.title}</h1>
+        <p class="section-description">{section.data.description}</p>
+        {section.data.links.length > 0 && (
+          <ul class="section-links">
+            {section.data.links.map((link) => (
+              <li>
+                {isExternal(link.href) ? (
+                  <a href={link.href} target="_blank" rel="noopener noreferrer" class="external-link">
+                    {link.label}<span class="sr-only"> (opens in a new tab)</span>
+                  </a>
+                ) : (
+                  <a href={link.href}>{link.label}</a>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </header>
 
     <div class="section-intro">
@@ -127,6 +132,17 @@ const isExternal = (href: string) => new URL(href).hostname !== new URL(SITE_URL
   .section-links a:hover {
     background: var(--primary);
     color: var(--bg);
+  }
+
+  /* Over a hero image the panel is always dark, so the theme's link color can't be relied on. */
+  .hero .section-links a {
+    border-color: rgba(255, 255, 255, 0.8);
+    color: #fff;
+  }
+
+  .hero .section-links a:hover {
+    background: #fff;
+    color: #111;
   }
 
   .section-intro {
