@@ -76,7 +76,7 @@ Domain clarity −6. Maintainability −4. User trust −3.
 
 Notice what's missing: there's no delayed effect on this one. No `recovery_begins_next_turn`. Just immediate, unrecoverable score damage, and then the game continues.
 
-I designed it this way deliberately. The reason there's nothing to recover from isn't that the damage is especially severe. It's that you can't recover knowledge that was never officially part of the system. There's no remediation path because there was never a formal path in the first place. The cron job worked. Nobody documented it. Nobody knew to. The absence of a delayed effect is the model: when something critical was never officially anyone's problem, its failure can't be officially anyone's fix either. The good news is that even if this card notes an unrecoverable problem -- the system in general can be recoverable in general with other actions. That, too, reflects reality.
+I designed it this way deliberately. The reason there's nothing to recover from isn't that the damage is especially severe. It's that you can't recover knowledge that was never officially part of the system. There's no remediation path because there was never a formal path in the first place. The cron job worked. Nobody documented it. Nobody knew to. The absence of a delayed effect is the model: when something critical was never officially anyone's problem, its failure can't be officially anyone's fix either. The good news is that even if this card notes an unrecoverable problem — the system in general can be recoverable in general with other actions. That, too, reflects reality.
 
 ## The Correct Decision With the Wrong Timeline
 
@@ -132,7 +132,7 @@ When a run ends, you get an outcome archetype: `firefighter`, `burnout_machine`,
 This mechanic exists because outcome and process are different things, and knowing the final score doesn't tell you what happened. That's also true of postmortems. Two teams can arrive at the same failed release through completely different sequences of decisions, and a retrospective that only looks at the outcome misses the pattern that produced it.
 
 ![DDDnD end screen archetype: The Visionary. You saw the big picture and reshaped the domain, even when others couldn't see why it mattered.](../../assets/images/dddnd/dddnd-archetype-visionary.png)
-*DDDnD end screen archetype: The Visionary. You saw the big picture and reshaped the domain, even when others couldn't see why it mattered."*
+*DDDnD end screen archetype: The Visionary. You saw the big picture and reshaped the domain, even when others couldn't see why it mattered.”*
 
 
 

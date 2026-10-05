@@ -48,10 +48,12 @@ Ordered by urgency. PR 1 comes first because the comment mapping only stays free
 
 Before the image and sections work, so neither is built against APIs that are about to change.
 
-- [ ] Upgrade `astro` 6 → 7 and `@astrojs/vue` 6 → 7 together (`@astrojs/vue` 7 requires Astro 7); bump `@astrojs/sitemap`.
-- [ ] Work through the official Astro 7 upgrade guide for breaking changes that affect this site (content collections, images, Markdown/rehype plugins, Vue islands).
-- [ ] `z` already comes from `astro/zod` (done in PR 1), since `astro:content`'s `z` is removed in 7.
-- [ ] Bump `engines.node`, `.nvmrc`, `netlify.toml` and CI if Astro 7 needs a newer Node.
+- [x] Upgrade `astro` 6 → 7 and `@astrojs/vue` 6 → 7 together (`@astrojs/vue` 7 requires Astro 7); bump `@astrojs/sitemap`.
+- [x] Work through the official Astro 7 upgrade guide for breaking changes that affect this site. What applied: Markdown now runs through Sätteri (the rehype link plugin was ported to a Sätteri hast plugin), and `compressHTML` defaults to JSX-style whitespace stripping (set back to `true`). Sätteri renders `--` as an en dash rather than an em dash, so prefer a literal `—` or `---` in posts.
+- [x] `z` already comes from `astro/zod` (done in PR 1), since `astro:content`'s `z` is removed in 7.
+- [x] Bump `engines.node`, `.nvmrc`, `netlify.toml` and CI if Astro 7 needs a newer Node. (Not needed: Astro 7 requires Node ≥ 22.12.0, which is what we pin.)
+- [x] Markdown links: only external links open in a new tab, marked with an icon plus screen-reader text; links within the blog stay in the same tab.
+- [x] Approve esbuild's install script (npm `allowScripts`).
 - [ ] Preview: compare every page type against production (home, `/posts`, pagination, tags, a post with images, RSS, `latest-posts.json`, sitemap, theme toggle, comments).
 
 ### PR 3: Image performance
@@ -65,7 +67,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 ### PR 4: Security baseline
 
 - [ ] Security headers in `netlify.toml`: CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`.
-- [ ] CSP allows only what's used: Giscus, Plausible, fonts (unless self-hosted in PR 3), and later YouTube (nocookie). Check whether Astro's built-in CSP support can produce hashes for the inline scripts.
+- [ ] CSP allows only what's used: `data:` in `img-src` (the external-link icon is an inline SVG mask), Giscus, Plausible, fonts (unless self-hosted in PR 3), and later YouTube (nocookie). Check whether Astro's built-in CSP support can produce hashes for the inline scripts.
 - [ ] Dependabot (or Renovate) for npm and GitHub Actions; bump the outdated `actions/*@v3` in CI.
 - [ ] CI uses `npm ci` instead of `npm install`.
 - [ ] Preview: no CSP violations in the console on the home page, a post, tags, RSS, and comments with the theme toggled.
@@ -110,6 +112,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 - [ ] Audio generated ahead of time or recorded per post, possibly as a podcast feed.
 - [ ] Re-evaluate comments (D2) if the audience outgrows Giscus.
 - [ ] Section page lists episodes that don't have posts yet (D10).
+- [ ] Apply the internal/external link rule beyond Markdown links: raw HTML `<a>` tags inside posts (the Markdown plugin doesn't see them) and template links (nav, footer, post cards).
 
 ---
 
