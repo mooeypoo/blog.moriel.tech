@@ -1,18 +1,26 @@
 ---
-import type { CollectionEntry } from 'astro:content'
+import { getEntry, type CollectionEntry } from 'astro:content'
 import PostPreviewImage from './PostPreviewImage.astro'
+import SectionLabel from './SectionLabel.astro'
 import { getPostDisplayImage, getPostPath } from '../lib/content'
+import { getItemLabel } from '../lib/sections'
 
 interface Props {
   post: CollectionEntry<'posts'>
+  /** On a section's own landing page the section name is redundant; only "Episode 4" is shown. */
+  inSection?: boolean
 }
 
-const { post } = Astro.props
+const { post, inSection = false } = Astro.props
+const section = post.data.section ? await getEntry(post.data.section) : undefined
+const itemLabel = section ? getItemLabel(section, post) : undefined
 ---
 
 <article class="post-card">
   <PostPreviewImage href={getPostPath(post)} image={getPostDisplayImage(post)} />
   <div class="post-content">
+    {section && !inSection && <SectionLabel section={section} label={itemLabel} />}
+    {inSection && itemLabel && <p class="item-label">{itemLabel}</p>}
     <h2 class="post-title">
       <a href={getPostPath(post)}>{post.data.title}</a>
     </h2>
@@ -52,6 +60,13 @@ const { post } = Astro.props
     width: 220px;
     height: 132px;
     border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .item-label {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0.75;
   }
 
   .post-title {

@@ -3,7 +3,9 @@ import { Picture } from 'astro:assets'
 import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
-import { getPostSlug, getPostSocialImage, normalizeImageUrl } from '../../lib/content'
+import SectionLabel from '../../components/SectionLabel.astro'
+import { getPostPath, getPostSlug, getPostSocialImage, normalizeImageUrl } from '../../lib/content'
+import { getItemLabel, getPostSectionContext, getSectionPath } from '../../lib/sections'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
@@ -33,6 +35,19 @@ const description = post.data.description
 const author = 'Moriel Schottlender'
 const publishedTime = post.data.date?.toISOString()
 const socialImage = await getPostSocialImage(post)
+const sectionContext = await getPostSectionContext(post)
+// Neighbors are labeled by their number ("Episode 3") when they have one.
+const sectionNav = sectionContext && (sectionContext.previous || sectionContext.next)
+  ? (() => {
+      const { section, previous, next } = sectionContext
+      const noun = section.data.itemLabel.toLowerCase()
+      return {
+        sectionTitle: section.data.title,
+        previous: previous && { post: previous, label: getItemLabel(section, previous) ?? `Previous ${noun}` },
+        next: next && { post: next, label: getItemLabel(section, next) ?? `Next ${noun}` },
+      }
+    })()
+  : undefined
 const heroImage = post.data.image
 // The hero spans the viewport, so offer widths up to large screens, but never upscale.
 const heroWidths = typeof heroImage === 'object'
@@ -90,6 +105,7 @@ function formatDate(d: Date | undefined) {
         <img class="post-hero-image" src={normalizeImageUrl(heroImage)} alt="" fetchpriority="high" />
       )}
       <div class="post-header-content">
+        {sectionContext && <SectionLabel section={sectionContext.section} label={sectionContext.label} />}
         <h1>{title}</h1>
         {post.data.date && <p class="post-date">{formatDate(post.data.date)}</p>}
         {post.data.description && <p class="post-description">{post.data.description}</p>}
@@ -107,8 +123,28 @@ function formatDate(d: Date | undefined) {
       <Content />
     </div>
 
+    {sectionNav && (
+      <nav class="section-nav" aria-label={`More from ${sectionNav.sectionTitle}`}>
+        {sectionNav.previous ? (
+          <a class="section-nav-link" href={getPostPath(sectionNav.previous.post)}>
+            <span class="section-nav-direction">← {sectionNav.previous.label}</span>
+            <span class="section-nav-title">{sectionNav.previous.post.data.title}</span>
+          </a>
+        ) : <span />}
+        {sectionNav.next && (
+          <a class="section-nav-link section-nav-next" href={getPostPath(sectionNav.next.post)}>
+            <span class="section-nav-direction">{sectionNav.next.label} →</span>
+            <span class="section-nav-title">{sectionNav.next.post.data.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+
     <footer class="post-footer">
       <a href="/posts">← Back to all posts</a>
+      {sectionContext && (
+        <a href={getSectionPath(sectionContext.section)}>All of {sectionContext.section.data.title} →</a>
+      )}
     </footer>
 
     <Comments client:load term={post.data.commentsId ?? getPostSlug(post)} />
@@ -211,7 +247,45 @@ function formatDate(d: Date | undefined) {
     margin: 3rem auto;
   }
 
+  .section-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .section-nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--outline);
+    border-radius: 8px;
+    text-decoration: none;
+  }
+
+  .section-nav-link:hover {
+    border-color: var(--primary);
+  }
+
+  .section-nav-next {
+    text-align: right;
+  }
+
+  .section-nav-direction {
+    font-size: 0.85rem;
+    opacity: 0.75;
+  }
+
+  .section-nav-title {
+    font-weight: 600;
+  }
+
   .post-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
     margin-top: 3rem;
     padding-top: 2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -226,6 +300,10 @@ function formatDate(d: Date | undefined) {
   }
 
   @media (max-width: 640px) {
+    .section-nav {
+      grid-template-columns: 1fr;
+    }
+
     .post-header--hero {
       min-height: 280px;
     }
@@ -306,17 +384,6 @@ function formatDate(d: Date | undefined) {
 
   .blog-prose a:hover {
     opacity: 0.8;
-  }
-
-  /* A mask lets the icon follow the link color in both themes. */
-  .blog-prose a.external-link::after {
-    content: '';
-    display: inline-block;
-    width: 0.7em;
-    height: 0.7em;
-    margin-left: 0.2em;
-    background-color: currentColor;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpath d='M15 3h6v6'/%3E%3Cpath d='M10 14 21 3'/%3E%3C/svg%3E") no-repeat center / contain;
   }
 
   .blog-prose code {
