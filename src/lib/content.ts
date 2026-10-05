@@ -1,3 +1,4 @@
+import { getImage } from 'astro:assets'
 import { getCollection } from 'astro:content'
 import type { ImageMetadata } from 'astro'
 
@@ -11,18 +12,32 @@ export function normalizeImageUrl(image?: string) {
   return image.startsWith('/') ? image : `/${image}`
 }
 
-export function getImageSrc(image?: PostImage) {
-  if (!image) return undefined
-  if (typeof image === 'string') return normalizeImageUrl(image)
-  return image.src
-}
-
 export function getPostDisplayImage(entry: { data: { display?: PostImage; image?: PostImage } }) {
   return entry.data.display || entry.data.image
 }
 
-export function getPostDisplayImageUrl(entry: { data: { display?: PostImage; image?: PostImage } }) {
-  return getImageSrc(entry.data.display || entry.data.image)
+const SOCIAL_IMAGE_MAX_WIDTH = 1200
+
+export interface SocialImage {
+  src: string
+  width?: number
+  height?: number
+}
+
+// Social platforms and feed readers download the whole file, so the multi-MB sources
+// are resized to a JPEG they all accept. Not cropped: some previews are panoramic.
+export async function getPostSocialImage(entry: { data: { display?: PostImage; image?: PostImage } }): Promise<SocialImage | undefined> {
+  const image = getPostDisplayImage(entry)
+  if (!image) return undefined
+  if (typeof image === 'string') return { src: normalizeImageUrl(image)! }
+
+  const width = Math.min(image.width, SOCIAL_IMAGE_MAX_WIDTH)
+  const result = await getImage({ src: image, width, format: 'jpg', quality: 80 })
+  return {
+    src: result.src,
+    width,
+    height: Math.round((image.height * width) / image.width),
+  }
 }
 
 export function getPostSlug(entry: { id: string; slug?: string }) {

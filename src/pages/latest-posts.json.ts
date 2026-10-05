@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { getPostDisplayImageUrl, getPublishedPosts, getPostPath } from '../lib/content'
+import { getPostSocialImage, getPublishedPosts, getPostPath } from '../lib/content'
 
 export const prerender = true
 
@@ -7,14 +7,14 @@ const MAX_POSTS = 5
 
 export const GET: APIRoute = async () => {
   const posts = await getPublishedPosts()
-  const latest = posts.slice(0, MAX_POSTS).map((post) => ({
+  const latest = await Promise.all(posts.slice(0, MAX_POSTS).map(async (post) => ({
     title: post.data.title,
     description: post.data.description,
     date: post.data.date.toISOString(),
     url: `https://blog.moriel.tech${getPostPath(post)}`,
-    displayImage: getPostDisplayImageUrl(post),
+    displayImage: (await getPostSocialImage(post))?.src,
     tags: post.data.tags || [],
-  }))
+  })))
 
   return new Response(JSON.stringify({
     updatedAt: new Date().toISOString(),

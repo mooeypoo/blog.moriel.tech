@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
-import { getPostDisplayImageUrl, getPublishedPosts, getPostPath } from '../lib/content'
-import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from '../lib/seo'
+import { getPostSocialImage, getPublishedPosts, getPostPath } from '../lib/content'
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION, toAbsoluteUrl } from '../lib/seo'
 
 export const prerender = true
 
@@ -29,11 +29,11 @@ export const GET: APIRoute = async () => {
     .filter((post) => post?.data?.date instanceof Date)
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 
-  const items = posts.map((post) => {
+  const items = (await Promise.all(posts.map(async (post) => {
     const url = `${SITE_URL}${getPostPath(post)}`
     const title = escapeXml(post.data.title)
     const description = escapeXml(post.data.description || '')
-    const imageUrl = getPostDisplayImageUrl(post)
+    const imageUrl = toAbsoluteUrl((await getPostSocialImage(post))?.src)
     const pubDate = post.data.date.toUTCString()
     const categories = (post.data.tags || []).map(
       (tag: string) => `<category>${escapeXml(tag)}</category>`
@@ -52,7 +52,7 @@ export const GET: APIRoute = async () => {
       ...categories,
       '</item>',
     ].join('\n')
-  }).join('\n')
+  }))).join('\n')
 
   const now = new Date().toUTCString()
 

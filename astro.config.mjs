@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config'
+import { defineConfig, fontProviders } from 'astro/config'
 import sitemap from '@astrojs/sitemap'
 import vue from '@astrojs/vue'
 import { satteri } from '@astrojs/markdown-satteri'
@@ -42,15 +42,72 @@ const openExternalLinksInNewTab = {
   },
 }
 
+// Post images never render wider than the article (`.post-detail` max-width). Without
+// this, browsers assume full viewport width and download larger files than needed.
+/** @type {import('satteri').HastPluginEntry} */
+const sizePostImagesToColumn = {
+  name: 'size-post-images-to-column',
+  element: {
+    filter: ['img'],
+    visit(node, ctx) {
+      ctx.setProperty(node, 'sizes', '(min-width: 800px) 800px, 100vw')
+    },
+  },
+}
+
 // https://astro.build/config
 export default defineConfig({
   site: SITE,
   output: 'static',
   // Astro 7 defaults to JSX-style whitespace stripping, which can glue inline words together.
   compressHTML: true,
+  image: {
+    // Gives Markdown images a srcset instead of one full-size file.
+    layout: 'constrained',
+  },
+  // Downloaded at build time and served from this site: no third-party requests, and
+  // generated fallback metrics keep text from shifting while fonts load.
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: 'Arimo',
+      cssVariable: '--font-arimo',
+      weights: [400, 600],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['sans-serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Roboto',
+      cssVariable: '--font-roboto',
+      weights: [400, 500, 700],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['sans-serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Merriweather',
+      cssVariable: '--font-merriweather',
+      weights: [700],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Inconsolata',
+      cssVariable: '--font-inconsolata',
+      weights: [400, 600, 700],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['monospace'],
+    },
+  ],
   markdown: {
     processor: satteri({
-      hastPlugins: [openExternalLinksInNewTab],
+      hastPlugins: [openExternalLinksInNewTab, sizePostImagesToColumn],
     }),
   },
   integrations: [sitemap(), vue()],
