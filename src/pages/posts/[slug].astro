@@ -3,6 +3,7 @@ import { Picture } from 'astro:assets'
 import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
+import ListenButton from '../../components/ListenButton.astro'
 import SectionLabel from '../../components/SectionLabel.astro'
 import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, normalizeImageUrl } from '../../lib/content'
 import { getItemLabel, getPostSectionContext, getSectionPath } from '../../lib/sections'
@@ -141,6 +142,7 @@ const jsonLd = generateBlogPostingSchema({
             </a>
           </div>
         )}
+        <ListenButton />
       </div>
     </header>
 
@@ -383,6 +385,13 @@ const jsonLd = generateBlogPostingSchema({
 <style is:global>
   main.page-content {
     padding-top: 0;
+  }
+
+  /* The element being read aloud by the Listen button. */
+  .is-being-read {
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--primary) 18%, transparent);
   }
 
   .post-header--hero .post-hero-image {
