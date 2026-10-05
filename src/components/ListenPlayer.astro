@@ -1,0 +1,490 @@
+---
+// Reads the post aloud (ROADMAP D14, PR 11). Browser speech is the only source for now;
+// PR 12 adds pre-generated audio behind the same Source interface.
+import { getListeningMinutes } from '../lib/speech'
+
+interface Props {
+  words: number
+}
+
+const { words } = Astro.props
+---
+
+<section class="listen-slot" data-listen data-words={words} aria-label="Listen to this post" hidden>
+  <div class="listen-bar" data-listen-bar>
+    <button type="button" class="listen-play" data-listen-play aria-label="Listen to this post">
+      <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+      <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
+    </button>
+
+    <div class="listen-main">
+      <p class="listen-title">
+        Listen to this post <span class="listen-duration" data-listen-duration>~{getListeningMinutes(words, 1)} min</span>
+      </p>
+      <div class="listen-progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" data-listen-progress>
+        <div class="listen-progress-fill" data-listen-fill></div>
+      </div>
+      <p class="listen-status" data-listen-status></p>
+    </div>
+
+    <div class="listen-controls">
+      <button type="button" class="listen-icon-button" data-listen-prev aria-label="Previous paragraph">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z" /></svg>
+      </button>
+      <button type="button" class="listen-icon-button" data-listen-next aria-label="Next paragraph">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l11-7z" /></svg>
+      </button>
+      <button type="button" class="listen-icon-button" data-listen-stop aria-label="Stop">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6z" /></svg>
+      </button>
+      <label class="listen-setting listen-speed">
+        <span>Speed</span>
+        <select data-listen-rate>
+          <option value="0.75">0.75×</option>
+          <option value="0.9">0.9×</option>
+          <option value="1" selected>1×</option>
+          <option value="1.15">1.15×</option>
+          <option value="1.25">1.25×</option>
+          <option value="1.5">1.5×</option>
+        </select>
+      </label>
+      <label class="listen-setting listen-voice">
+        <span>Voice</span>
+        <select data-listen-voice></select>
+      </label>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { getListeningMinutes, normalizeForSpeech, rankVoices } from '../lib/speech'
+
+  type State = 'idle' | 'playing' | 'paused'
+
+  /** What the player drives. PR 12 adds an audio-file implementation. */
+  interface Source {
+    readonly length: number
+    play(index: number): void
+    pause(): void
+    stop(): void
+  }
+
+  const READABLE = 'p, h2, h3, h4, h5, h6, li, blockquote'
+  const RATE_KEY = 'listen-rate'
+  const VOICE_KEY = 'listen-voice'
+
+  const storage = {
+    get: (key: string) => {
+      try {
+        return localStorage.getItem(key)
+      } catch {
+        return null
+      }
+    },
+    set: (key: string, value: string) => {
+      try {
+        localStorage.setItem(key, value)
+      } catch {}
+    },
+  }
+
+  function readableText(element: Element) {
+    const clone = element.cloneNode(true) as Element
+    clone.querySelectorAll('.sr-only, pre, .video-embed').forEach((node) => node.remove())
+    return (clone.textContent ?? '').replace(/\s+/g, ' ').trim()
+  }
+
+  function collectBlocks(title: Element, article: Element) {
+    const blocks = [title]
+    for (const element of article.querySelectorAll(READABLE)) {
+      // Read nested blocks (a paragraph inside a list item) once, through the outer one.
+      if (element.parentElement?.closest(READABLE) || element.closest('pre, .video-embed')) continue
+      blocks.push(element)
+    }
+    return blocks
+      .map((element) => ({ element, text: normalizeForSpeech(readableText(element)) }))
+      .filter((block) => block.text)
+  }
+
+  /**
+   * Whole paragraphs keep the voice's natural rhythm. Desktop Chrome stops long utterances
+   * after ~15 s, which a periodic pause/resume prevents; elsewhere that would cause stutters.
+   */
+  class SpeechSource implements Source {
+    rate = 1
+    voice: SpeechSynthesisVoice | undefined
+    // Cancelling fires `end` on the old utterance in some browsers; only the newest may advance.
+    private generation = 0
+    private keepAlive: number | undefined
+    private readonly needsKeepAlive = /Chrome\//.test(navigator.userAgent) && !/Android|Mobile/.test(navigator.userAgent)
+
+    constructor(
+      private readonly texts: string[],
+      private readonly onIndex: (index: number) => void,
+      private readonly onEnd: () => void,
+    ) {}
+
+    get length() {
+      return this.texts.length
+    }
+
+    play(index: number) {
+      const synth = window.speechSynthesis
+      const current = ++this.generation
+      synth.cancel()
+      this.clearKeepAlive()
+      if (index >= this.texts.length) return this.onEnd()
+
+      const utterance = new SpeechSynthesisUtterance(this.texts[index])
+      utterance.lang = document.documentElement.lang || 'en'
+      utterance.rate = this.rate
+      if (this.voice) utterance.voice = this.voice
+      utterance.onend = () => {
+        if (current === this.generation) this.play(index + 1)
+      }
+      utterance.onerror = (event) => {
+        if (current === this.generation && event.error !== 'interrupted' && event.error !== 'canceled') this.onEnd()
+      }
+      this.onIndex(index)
+      synth.speak(utterance)
+
+      if (this.needsKeepAlive) {
+        this.keepAlive = window.setInterval(() => {
+          if (synth.speaking && !synth.paused) {
+            synth.pause()
+            synth.resume()
+          }
+        }, 10000)
+      }
+    }
+
+    // Native pause/resume is unreliable on Android, so pausing cancels and resuming restarts the paragraph.
+    pause() {
+      this.stop()
+    }
+
+    stop() {
+      this.generation++
+      this.clearKeepAlive()
+      window.speechSynthesis.cancel()
+    }
+
+    private clearKeepAlive() {
+      window.clearInterval(this.keepAlive)
+      this.keepAlive = undefined
+    }
+  }
+
+  function setUp() {
+    const slot = document.querySelector<HTMLElement>('[data-listen]')
+    const title = document.querySelector('.post-header h1')
+    const article = document.querySelector('.post-content')
+    if (!slot || !title || !article) return
+
+    const query = <T extends Element>(selector: string) => slot.querySelector<T>(selector)!
+    const bar = query<HTMLElement>('[data-listen-bar]')
+    const playButton = query<HTMLButtonElement>('[data-listen-play]')
+    const stopButton = query<HTMLButtonElement>('[data-listen-stop]')
+    const prevButton = query<HTMLButtonElement>('[data-listen-prev]')
+    const nextButton = query<HTMLButtonElement>('[data-listen-next]')
+    const rateSelect = query<HTMLSelectElement>('[data-listen-rate]')
+    const voiceSelect = query<HTMLSelectElement>('[data-listen-voice]')
+    const progress = query<HTMLElement>('[data-listen-progress]')
+    const fill = query<HTMLElement>('[data-listen-fill]')
+    const status = query<HTMLElement>('[data-listen-status]')
+    const duration = query<HTMLElement>('[data-listen-duration]')
+    const words = Number(slot.dataset.words)
+
+    const blocks = collectBlocks(title, article)
+    let state: State = 'idle'
+    let index = 0
+    let highlighted: Element | undefined
+    let slotVisible = true
+
+    const source = new SpeechSource(
+      blocks.map((block) => block.text),
+      (current) => {
+        index = current
+        highlight(blocks[current].element)
+        render()
+      },
+      () => stop(),
+    )
+
+    function highlight(element: Element | undefined) {
+      highlighted?.classList.remove('is-being-read')
+      highlighted = element
+      if (!element) return
+      element.classList.add('is-being-read')
+      const { top, bottom } = element.getBoundingClientRect()
+      if (top < 0 || bottom > window.innerHeight - bar.offsetHeight) element.scrollIntoView({ block: 'center' })
+    }
+
+    function render() {
+      playButton.classList.toggle('is-playing', state === 'playing')
+      playButton.setAttribute('aria-label', state === 'playing' ? 'Pause' : state === 'paused' ? 'Resume' : 'Listen to this post')
+      bar.classList.toggle('is-active', state !== 'idle')
+      bar.classList.toggle('is-floating', state !== 'idle' && !slotVisible)
+      progress.setAttribute('aria-valuemax', String(source.length))
+      progress.setAttribute('aria-valuenow', String(state === 'idle' ? 0 : index + 1))
+      fill.style.width = state === 'idle' ? '0%' : `${((index + 1) / source.length) * 100}%`
+      status.textContent = state === 'idle' ? '' : `Paragraph ${index + 1} of ${source.length}`
+      duration.textContent = `~${getListeningMinutes(words, source.rate)} min`
+      // Reserve the in-place height so the article doesn't jump when the player floats.
+      if (!bar.classList.contains('is-floating')) slot.style.minHeight = `${bar.offsetHeight}px`
+    }
+
+    function play(from = index) {
+      state = 'playing'
+      source.play(from)
+      render()
+    }
+
+    function pause() {
+      state = 'paused'
+      source.pause()
+      render()
+    }
+
+    function stop() {
+      state = 'idle'
+      index = 0
+      source.stop()
+      highlight(undefined)
+      render()
+    }
+
+    function jump(offset: number) {
+      const target = Math.min(Math.max(index + offset, 0), source.length - 1)
+      if (state === 'playing') play(target)
+      else {
+        index = target
+        highlight(blocks[target].element)
+        if (state === 'idle') state = 'paused'
+        render()
+      }
+    }
+
+    // Settings apply from the start of the current paragraph; speech can't change mid-utterance.
+    function applySettings() {
+      if (state === 'playing') play(index)
+      else render()
+    }
+
+    function populateVoices() {
+      const voices = rankVoices(window.speechSynthesis.getVoices(), document.documentElement.lang || 'en')
+      if (voices.length === 0) return
+      const saved = storage.get(VOICE_KEY)
+      voiceSelect.replaceChildren(
+        ...voices.map((voice) => new Option(voice.name, voice.voiceURI, false, voice.voiceURI === saved)),
+      )
+      source.voice = voices.find((voice) => voice.voiceURI === voiceSelect.value) ?? voices[0]
+      query<HTMLElement>('.listen-voice').hidden = voices.length < 2
+      slot.hidden = false
+      render()
+    }
+
+    const savedRate = storage.get(RATE_KEY)
+    if (savedRate && [...rateSelect.options].some((option) => option.value === savedRate)) rateSelect.value = savedRate
+    source.rate = Number(rateSelect.value)
+
+    playButton.addEventListener('click', () => (state === 'playing' ? pause() : play()))
+    stopButton.addEventListener('click', stop)
+    prevButton.addEventListener('click', () => jump(-1))
+    nextButton.addEventListener('click', () => jump(1))
+    rateSelect.addEventListener('change', () => {
+      source.rate = Number(rateSelect.value)
+      storage.set(RATE_KEY, rateSelect.value)
+      applySettings()
+    })
+    voiceSelect.addEventListener('change', () => {
+      source.voice = window.speechSynthesis.getVoices().find((voice) => voice.voiceURI === voiceSelect.value)
+      storage.set(VOICE_KEY, voiceSelect.value)
+      applySettings()
+    })
+    window.addEventListener('pagehide', stop)
+
+    // The compact player floats only while a session is active and its own spot is off screen.
+    new IntersectionObserver(([entry]) => {
+      slotVisible = entry.isIntersecting
+      render()
+    }).observe(slot)
+
+    populateVoices()
+    window.speechSynthesis.addEventListener('voiceschanged', populateVoices)
+    render()
+  }
+
+  if ('speechSynthesis' in window) setUp()
+</script>
+
+<style>
+  .listen-slot {
+    max-width: 85ch;
+    margin: 0 auto 2.5rem;
+  }
+
+  .listen-slot[hidden],
+  .listen-setting[hidden] {
+    display: none;
+  }
+
+  .listen-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--outline);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .listen-play {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 0;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--bg);
+    cursor: pointer;
+  }
+
+  .listen-play svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: currentColor;
+  }
+
+  .listen-play .icon-pause,
+  .listen-play.is-playing .icon-play {
+    display: none;
+  }
+
+  .listen-play.is-playing .icon-pause {
+    display: block;
+  }
+
+  .listen-main {
+    flex: 1;
+    min-width: 12rem;
+  }
+
+  .listen-title {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .listen-duration {
+    margin-left: 0.4rem;
+    font-weight: 400;
+    opacity: 0.7;
+  }
+
+  .listen-progress {
+    height: 4px;
+    margin-top: 0.5rem;
+    border-radius: 2px;
+    background: var(--outline);
+    overflow: hidden;
+  }
+
+  .listen-progress-fill {
+    width: 0;
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.3s;
+  }
+
+  .listen-status {
+    min-height: 1.2em;
+    margin: 0.35rem 0 0;
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .listen-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .listen-icon-button {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--outline);
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .listen-icon-button svg {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+  }
+
+  /* Progress and previous/next/stop only mean something once listening has started. */
+  .listen-bar:not(.is-active) :is(.listen-icon-button, .listen-progress, .listen-status) {
+    display: none;
+  }
+
+  .listen-setting {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+  }
+
+  .listen-setting select {
+    max-width: 11rem;
+    padding: 0.25rem 0.4rem;
+    border: 1px solid var(--outline);
+    border-radius: 6px;
+    background: var(--bg);
+    color: inherit;
+    font: inherit;
+  }
+
+  .listen-play:focus-visible,
+  .listen-icon-button:focus-visible,
+  .listen-setting select:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  .listen-bar.is-floating {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    z-index: 50;
+    width: min(800px, calc(100% - 2rem));
+    padding: 0.6rem 1rem;
+    transform: translateX(-50%);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  .listen-bar.is-floating .listen-play {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .listen-bar.is-floating .listen-title,
+  .listen-bar.is-floating .listen-voice {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .listen-bar.is-floating .listen-speed,
+    .listen-bar.is-floating .listen-status {
+      display: none;
+    }
+  }
+</style>
