@@ -30,7 +30,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 ## Open questions
 
 - [ ] Physics of Software playlist URL for the section's "Watch on YouTube" link (`src/content/sections/physics-of-software.md`).
-- [ ] Newsletter: provider and placement (decide before PR 11).
+- [ ] Newsletter: provider and placement (decide before PR 13).
 
 ---
 
@@ -144,7 +144,27 @@ See [Listen (read aloud)](#listen-read-aloud) (D14).
 - [x] Raw HTML `<a>` tags in posts: enable Sätteri's `rawHtml` parsing so the link plugin sees them, if the build output stays otherwise identical; if not, document "use Markdown links in posts" under Conventions instead. (Identical: enabled.)
 - [ ] Preview: footer links (RSS same tab, social links new tab with icon).
 
-### PR 11: Newsletter (pending decision)
+### PR 11: Listen v2
+
+Phase 1 sounded poor on Android: curly quotes and apostrophes made the voice pause mid-sentence ("they’d “gotten" stopped at "they’d"), and 220-character pieces broke the rhythm.
+
+- [x] Normalize text before speaking (the page keeps its typography): curly apostrophes → `'`, quotation marks removed, dashes → commas, common abbreviations expanded.
+- [x] Speak whole paragraphs. Desktop Chrome's ~15 s cutoff is handled with its keep-alive workaround instead of splitting.
+- [x] Pick the best installed voice automatically (prefers "Natural", "Enhanced", "Premium", "Google" voices).
+- [x] Dedicated player between the header and the article: large play/pause, "Listen to this post" with estimated listening time, paragraph progress, previous/next paragraph, speed (0.75×–1.5×) and voice pickers remembered between visits.
+- [x] While a session is active (playing or paused) and the player has scrolled away, a compact version sticks to the bottom of the screen; stopped or finished, it stays in place.
+- [x] Player built around a source (browser speech now), so PR 12 can plug in audio files.
+- [x] Remove the header Listen button.
+- [x] Tested with a scripted speech engine: normalized text (no curly characters reach the engine), whole paragraphs (43 instead of 88 pieces on Conservation), voice ranking, previous/next, pause/resume, speed and voice remembered, floating only while active and scrolled away.
+- [ ] Preview: listen on Android (the quote pause), iPhone, and desktop Chrome (a paragraph longer than 15 seconds keeps going).
+
+### PR 12: Listen, phase 2 (Kokoro audio)
+
+- [ ] Decide storage for the audio files (first step of this PR).
+- [ ] Script to generate a post's audio locally with Kokoro.
+- [ ] Player uses the audio file when a post has one (seek, background play on phones, lock-screen controls); browser speech stays the fallback.
+
+### PR 13: Newsletter (pending decision)
 
 - [ ] Decide provider and placement (see Open questions).
 
@@ -156,8 +176,7 @@ See [Listen (read aloud)](#listen-read-aloud) (D14).
 - [ ] OG image generated per post at build time.
 - [ ] MDX for interactive Physics of Software diagrams.
 - [ ] Book home page (`layout: book` on the section).
-- [ ] Listen: let readers pick a voice and speed (phase 1 uses the browser default).
-- [ ] Listen, phase 2: audio generated ahead of time with an open-source voice model (Kokoro) for flagship posts. Needs a storage plan first.
+- [ ] Listen: "read from here", starting from a chosen paragraph (a play icon on hover).
 - [ ] Listen, phase 3 (optional): Moriel's own recordings for selected posts, in the same player; possibly a podcast feed.
 - [ ] Re-evaluate comments (D2) if the audience outgrows Giscus.
 - [ ] Section page lists episodes that don't have posts yet (D10).

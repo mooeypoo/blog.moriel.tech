@@ -3,9 +3,9 @@ import { Picture } from 'astro:assets'
 import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
-import ListenButton from '../../components/ListenButton.astro'
+import ListenPlayer from '../../components/ListenPlayer.astro'
 import SectionLabel from '../../components/SectionLabel.astro'
-import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, normalizeImageUrl } from '../../lib/content'
+import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, getWordCount, normalizeImageUrl } from '../../lib/content'
 import { getItemLabel, getPostSectionContext, getSectionPath } from '../../lib/sections'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 import { getVideoTitle } from '../../lib/videos'
@@ -142,9 +142,10 @@ const jsonLd = generateBlogPostingSchema({
             </a>
           </div>
         )}
-        <ListenButton />
       </div>
     </header>
+
+    <ListenPlayer words={getWordCount(post)} />
 
     <div class="post-content blog-prose">
       {showTopVideo && <Fragment set:html={renderVideoEmbed(video!, { title: videoTitle })} />}
@@ -387,7 +388,7 @@ const jsonLd = generateBlogPostingSchema({
     padding-top: 0;
   }
 
-  /* The element being read aloud by the Listen button. */
+  /* The element being read aloud by the Listen player. */
   .is-being-read {
     border-radius: 4px;
     background: color-mix(in srgb, var(--primary) 18%, transparent);
