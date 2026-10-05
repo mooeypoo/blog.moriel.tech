@@ -5,4 +5,4 @@ itemLabel: Chapter
 unordered: exclude
 ---
 
-I'm writing a book about delivery engineering. This is where its chapters, and the thinking behind them, will be published as I go.
+I'm writing a series of posts about delivery engineering. This is where the collection will live, and the thinking behind them, will be published as I go.
