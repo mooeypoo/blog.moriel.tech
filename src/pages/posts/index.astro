@@ -1,4 +1,5 @@
 ---
+import { getCardUrl } from '../../lib/social-cards'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostListCard from '../../components/PostListCard.astro'
 import { getPublishedPosts, PAGE_SIZE } from '../../lib/content'
@@ -17,7 +18,7 @@ const title = 'All Posts'
 const description = 'Browse all blog posts on Moriel\'s Blog about human-centered software development, experiences, thoughts, and learnings.'
 ---
 
-<BaseLayout title={title} description={description} canonical={canonical}>
+<BaseLayout title={title} description={description} canonical={canonical} ogImage={getCardUrl('posts')}>
   <section class="posts-container">
     <h1>All posts</h1>
     

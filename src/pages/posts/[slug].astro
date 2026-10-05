@@ -8,6 +8,7 @@ import SectionLabel from '../../components/SectionLabel.astro'
 import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, getWordCount, normalizeImageUrl } from '../../lib/content'
 import { getItemLabel, getPostSectionContext, getSectionPath } from '../../lib/sections'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
+import { getCardUrl } from '../../lib/social-cards'
 import { getVideoTitle } from '../../lib/videos'
 import {
   findStandaloneVideoIds,
@@ -63,7 +64,6 @@ const heroImage = post.data.image
 const heroWidths = typeof heroImage === 'object'
   ? [640, 960, 1280, 1920, 2560].filter((width) => width < heroImage.width).concat(heroImage.width)
   : []
-const displayImageAlt = `${title} social preview image`
 const video = post.data.video
 const videoTitle = video ? await getVideoTitle(video) : undefined
 // A bare URL for the same video in the body places it there instead (ROADMAP D15).
@@ -90,12 +90,8 @@ const jsonLd = generateBlogPostingSchema({
   title={title}
   description={description}
   canonical={canonical}
-  ogImage={socialImage?.src}
+  ogImage={getCardUrl(`posts/${getPostSlug(post)}`)}
   ogType="article"
-  twitterCard="summary_large_image"
-  ogImageAlt={displayImageAlt}
-  ogImageWidth={socialImage?.width}
-  ogImageHeight={socialImage?.height}
 >
   <Fragment slot="head">
     <meta property="article:published_time" content={publishedTime} />

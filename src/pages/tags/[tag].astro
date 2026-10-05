@@ -1,4 +1,5 @@
 ---
+import { getCardUrl, tagCardPath } from '../../lib/social-cards'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostListCard from '../../components/PostListCard.astro'
 import { getPublishedPosts } from '../../lib/content'
@@ -33,7 +34,7 @@ const title = `Posts tagged with "${tag}"`
 const description = `All posts tagged with ${tag} on Moriel's Blog.`
 ---
 
-<BaseLayout title={title} description={description} canonical={canonical}>
+<BaseLayout title={title} description={description} canonical={canonical} ogImage={getCardUrl(tagCardPath(tag))}>
   <section class="tag-posts-container">
     <h1>Posts tagged <em>#{tag}</em></h1>
 
