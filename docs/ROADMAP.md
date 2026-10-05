@@ -195,10 +195,12 @@ Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×6
 
 ### PR 15: Section hero images
 
-- [ ] `hero` on section files (an image in `src/assets`), rendered like the post hero; sections without one keep the plain header.
-- [ ] Share the hero rendering between post and section pages.
-- [ ] Section social cards use the hero image when present.
-- [ ] Document `hero` in `docs/FRONTMATTER.md`. Images to come from Moriel.
+- [x] `hero` on section files (an image in `src/assets`), rendered like the post hero; sections without one keep the plain header.
+- [x] Share the hero rendering between post and section pages (`HeroImage.astro` + `src/styles/hero.css`); post headers render pixel-identically.
+- [x] Fixed along the way: the full-width hero (100vw) caused a sideways scroll on systems with visible scrollbars, on posts too; links over a hero are white for contrast.
+- [x] Section social cards use the hero image when present.
+- [x] Document `hero` in `docs/FRONTMATTER.md`.
+- [ ] Moriel: add hero images for The Physics of Software and Delivery Engineering.
 
 ### Later (not yet split into PRs)
 

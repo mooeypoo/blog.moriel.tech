@@ -57,6 +57,7 @@ The filename is the section's ID and URL: `physics-of-software.md` → `/physics
 ---
 title: The Physics of Software
 description: Real physics, and what it says about your codebase.
+hero: ../../assets/images/sections/physics-of-software.png
 itemLabel: Episode
 unordered: include
 links:
@@ -69,6 +70,7 @@ Intro text, in Markdown…
 |---|---|---|
 | `title` | yes | Section name, used in the nav, labels, and feed. |
 | `description` | yes | Shown under the title on the landing page. |
+| `hero` | no | Image behind the landing page header and its social card. Put it in `src/assets` so it's optimized. Without one, the header is plain. |
 | `itemLabel` | yes | Word for numbered posts: `Episode`, `Chapter`. |
 | `unordered` | no (`include`) | `exclude` keeps posts without `order` out of the reading sequence; they're listed under **Updates** instead. |
 | `links` | no | Buttons on the landing page. |
