@@ -5,4 +5,7 @@
 /posts/2026-05-junior-dev-collapse          /posts/junior-dev-collapse          301
 /posts/2026-06-conservation-of-complexity   /posts/conservation-of-complexity   301
 
+# "Physics of Software" became a section (docs/ROADMAP.md D4)
+/tags/Physics%20of%20Software   /physics-of-software   301
+
 # Catch-all (optional, for any additional future redirects)

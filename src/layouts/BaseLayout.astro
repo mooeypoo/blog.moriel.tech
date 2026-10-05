@@ -3,6 +3,7 @@ import { Font } from 'astro:assets'
 import ThemeToggle from '../components/ThemeToggle.vue'
 import Footer from '../components/Footer.astro'
 import { resolveSocialImage } from '../lib/seo'
+import { getNavSections, getSectionPath } from '../lib/sections'
 
 interface Props {
   title?: string
@@ -29,6 +30,7 @@ const {
 } = Astro.props
 
 const resolvedOgImage = resolveSocialImage(ogImage)
+const navSections = (await getNavSections()).map((section) => ({ title: section.data.title, href: getSectionPath(section) }))
 ---
 
 <!doctype html>
@@ -74,7 +76,7 @@ const resolvedOgImage = resolveSocialImage(ogImage)
     <slot name="head" />
   </head>
   <body>
-    <ThemeToggle client:load />
+    <ThemeToggle client:load sections={navSections} />
     
     <main class="page-content">
       <slot />
@@ -99,6 +101,17 @@ const resolvedOgImage = resolveSocialImage(ogImage)
     --text: #212121;
     --primary: #1976d2;
     --outline: rgba(0, 0, 0, 0.2);
+  }
+
+  /* A mask lets the icon follow the link color in both themes. */
+  a.external-link::after {
+    content: '';
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    margin-left: 0.2em;
+    background-color: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpath d='M15 3h6v6'/%3E%3Cpath d='M10 14 21 3'/%3E%3C/svg%3E") no-repeat center / contain;
   }
 
   .sr-only {

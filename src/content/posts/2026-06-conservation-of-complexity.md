@@ -3,7 +3,7 @@ title: "Conservation of Software Complexity (The Physics of Software)"
 date: 2026-06-19
 tags:
   - Architecture
-  - Physics of Software
+section: physics-of-software
 description: Complexity doesn't disappear when you "simplify" something. It moves. And there's a real, honest-to-physics reason why.
 image: ../../assets/images/posts/conservation-of-complexity-layers.png
 ---

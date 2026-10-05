@@ -1,11 +1,19 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import PostPreviewImage from '../components/PostPreviewImage.astro'
+import SectionLabel from '../components/SectionLabel.astro'
+import { getEntry } from 'astro:content'
 import { getPostDisplayImage, getPublishedPosts, getPostPath } from '../lib/content'
+import { getItemLabel } from '../lib/sections'
 import { SITE_URL } from '../lib/seo'
 
 const allPosts = await getPublishedPosts()
-const recentPosts = allPosts.slice(0, 5)
+const recentPosts = await Promise.all(
+  allPosts.slice(0, 5).map(async (post) => {
+    const section = post.data.section ? await getEntry(post.data.section) : undefined
+    return { post, section, itemLabel: section ? getItemLabel(section, post) : undefined }
+  }),
+)
 ---
 
 <BaseLayout
@@ -23,9 +31,10 @@ const recentPosts = allPosts.slice(0, 5)
       <section class="recent-posts">
         <h2>Recent posts</h2>
         <div class="posts-grid">
-          {recentPosts.map((post) => (
+          {recentPosts.map(({ post, section, itemLabel }) => (
             <article class="post-card">
               <PostPreviewImage href={getPostPath(post)} image={getPostDisplayImage(post)} />
+              {section && <SectionLabel section={section} label={itemLabel} />}
               <h3 class="post-title">
                 <a href={getPostPath(post)}>{post.data.title}</a>
               </h3>
@@ -95,6 +104,10 @@ const recentPosts = allPosts.slice(0, 5)
   .post-title {
     margin: 0 0 0.5rem 0;
     font-size: 1.25rem;
+  }
+
+  .post-card :global(.post-image-link + .section-label) {
+    margin-top: 0.75rem;
   }
 
   .post-title a {

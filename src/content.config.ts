@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { glob } from 'astro/loaders'
-import { defineCollection } from 'astro:content'
+import { defineCollection, reference } from 'astro:content'
 import { z } from 'astro/zod'
 
 const DATE_PREFIX = /^\d{4}-\d{2}(-\d{2})?-/
@@ -43,9 +43,27 @@ const posts = defineCollection({
     // Optional override used for card/social preview use (OpenGraph/Twitter/list cards).
     // If omitted, the site falls back to `image`.
     display: z.union([image(), z.string()]).optional(),
+    section: reference('sections').optional(),
+    // Position and displayed number within the section ("Episode 4"). Never part of the URL.
+    order: z.number().int().positive().optional(),
+  }),
+})
+
+// Curated categories with their own landing page at /<id> (docs/ROADMAP.md D3, D11).
+const sections = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/sections' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    // Labels a post's `order`: "Episode 4", "Chapter 3".
+    itemLabel: z.string(),
+    // `exclude` keeps posts without `order` out of the reading sequence (e.g. book announcements).
+    unordered: z.enum(['include', 'exclude']).default('include'),
+    links: z.array(z.object({ label: z.string(), href: z.string().url() })).default([]),
   }),
 })
 
 export const collections = {
   posts,
+  sections,
 }

@@ -24,6 +24,7 @@
         <ul>
           <li><a href="/">Home</a></li>
           <li><a href="/posts">Posts</a></li>
+          <li v-for="section in sections" :key="section.href"><a :href="section.href">{{ section.title }}</a></li>
           <li><a href="/tags">Tags</a></li>
           <li><a href="https://moriel.tech">About</a></li>
           <li><a href="https://moriel.tech/contact">Contact</a></li>
@@ -59,6 +60,7 @@
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/posts">Posts</a></li>
+        <li v-for="section in sections" :key="section.href"><a :href="section.href">{{ section.title }}</a></li>
         <li><a href="/tags">Tags</a></li>
         <li><a href="https://moriel.tech">About</a></li>
         <li><a href="https://moriel.tech/contact">Contact</a></li>
@@ -69,6 +71,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+withDefaults(defineProps<{
+  sections?: { title: string; href: string }[]
+}>(), {
+  sections: () => [],
+})
 
 const drawerOpen = ref(false)
 const isDark = ref(true)
