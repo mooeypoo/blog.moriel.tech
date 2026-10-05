@@ -129,11 +129,13 @@ See [Video embeds](#video-embeds) for how placement works (D15).
 
 See [Listen (read aloud)](#listen-read-aloud) (D14).
 
-- [ ] **Listen** button in the post header; hidden where `speechSynthesis` isn't available.
-- [ ] Reads the title, then the article body one element at a time (paragraphs, headings, list items, quotes), splitting long paragraphs by sentence. Skips code blocks, video players, and screen-reader-only text.
-- [ ] Pause cancels and remembers the current element; resume restarts it (native pause is unreliable on Android). Stop resets. Speech stops when leaving the page.
-- [ ] Highlights the element being read and scrolls only when it leaves the screen.
-- [ ] No CSP change (nothing new is loaded).
+- [x] **Listen** button in the post header; hidden where `speechSynthesis` isn't available.
+- [x] Reads the title, then the article body one element at a time (paragraphs, headings, list items, quotes), splitting long paragraphs by sentence. Skips code blocks, video players, and screen-reader-only text.
+- [x] Pause cancels and remembers the current element; resume restarts it (native pause is unreliable on Android). Stop resets. Speech stops when leaving the page.
+- [x] Highlights the element being read and scrolls only when it leaves the screen.
+- [x] No CSP change (nothing new is loaded).
+- [x] Tested with a scripted speech engine on four posts: order, 220-character limit, skipped players, pause/resume, stop, finishing.
+- [ ] Preview: listen on real devices (Chrome desktop, Safari on iPhone, Chrome on Android), including pause and resume.
 
 ### PR 10: Consistent links
 
@@ -153,6 +155,7 @@ See [Listen (read aloud)](#listen-read-aloud) (D14).
 - [ ] OG image generated per post at build time.
 - [ ] MDX for interactive Physics of Software diagrams.
 - [ ] Book home page (`layout: book` on the section).
+- [ ] Listen: let readers pick a voice and speed (phase 1 uses the browser default).
 - [ ] Listen, phase 2: audio generated ahead of time with an open-source voice model (Kokoro) for flagship posts. Needs a storage plan first.
 - [ ] Listen, phase 3 (optional): Moriel's own recordings for selected posts, in the same player; possibly a podcast feed.
 - [ ] Re-evaluate comments (D2) if the audience outgrows Giscus.
