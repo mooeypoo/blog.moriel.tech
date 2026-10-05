@@ -2,9 +2,11 @@
 //
 //   node --experimental-strip-types generate.mjs [--dist ../../dist] [--out out] [--from <url>] [--regenerate <slugs|all>] [--plan] [slug...]
 //
-// --from downloads what's already published first, so only new or changed posts are generated.
-// Naming slugs limits the run to those posts (a local preview) and skips pruning.
-// --plan only reports what would be generated or removed.
+// Audio is generated per paragraph and stored as segments named by what they sound like, so an
+// edit only regenerates the paragraphs that changed; each post's MP3 is its segments joined.
+// --from downloads the published segments first. Naming slugs limits the run to those posts
+// (a local preview) and skips pruning. --plan only reports what would be generated or removed.
+import { createHash } from 'node:crypto'
 import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
@@ -37,11 +39,19 @@ const { values: options, positionals: onlySlugs } = parseArgs({
 })
 const distDir = resolve(options.dist)
 const outDir = resolve(options.out)
+const segmentsDir = join(outDir, 'segments')
 const forced = new Set(options.regenerate.split(/[\s,]+/).filter(Boolean))
-mkdirSync(outDir, { recursive: true })
+mkdirSync(segmentsDir, { recursive: true })
 
 env.cacheDir = resolve(import.meta.dirname, '.cache')
 env.remotePathTemplate = `{model}/resolve/${MODEL_REVISION}/`
+
+/** Everything that changes how a paragraph sounds is in its name, so a match can be reused as is. */
+function segmentName(text, isTitle) {
+  const pause = isTitle ? PAUSE_AFTER_TITLE : PAUSE_BETWEEN_BLOCKS
+  const key = JSON.stringify([MODEL_REVISION, VOICE, SAMPLE_RATE, BITRATE_KBPS, pause, text])
+  return `${createHash('sha256').update(key).digest('hex').slice(0, 20)}.mp3`
+}
 
 function splitIntoParts(text) {
   if (text.length <= MAX_PART_LENGTH) return [text]
@@ -68,37 +78,45 @@ function encodeMp3(samples) {
   return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)))
 }
 
+// MPEG-2 Layer III, as lamejs writes at 24 kHz: 576 samples per frame.
+const MPEG2_L3_BITRATES = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160]
+const MPEG2_SAMPLE_RATES = [22050, 24000, 16000]
+
+/** Exact playing time, counted frame by frame, so joined segments give exact paragraph start times. */
+function mp3Duration(buffer) {
+  let offset = 0
+  let seconds = 0
+  while (offset + 4 <= buffer.length) {
+    if (buffer[offset] !== 0xff || (buffer[offset + 1] & 0xf6) !== 0xf2) throw new Error(`Unexpected MP3 frame at byte ${offset}`)
+    const bitrate = MPEG2_L3_BITRATES[buffer[offset + 2] >> 4] * 1000
+    const sampleRate = MPEG2_SAMPLE_RATES[(buffer[offset + 2] >> 2) & 3]
+    const padding = (buffer[offset + 2] >> 1) & 1
+    offset += Math.floor((72 * bitrate) / sampleRate) + padding
+    seconds += 576 / sampleRate
+  }
+  return seconds
+}
+
 let tts
-async function synthesize(texts) {
+async function synthesizeSegment(text, isTitle) {
   tts ??= await KokoroTTS.from_pretrained(MODEL, { dtype: 'fp32', device: 'cpu' })
   const parts = []
-  const starts = []
-  let length = 0
-  for (const [index, text] of texts.entries()) {
-    starts.push(length / SAMPLE_RATE)
-    for (const part of splitIntoParts(text)) {
-      const { audio } = await tts.generate(part, { voice: VOICE })
-      parts.push(audio)
-      length += audio.length
-    }
-    const pause = new Float32Array(Math.round(SAMPLE_RATE * (index === 0 ? PAUSE_AFTER_TITLE : PAUSE_BETWEEN_BLOCKS)))
-    parts.push(pause)
-    length += pause.length
-  }
-  const samples = new Float32Array(length)
+  for (const part of splitIntoParts(text)) parts.push((await tts.generate(part, { voice: VOICE })).audio)
+  parts.push(new Float32Array(Math.round(SAMPLE_RATE * (isTitle ? PAUSE_AFTER_TITLE : PAUSE_BETWEEN_BLOCKS))))
+  const samples = new Float32Array(parts.reduce((length, part) => length + part.length, 0))
   let offset = 0
   for (const part of parts) {
     samples.set(part, offset)
     offset += part.length
   }
-  return { mp3: encodeMp3(samples), duration: length / SAMPLE_RATE, starts }
+  return encodeMp3(samples)
 }
 
 async function download(path) {
   const response = await fetch(new URL(path, options.from))
   if (response.status === 404) return undefined
   if (!response.ok) throw new Error(`Downloading ${path} from ${options.from} failed: ${response.status}`)
-  return response
+  return Buffer.from(await response.arrayBuffer())
 }
 
 // What the site would read: the player is absent on posts with `listen: false`.
@@ -113,60 +131,77 @@ for (const slug of readdirSync(join(distDir, 'posts'))) {
 }
 
 const manifestPath = join(outDir, 'manifest.json')
-let manifest = { model: `${MODEL}@${MODEL_REVISION}`, posts: {} }
-if (options.from) manifest = (await (await download('manifest.json'))?.json()) ?? manifest
-else if (existsSync(manifestPath)) manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
-manifest.model = `${MODEL}@${MODEL_REVISION}`
+const emptyManifest = { model: `${MODEL}@${MODEL_REVISION}`, posts: {} }
+let published = emptyManifest
+if (options.from) published = JSON.parse((await download('manifest.json'))?.toString() ?? 'null') ?? emptyManifest
+else if (existsSync(manifestPath)) published = JSON.parse(readFileSync(manifestPath, 'utf8'))
+const publishedSegments = new Set(Object.values(published.posts).flatMap((entry) => entry.segments ?? []))
 
-const removed = []
-if (onlySlugs.length === 0) {
-  for (const slug of Object.keys(manifest.posts)) {
-    if (posts.has(slug)) continue
-    removed.push(slug)
-    if (options.plan) continue
-    rmSync(join(outDir, manifest.posts[slug].file), { force: true })
-    delete manifest.posts[slug]
-  }
-}
+const selected = [...posts.keys()].filter((slug) => onlySlugs.length === 0 || onlySlugs.includes(slug))
+const manifest = { model: `${MODEL}@${MODEL_REVISION}`, posts: onlySlugs.length > 0 ? { ...published.posts } : {} }
+const report = []
 
-const generated = []
-for (const [slug, { texts, hash }] of posts) {
-  if (onlySlugs.length > 0 && !onlySlugs.includes(slug)) continue
-  const existing = manifest.posts[slug]
-  const current = existing?.hash === hash && existing.voice === VOICE && !forced.has('all') && !forced.has(slug)
+for (const slug of selected) {
+  const { texts, hash } = posts.get(slug)
+  const regenerate = forced.has('all') || forced.has(slug)
+  const segments = texts.map((text, index) => ({ text, isTitle: index === 0, name: segmentName(text, index === 0) }))
+  let generatedCount = 0
 
-  if (current) {
-    if (options.plan || !options.from || existsSync(join(outDir, existing.file))) continue
-    // Republishing replaces the whole Pages site, so unchanged audio is carried over.
-    const response = await download(existing.file)
-    if (response) {
-      writeFileSync(join(outDir, existing.file), Buffer.from(await response.arrayBuffer()))
-      continue
+  for (const segment of segments) {
+    const path = join(segmentsDir, segment.name)
+    if (!regenerate && existsSync(path)) continue
+    if (!regenerate && options.from && publishedSegments.has(segment.name)) {
+      if (options.plan) continue
+      const data = await download(`segments/${segment.name}`)
+      if (data) {
+        writeFileSync(path, data)
+        continue
+      }
     }
-    // Listed but missing from the site: fall through and regenerate it.
+    generatedCount++
+    if (!options.plan) writeFileSync(path, await synthesizeSegment(segment.text, segment.isTitle))
   }
+  if (generatedCount > 0) report.push(`${slug} (${generatedCount} of ${segments.length} paragraphs)`)
+  if (options.plan) continue
 
-  if (options.plan) {
-    generated.push(slug)
-    continue
+  const buffers = segments.map((segment) => readFileSync(join(segmentsDir, segment.name)))
+  const starts = []
+  let duration = 0
+  for (const buffer of buffers) {
+    starts.push(Math.round(duration * 100) / 100)
+    duration += mp3Duration(buffer)
   }
-  const started = Date.now()
-  const { mp3, duration, starts } = await synthesize(texts)
   const file = `${slug}-${hash.slice(0, 12)}.mp3`
-  if (existing && existing.file !== file) rmSync(join(outDir, existing.file), { force: true })
-  writeFileSync(join(outDir, file), mp3)
-  manifest.posts[slug] = { hash, voice: VOICE, file, duration: Math.round(duration * 100) / 100, starts: starts.map((s) => Math.round(s * 100) / 100) }
-  generated.push(slug)
-  console.log(`${slug}: ${Math.round(duration)}s of audio, ${(mp3.length / 1e6).toFixed(1)} MB, in ${Math.round((Date.now() - started) / 1000)}s`)
+  writeFileSync(join(outDir, file), Buffer.concat(buffers))
+  manifest.posts[slug] = {
+    hash,
+    voice: VOICE,
+    file,
+    duration: Math.round(duration * 100) / 100,
+    starts,
+    segments: segments.map((segment) => segment.name),
+  }
 }
+
+const removed = onlySlugs.length > 0 ? [] : Object.keys(published.posts).filter((slug) => !posts.has(slug))
 
 if (options.plan) {
-  console.log(`Would generate: ${generated.join(', ') || 'none'}. Would remove: ${removed.join(', ') || 'none'}.`)
+  console.log(`Would generate: ${report.join(', ') || 'nothing'}. Would remove: ${removed.join(', ') || 'none'}.`)
   process.exit(0)
+}
+
+// Keep only what the manifest references; the deployed site is exactly this folder.
+const referenced = new Set(Object.values(manifest.posts).flatMap((entry) => [entry.file, ...entry.segments]))
+for (const name of readdirSync(outDir)) {
+  if (name.endsWith('.mp3') && !referenced.has(name)) rmSync(join(outDir, name))
+}
+for (const name of readdirSync(segmentsDir)) {
+  if (!referenced.has(name)) rmSync(join(segmentsDir, name))
 }
 
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`)
 writeFileSync(join(outDir, 'index.html'), '<!doctype html><meta charset="utf-8"><title>Listen audio</title><p>Audio for the Listen player on <a href="https://blog.moriel.tech">blog.moriel.tech</a>.</p>\n')
 
-console.log(`Generated: ${generated.join(', ') || 'none'}. Removed: ${removed.join(', ') || 'none'}.`)
-if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${generated.length + removed.length > 0}\n`)
+const changed = JSON.stringify(manifest.posts) !== JSON.stringify(published.posts)
+console.log(`Generated: ${report.join(', ') || 'nothing'}. Removed: ${removed.join(', ') || 'none'}.`)
+if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`)

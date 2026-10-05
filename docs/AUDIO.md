@@ -6,9 +6,10 @@ Posts are read aloud by the Listen player. When a post has generated audio (Koko
 
 - **What gets read:** the post title and its article text, cleaned up for speech (quotes and dashes normalized, abbreviations expanded). Code blocks, video players, and screen-reader-only text are skipped. The player, the generator, and CI all use the same extraction (`src/lib/listen-text.ts`).
 - **Fingerprint:** the spoken text of each post is hashed (SHA-256). Audio is tied to that hash, so it only plays while the post's spoken text matches what was recorded. Edits that change the text make the player fall back to the browser voice until new audio is published; edits that don't (tags, images, other frontmatter) change nothing.
-- **Where audio lives:** this repo's GitHub Pages site, `https://mooeypoo.github.io/blog.moriel.tech/`, deployed by GitHub Actions. It holds one MP3 per post (the hash is in the filename) plus `manifest.json` (hash, voice, duration, and where each paragraph starts, for highlighting and skipping). **Nothing is committed to git:** each run downloads the published audio, adds what's new or changed, and redeploys the whole site. If the site were ever wiped, a full run regenerates everything from the posts.
-- **When audio is made:** by the **Listen audio** workflow after every push to `main`, for new posts and posts whose spoken text (or the voice) changed. Audio for removed posts, drafts, and `listen: false` posts is dropped. It can also be run by hand from the Actions tab (**Run workflow**), optionally naming posts to regenerate or `all`.
-- **Voice:** Kokoro `af_heart`, an open-source model run on GitHub's machines (no paid service). About 3 minutes per post.
+- **Per paragraph:** each paragraph's audio is stored separately (`segments/`), named by a hash of everything that affects its sound (text, voice, model, bitrate, pause). A post's MP3 is its paragraphs joined, so **an edit only regenerates the paragraphs it changed**: a typo fix takes seconds, not a whole post. Changing the voice or model regenerates everything.
+- **Where audio lives:** this repo's GitHub Pages site, `https://mooeypoo.github.io/blog.moriel.tech/`, deployed by GitHub Actions. It holds one MP3 per post (the hash is in the filename), the paragraph segments, and `manifest.json` (hash, voice, duration, where each paragraph starts, and its segments). **Nothing is committed to git:** each run downloads the published segments, generates only missing ones, rebuilds every post's MP3, and redeploys the whole site. If the site were ever wiped, a full run regenerates everything from the posts.
+- **When audio is made:** by the **Listen audio** workflow after every push to `main`, for new paragraphs and paragraphs whose text changed. A new post takes about 25 minutes on GitHub's runners; the first run generates every post (about 2 hours). Audio for removed posts, drafts, and `listen: false` posts is dropped. It can also be run by hand from the Actions tab (**Run workflow**), optionally naming posts to regenerate or `all`.
+- **Voice:** Kokoro `af_heart`, an open-source model run on GitHub's machines (no paid service).
 - **Opting out:** `listen: false` in a post's frontmatter removes the player and skips generation.
 
 ## Generate locally (preview only)
@@ -18,7 +19,7 @@ Publishing always goes through the workflow. To listen to a post's generated aud
 ```bash
 npm run build
 npm run audio:install          # once; installs the generator's own dependencies
-npm run audio -- <post-slug>   # writes tools/listen-audio/out/<slug>-<hash>.mp3
+npm run audio -- <post-slug>   # writes tools/listen-audio/out/<slug>-<hash>.mp3; reruns reuse unchanged paragraphs
 npm run audio -- --plan --from https://mooeypoo.github.io/blog.moriel.tech/
                                # lists what the workflow would generate or remove
 ```

@@ -173,6 +173,7 @@ See [docs/AUDIO.md](AUDIO.md) (D17, D18).
 - [x] `listen: false` frontmatter opts a post out (no player, no audio).
 - [x] CSP: `media-src` and `connect-src` allow `https://mooeypoo.github.io/blog.moriel.tech/`.
 - [x] Tested locally: Conservation generated (12.9 min of audio, 4.6 MB); in headless Chrome with the Pages URL served from that output, the player picks the audio, seeks, skips by paragraph with the highlight following, resumes in place, sets lock-screen metadata, falls back to browser speech when the hash is stale or the file fails, and has no CSP violations. Generator `--plan`, carry-over, and removal checked against a local stand-in for Pages.
+- [x] Per-paragraph regeneration: paragraphs are stored as segments named by what they sound like, and each post's MP3 is its segments joined (valid MP3 frames, no re-encoding), so an edit regenerates only the changed paragraphs. Tested: one edited paragraph regenerated 1 of 4 in 3 s; Chrome plays the joined file to the end with the exact manifest duration; carry-over from a published site is byte-identical.
 - [ ] After merge: the first workflow run generates all posts (~25 min each on GitHub's runners, about 2 hours); confirm audio plays on the live site.
 - [x] `docs/FRONTMATTER.md`: every post and section field.
 

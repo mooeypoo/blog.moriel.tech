@@ -51,6 +51,8 @@ export interface AudioManifestEntry {
   duration: number
   /** Start time in seconds of each spoken block, in order. */
   starts: number[]
+  /** Per-paragraph audio the file is joined from; the generator reuses unchanged ones. */
+  segments: string[]
 }
 
 export interface AudioManifest {
