@@ -31,7 +31,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    # A full regeneration takes hours (about 35 s per paragraph); GitHub's limit is 360.
+    # A full regeneration of today's posts takes about 40 minutes; headroom for the blog to grow.
     timeout-minutes: 350
     outputs:
       changed: ${{ steps.generate.outputs.changed }}

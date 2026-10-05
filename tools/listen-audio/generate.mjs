@@ -26,8 +26,8 @@ const PAUSE_AFTER_TITLE = 0.9
 const PAUSE_BETWEEN_BLOCKS = 0.55
 // Kokoro silently truncates input past ~510 phoneme tokens, so long paragraphs are generated in parts.
 const MAX_PART_LENGTH = 300
-// Rough cost on GitHub's 4-core runners, for the PR heads-up.
-const SECONDS_PER_PARAGRAPH_ON_CI = 35
+// Measured on GitHub's runners (the first full run: 375 paragraphs in about 38 minutes).
+const SECONDS_PER_PARAGRAPH_ON_CI = 6
 
 const { values: options, positionals: onlySlugs } = parseArgs({
   allowPositionals: true,
