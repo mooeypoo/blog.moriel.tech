@@ -7,6 +7,9 @@ section: physics-of-software
 description: Complexity doesn't disappear when you "simplify" something. It moves. And there's a real, honest-to-physics reason why.
 image: ../../assets/images/posts/conservation-of-complexity-layers.png
 order: 1
+video: jA82t0UIvhM
+# Set to false to keep the YouTube buttons without embedding the video.
+videoEmbed: true
 ---
 
 A while back I watched someone proudly announce they'd "gotten rid of all the complexity" in a piece of code. Everything was decoupled now. Configurable. Clean separation of concerns. Honestly, by the metrics they cared about, beautiful work.

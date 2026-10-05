@@ -6,6 +6,7 @@ tags:
   - Localization
 description: I asked AI to build an app step by step – and to document every assumption it made along the way. What emerged was a striking mirror of how real software teams drift into invisible defaults and expensive "later" fixes.
 image: ../../assets/images/posts/step5-comparison.png
+video: ehRD-ijK3aY
 ---
 
 We usually think of software development as this super intentional process where every little choice – like field names, validation rules, or the UI layout – is completely deliberate. 
@@ -25,9 +26,9 @@ And some get hard to fix and implement later.
 
 ... Like localization concerns. 
 
-<div class="youtube"><strong>Watch the full experiment here:</strong>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ehRD-ijK3aY?si=8sL3X-skrG-K_qBV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
+**Watch the full experiment here:**
+
+https://www.youtube.com/watch?v=ehRD-ijK3aY
 
 ## Experiment: Reviewing Gen AI iterative assumptions
 

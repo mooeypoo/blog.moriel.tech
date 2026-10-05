@@ -24,6 +24,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D12 | Post URLs carry no date. Dated filenames are fine; the date prefix is stripped from the slug. The already-published dated URLs get 301 redirects. | Uniqueness is enforced by a build check instead, and evergreen posts don't look dated. |
 | D13 | The CSP allows inline `style` attributes (`style-src-attr 'unsafe-inline'`); `<style>` elements and all scripts stay hash-locked. | Shiki colors code blocks with style attributes. Style attributes can't run script, and only Moriel writes content, so this is negligible risk versus losing syntax highlighting or maintaining a Prism theme. |
 | D14 | Read-aloud is free and phased: browser speech first, then Kokoro-generated audio for flagship posts, optionally Moriel's own recordings. No paid text-to-speech service. | Browser speech costs nothing and ships quickly; pre-generated audio gives every reader the same good voice once there's a storage plan. See [Listen (read aloud)](#listen-read-aloud). |
+| D15 | Videos: frontmatter `video:` adds header buttons and a default top embed; a bare YouTube URL on its own line embeds in place (and replaces the top embed for the same video); `videoEmbed: false` skips the embed. Thumbnails are downloaded at build time. | Placement stays in plain Markdown, which still reads as a link anywhere else. No request reaches YouTube until a reader clicks play. |
 
 ## Open questions
 
@@ -101,17 +102,24 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 ### PR 7: YouTube integration
 
-- [ ] Post frontmatter `video: <youtubeId>`: a click-to-load player at the top of the post (`youtube-nocookie`, no YouTube JS until clicked), plus "Watch on YouTube" and "Subscribe" links.
-- [ ] Remark plugin: a bare YouTube URL on its own line becomes the same click-to-load player.
-- [ ] Replace the raw `<iframe>` in `genai-localization-experiment-intro.md`.
-- [ ] `VideoObject` JSON-LD on posts with `video`.
-- [ ] Channel link in the header and footer.
-- [ ] Update the CSP.
+See [Video embeds](#video-embeds) for how placement works (D15).
+
+- [x] Post frontmatter `video:` (a YouTube URL or ID) adds "Watch on YouTube" and "Subscribe" buttons to the post header and embeds the video at the top of the post body.
+- [x] `videoEmbed: false` keeps the buttons but skips the embed (default `true`).
+- [x] A bare YouTube URL on its own line in the Markdown becomes a player in place. If it's the frontmatter video, the top embed is dropped.
+- [x] Click-to-load player: a thumbnail and play button until clicked, then the `youtube-nocookie.com` player. Works as a plain link without JavaScript.
+- [x] Thumbnails downloaded at build time and served from this site (no YouTube request before clicking).
+- [x] Replace the raw `<iframe>` in `genai-localization-experiment-intro.md`.
+- [x] `VideoObject` JSON-LD on posts with `video`.
+- [x] YouTube channel link in the footer.
+- [x] Update the CSP: `youtube-nocookie.com` replaces `youtube.com` in `frame-src`.
+- [ ] Preview: play both videos (Conservation at the top, localization in the body); check mobile tap-to-play.
 
 ### Later (not yet split into PRs)
 
 - [ ] Post card images on list pages: add AVIF and tighten `sizes` (the home page still loads ~0.5 MB of card images on mobile).
 - [ ] Long-lived caching for hashed assets: `Cache-Control: public, max-age=31536000, immutable` on `/_astro/*` (Netlify currently revalidates every asset on every visit).
+- [ ] Real titles for in-body video players: the Markdown plugin is synchronous, so players placed in the body are labeled "Play video" instead of the video title (the top embed and JSON-LD use the real title).
 - [ ] Section hero images (`hero` on section files, rendered like the post hero).
 - [ ] Pagefind static search.
 - [ ] OG image generated per post at build time.
@@ -183,6 +191,19 @@ Intro text, in Markdown…
 ```
 
 ---
+
+### Video embeds
+
+```yaml
+video: jA82t0UIvhM     # YouTube URL or ID: header buttons + embed
+videoEmbed: true       # false: buttons only, no embed
+```
+
+- **Default:** the video embeds at the top of the post body.
+- **Placed:** paste the YouTube URL on its own line where the video should go. It becomes a player there; if it's the frontmatter video, the top embed is dropped. Works for any video, with or without frontmatter, and a post can embed several.
+- **Inline links** (`[text](youtube-url)`) stay links. URLs inside code blocks are ignored.
+- **Player:** a thumbnail (downloaded at build time, served from this site) with a play button. Clicking loads `youtube-nocookie.com`, which sets no YouTube cookies until playback. Without JavaScript the thumbnail is a link to YouTube.
+- **JSON-LD:** posts with `video` get a `VideoObject` (title from YouTube's oEmbed at build time). It has no `uploadDate`, which Google needs for video rich results; add a `videoDate` field later if that matters.
 
 ### Listen (read aloud)
 

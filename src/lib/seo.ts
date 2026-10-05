@@ -59,6 +59,14 @@ export interface BlogPostingSchema {
     '@id': string
   }
   keywords?: string
+  video?: {
+    '@type': 'VideoObject'
+    name: string
+    description: string
+    thumbnailUrl: string
+    embedUrl: string
+    url: string
+  }
 }
 
 export function generateBlogPostingSchema(params: {
@@ -69,6 +77,7 @@ export function generateBlogPostingSchema(params: {
   dateModified?: Date
   image?: string
   tags?: string[]
+  video?: { name: string; thumbnailUrl: string; embedUrl: string; url: string }
 }): BlogPostingSchema {
   return {
     '@context': 'https://schema.org',
@@ -96,5 +105,7 @@ export function generateBlogPostingSchema(params: {
       '@id': params.url,
     },
     keywords: params.tags?.join(', '),
+    // No uploadDate: it isn't known without the YouTube API, and Google requires it only for video rich results.
+    video: params.video && { '@type': 'VideoObject', description: params.description, ...params.video },
   }
 }

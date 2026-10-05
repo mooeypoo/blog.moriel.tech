@@ -3,6 +3,7 @@ import { defineConfig, fontProviders } from 'astro/config'
 import sitemap from '@astrojs/sitemap'
 import vue from '@astrojs/vue'
 import { satteri } from '@astrojs/markdown-satteri'
+import { parseYouTubeId, renderVideoEmbed } from './src/lib/youtube.mjs'
 
 const SITE = 'https://blog.moriel.tech'
 
@@ -42,6 +43,25 @@ const openExternalLinksInNewTab = {
   },
 }
 
+// A YouTube URL alone in a paragraph (a bare URL on its own line) becomes a player in place.
+// Must run before the link plugin, which appends screen-reader text to links.
+/** @type {import('satteri').HastPluginEntry} */
+const embedStandaloneVideos = {
+  name: 'embed-standalone-videos',
+  element: {
+    filter: ['p'],
+    visit(node, ctx) {
+      const children = (node.children ?? []).filter((child) => !(child.type === 'text' && !child.value.trim()))
+      const link = children.length === 1 && children[0].type === 'element' && children[0].tagName === 'a' ? children[0] : undefined
+      const href = link?.properties?.href
+      if (typeof href !== 'string' || ctx.textContent(link).trim() !== href) return
+
+      const id = parseYouTubeId(href)
+      if (id) ctx.replaceNode(node, { type: 'raw', value: renderVideoEmbed(id) })
+    },
+  },
+}
+
 // Post images never render wider than the article (`.post-detail` max-width). Without
 // this, browsers assume full viewport width and download larger files than needed.
 /** @type {import('satteri').HastPluginEntry} */
@@ -71,7 +91,7 @@ export default defineConfig({
         "img-src 'self' data:",
         "font-src 'self'",
         "connect-src 'self' https://plausible.io",
-        "frame-src https://giscus.app https://www.youtube.com",
+        "frame-src https://giscus.app https://www.youtube-nocookie.com",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
@@ -136,7 +156,7 @@ export default defineConfig({
   ],
   markdown: {
     processor: satteri({
-      hastPlugins: [openExternalLinksInNewTab, sizePostImagesToColumn],
+      hastPlugins: [embedStandaloneVideos, openExternalLinksInNewTab, sizePostImagesToColumn],
     }),
   },
   integrations: [sitemap(), vue()],

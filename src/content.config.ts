@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { glob } from 'astro/loaders'
 import { defineCollection, reference } from 'astro:content'
 import { z } from 'astro/zod'
+import { parseYouTubeId } from './lib/youtube.mjs'
 
 const DATE_PREFIX = /^\d{4}-\d{2}(-\d{2})?-/
 const postIdSources = new Map<string, string>()
@@ -46,6 +47,17 @@ const posts = defineCollection({
     section: reference('sections').optional(),
     // Position and displayed number within the section ("Episode 4"). Never part of the URL.
     order: z.number().int().positive().optional(),
+    // YouTube URL or ID: header buttons, plus an embed at the top unless the body places it
+    // (a bare URL on its own line) or `videoEmbed` is false (docs/ROADMAP.md D15).
+    video: z
+      .string()
+      .transform((value, ctx) => {
+        const id = parseYouTubeId(value)
+        if (!id) ctx.addIssue({ code: 'custom', message: `Not a YouTube video URL or ID: ${value}` })
+        return id ?? z.NEVER
+      })
+      .optional(),
+    videoEmbed: z.boolean().default(true),
   }),
 })
 
