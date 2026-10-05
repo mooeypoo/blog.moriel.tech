@@ -48,10 +48,10 @@ Ordered by urgency. PR 1 comes first because the comment mapping only stays free
 
 Before the image and sections work, so neither is built against APIs that are about to change.
 
-- [ ] Upgrade `astro` 6 → 7 and `@astrojs/vue` 6 → 7 together (`@astrojs/vue` 7 requires Astro 7); bump `@astrojs/sitemap`.
-- [ ] Work through the official Astro 7 upgrade guide for breaking changes that affect this site (content collections, images, Markdown/rehype plugins, Vue islands).
-- [ ] `z` already comes from `astro/zod` (done in PR 1), since `astro:content`'s `z` is removed in 7.
-- [ ] Bump `engines.node`, `.nvmrc`, `netlify.toml` and CI if Astro 7 needs a newer Node.
+- [x] Upgrade `astro` 6 → 7 and `@astrojs/vue` 6 → 7 together (`@astrojs/vue` 7 requires Astro 7); bump `@astrojs/sitemap`.
+- [x] Work through the official Astro 7 upgrade guide for breaking changes that affect this site. What applied: Markdown now runs through Sätteri (the rehype link plugin was ported to a Sätteri hast plugin), and `compressHTML` defaults to JSX-style whitespace stripping (set back to `true`). Sätteri renders `--` as an en dash rather than an em dash, so prefer a literal `—` or `---` in posts.
+- [x] `z` already comes from `astro/zod` (done in PR 1), since `astro:content`'s `z` is removed in 7.
+- [x] Bump `engines.node`, `.nvmrc`, `netlify.toml` and CI if Astro 7 needs a newer Node. (Not needed: Astro 7 requires Node ≥ 22.12.0, which is what we pin.)
 - [ ] Preview: compare every page type against production (home, `/posts`, pagination, tags, a post with images, RSS, `latest-posts.json`, sitemap, theme toggle, comments).
 
 ### PR 3: Image performance
