@@ -139,9 +139,10 @@ See [Listen (read aloud)](#listen-read-aloud) (D14).
 
 ### PR 10: Consistent links
 
-- [ ] Footer: RSS opens in the same tab (it's this blog); social links keep a new tab and get the external-link icon and screen-reader text.
-- [ ] Header nav stays same-tab, including About and Contact on moriel.tech (D16).
-- [ ] Raw HTML `<a>` tags in posts: enable Sätteri's `rawHtml` parsing so the link plugin sees them, if the build output stays otherwise identical; if not, document "use Markdown links in posts" under Conventions instead.
+- [x] Footer: RSS opens in the same tab (it's this blog); social links keep a new tab and get the external-link icon and screen-reader text.
+- [x] Header nav stays same-tab, including About and Contact on moriel.tech (D16).
+- [x] Raw HTML `<a>` tags in posts: enable Sätteri's `rawHtml` parsing so the link plugin sees them, if the build output stays otherwise identical; if not, document "use Markdown links in posts" under Conventions instead. (Identical: enabled.)
+- [ ] Preview: footer links (RSS same tab, social links new tab with icon).
 
 ### PR 11: Newsletter (pending decision)
 
