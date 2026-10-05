@@ -1,0 +1,31 @@
+---
+import { Picture } from 'astro:assets'
+import type { ImageMetadata } from 'astro'
+import { normalizeImageUrl } from '../lib/content'
+
+interface Props {
+  image: ImageMetadata | string
+}
+
+const { image } = Astro.props
+// The hero spans the viewport, so offer widths up to large screens, but never upscale.
+const widths = typeof image === 'object'
+  ? [640, 960, 1280, 1920, 2560].filter((width) => width < image.width).concat(image.width)
+  : []
+---
+
+{typeof image === 'object' ? (
+  <Picture
+    class="hero-image"
+    src={image}
+    alt=""
+    formats={['avif']}
+    fallbackFormat="webp"
+    widths={widths}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+  />
+) : (
+  <img class="hero-image" src={normalizeImageUrl(image)} alt="" fetchpriority="high" />
+)}

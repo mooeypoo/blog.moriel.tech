@@ -66,9 +66,11 @@ const posts = defineCollection({
 // Curated categories with their own landing page at /<id> (docs/ROADMAP.md D3, D11).
 const sections = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/sections' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     description: z.string(),
+    // Landing page header image, and its social card's background.
+    hero: image().optional(),
     // Labels a post's `order`: "Episode 4", "Chapter 3".
     itemLabel: z.string(),
     // `exclude` keeps posts without `order` out of the reading sequence (e.g. book announcements).

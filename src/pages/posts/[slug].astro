@@ -1,11 +1,12 @@
 ---
-import { Picture } from 'astro:assets'
 import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
+import HeroImage from '../../components/HeroImage.astro'
+import '../../styles/hero.css'
 import ListenPlayer from '../../components/ListenPlayer.astro'
 import SectionLabel from '../../components/SectionLabel.astro'
-import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, getWordCount, normalizeImageUrl } from '../../lib/content'
+import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, getWordCount } from '../../lib/content'
 import { getItemLabel, getPostSectionContext, getSectionPath } from '../../lib/sections'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 import { getCardUrl } from '../../lib/social-cards'
@@ -60,10 +61,6 @@ const sectionNav = sectionContext && (sectionContext.previous || sectionContext.
     })()
   : undefined
 const heroImage = post.data.image
-// The hero spans the viewport, so offer widths up to large screens, but never upscale.
-const heroWidths = typeof heroImage === 'object'
-  ? [640, 960, 1280, 1920, 2560].filter((width) => width < heroImage.width).concat(heroImage.width)
-  : []
 const video = post.data.video
 const videoTitle = video ? await getVideoTitle(video) : undefined
 // A bare URL for the same video in the body places it there instead (ROADMAP D15).
@@ -99,24 +96,9 @@ const jsonLd = generateBlogPostingSchema({
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </Fragment>
   <article class="post-detail">
-    <header class:list={['post-header', { 'post-header--hero': Boolean(heroImage) }]}>
-      {typeof heroImage === 'object' && (
-        <Picture
-          class="post-hero-image"
-          src={heroImage}
-          alt=""
-          formats={['avif']}
-          fallbackFormat="webp"
-          widths={heroWidths}
-          sizes="100vw"
-          loading="eager"
-          fetchpriority="high"
-        />
-      )}
-      {typeof heroImage === 'string' && (
-        <img class="post-hero-image" src={normalizeImageUrl(heroImage)} alt="" fetchpriority="high" />
-      )}
-      <div class="post-header-content">
+    <header class:list={['post-header', { hero: Boolean(heroImage) }]}>
+      {heroImage && <HeroImage image={heroImage} />}
+      <div class:list={['post-header-content', { 'hero-content': Boolean(heroImage) }]}>
         {sectionContext && <SectionLabel section={sectionContext.section} label={sectionContext.label} />}
         <h1>{title}</h1>
         <p class="post-date">{formatPostDate(post.data.date)} · {getReadingMinutes(post)} min read</p>
@@ -206,34 +188,11 @@ const jsonLd = generateBlogPostingSchema({
     text-align: center;
   }
 
-  .post-header--hero {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    border-radius: 0;
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
-    min-height: 360px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(1rem, 3vw, 2rem);
-  }
 
   .post-header-content {
     width: 100%;
   }
 
-  .post-header--hero .post-header-content {
-    max-width: 720px;
-    padding: clamp(1rem, 3vw, 1.5rem);
-    border-radius: 10px;
-    background: rgba(10, 10, 10, 0.68);
-    backdrop-filter: blur(2px);
-    color: #fff;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
-  }
 
   .post-header h1 {
     margin: 0 0 0.5rem 0;
@@ -296,13 +255,13 @@ const jsonLd = generateBlogPostingSchema({
     color: #000;
   }
 
-  .post-header--hero .tag {
+  .hero .tag {
     border-color: rgba(255, 255, 255, 0.8);
     color: #fff;
     background: rgba(0, 0, 0, 0.2);
   }
 
-  .post-header--hero .tag:hover {
+  .hero .tag:hover {
     background: #fff;
     color: #111;
     border-color: #fff;
@@ -368,14 +327,6 @@ const jsonLd = generateBlogPostingSchema({
     .section-nav {
       grid-template-columns: 1fr;
     }
-
-    .post-header--hero {
-      min-height: 280px;
-    }
-
-    .post-header--hero .post-header-content {
-      padding: 1rem;
-    }
   }
 </style>
 
@@ -391,14 +342,6 @@ const jsonLd = generateBlogPostingSchema({
     box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--primary) 18%, transparent);
   }
 
-  .post-header--hero .post-hero-image {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
 
   .blog-prose {
     font-family: var(--font-roboto);
