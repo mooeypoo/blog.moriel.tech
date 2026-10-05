@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { glob } from 'astro/loaders'
-import { defineCollection, z } from 'astro:content'
+import { defineCollection } from 'astro:content'
+import { z } from 'astro/zod'
 
 const DATE_PREFIX = /^\d{4}-\d{2}(-\d{2})?-/
 const postIdSources = new Map<string, string>()
