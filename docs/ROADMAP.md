@@ -32,7 +32,6 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 ## Open questions
 
 - [ ] Physics of Software playlist URL for the section's "Watch on YouTube" link (`src/content/sections/physics-of-software.md`).
-- [ ] Newsletter: provider and placement (decide before PR 14).
 
 ---
 
@@ -183,12 +182,9 @@ See [docs/AUDIO.md](AUDIO.md) (D17, D18).
 - [x] Resumable runs: generated paragraphs are saved to the Actions cache even when a run fails or times out; progress is logged per post. Timeout raised to 350 minutes (the first full run is ~375 paragraphs, about 3.5 hours).
 - [x] `AGENTS.md` (and `CLAUDE.md` pointing to it): repo conventions, the frontmatter reference, and the audio pipeline, so AI agents know what to keep in sync.
 
-### PR 14: Newsletter (pending decision)
-
-- [ ] Decide provider and placement (see Open questions).
-
 ### Later (not yet split into PRs)
 
+- [ ] **Newsletter (parked 2026-10-05; revisit later).** Options considered: Buttondown (small, privacy-friendly, Markdown, can email new posts from the RSS feed; small free tier) or Kit/ConvertKit (generous free tier, heavier tracking); not Substack (owns the audience) or Mailchimp (heavy, tracking). Open choices: an on-site form (needs a CSP `form-action` change) or a link to the provider's page, and placement (end of posts, the Delivery Engineering page, the footer).
 - [ ] Real titles for in-body video players: the Markdown plugin is synchronous, so players placed in the body are labeled "Play video" instead of the video title (the top embed and JSON-LD use the real title).
 - [ ] Section hero images (`hero` on section files, rendered like the post hero).
 - [ ] Pagefind static search.
