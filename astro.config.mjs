@@ -90,7 +90,9 @@ export default defineConfig({
         // data: is the external-link icon (an inline SVG mask).
         "img-src 'self' data:",
         "font-src 'self'",
-        "connect-src 'self' https://plausible.io",
+        // The Listen player fetches its manifest and audio from this repo's GitHub Pages (docs/AUDIO.md).
+        "connect-src 'self' https://plausible.io https://mooeypoo.github.io/blog.moriel.tech/",
+        "media-src 'self' https://mooeypoo.github.io/blog.moriel.tech/",
         "frame-src https://giscus.app https://www.youtube-nocookie.com",
         "object-src 'none'",
         "base-uri 'self'",

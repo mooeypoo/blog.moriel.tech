@@ -145,7 +145,7 @@ const jsonLd = generateBlogPostingSchema({
       </div>
     </header>
 
-    <ListenPlayer words={getWordCount(post)} />
+    {post.data.listen && <ListenPlayer slug={getPostSlug(post)} words={getWordCount(post)} />}
 
     <div class="post-content blog-prose">
       {showTopVideo && <Fragment set:html={renderVideoEmbed(video!, { title: videoTitle })} />}

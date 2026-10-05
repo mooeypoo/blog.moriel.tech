@@ -26,11 +26,13 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D14 | Read-aloud is free and phased: browser speech first, then Kokoro-generated audio for flagship posts, optionally Moriel's own recordings. No paid text-to-speech service. | Browser speech costs nothing and ships quickly; pre-generated audio gives every reader the same good voice once there's a storage plan. See [Listen (read aloud)](#listen-read-aloud). |
 | D15 | Videos: frontmatter `video:` adds header buttons and a default top embed; a bare YouTube URL on its own line embeds in place (and replaces the top embed for the same video); `videoEmbed: false` skips the embed. Thumbnails are downloaded at build time. | Placement stays in plain Markdown, which still reads as a link anywhere else. No request reaches YouTube until a reader clicks play. |
 | D16 | Header nav links open in the same tab, including About and Contact on moriel.tech; the new-tab rule applies to links in content and the footer. | The nav moves between Moriel's own sites; opening a new tab there would feel like leaving rather than navigating. |
+| D17 | Generated audio is deployed by GitHub Actions to this repo's GitHub Pages site (`mooeypoo.github.io/blog.moriel.tech`), never committed to git, and tied to a hash of each post's spoken text; it's regenerated automatically after merge when that text or the voice changes. | No second repo, deploy key, or DNS; no binaries in git history; free; stale audio can never play over an edited post. |
+| D18 | Every post gets audio by default; `listen: false` opts out. | Generation is cheap and automatic, so opting in per post would only be something to forget. |
 
 ## Open questions
 
 - [ ] Physics of Software playlist URL for the section's "Watch on YouTube" link (`src/content/sections/physics-of-software.md`).
-- [ ] Newsletter: provider and placement (decide before PR 13).
+- [ ] Newsletter: provider and placement (decide before PR 14).
 
 ---
 
@@ -160,11 +162,27 @@ Phase 1 sounded poor on Android: curly quotes and apostrophes made the voice pau
 
 ### PR 12: Listen, phase 2 (Kokoro audio)
 
-- [ ] Decide storage for the audio files (first step of this PR).
-- [ ] Script to generate a post's audio locally with Kokoro.
-- [ ] Player uses the audio file when a post has one (seek, background play on phones, lock-screen controls); browser speech stays the fallback.
+See [docs/AUDIO.md](AUDIO.md) (D17, D18).
 
-### PR 13: Newsletter (pending decision)
+- [x] Decide storage: this repo's GitHub Pages, deployed by Actions (D17). Pages source set to GitHub Actions.
+- [x] Voice: Kokoro `af_heart`.
+- [x] Shared spoken-text extraction and fingerprint (SHA-256) in `src/lib/listen-text.ts`, used by the player and the generator.
+- [x] Generator (`tools/listen-audio`, its own dependencies so Netlify builds don't install them): reads the built pages, generates per paragraph with Kokoro (model revision pinned), encodes mono MP3 in Node (no ffmpeg), writes `<slug>-<hash>.mp3` and `manifest.json` (hash, voice, duration, paragraph start times). Skips posts whose hash and voice already match; drops posts that no longer exist or opted out.
+- [x] **Listen audio** workflow: on push to `main` and by hand (optionally forcing posts or `all`); downloads the published audio, generates what's missing, deploys to Pages. Pinned actions, read-only repo access, Pages write only in the deploy job.
+- [x] Player: an audio-file source when the manifest's hash matches the page; seeking, background play, lock-screen controls (Media Session); paragraph highlight and prev/next follow the audio. Browser speech stays the fallback.
+- [x] `listen: false` frontmatter opts a post out (no player, no audio).
+- [x] CSP: `media-src` and `connect-src` allow `https://mooeypoo.github.io/blog.moriel.tech/`.
+- [x] Tested locally: Conservation generated (12.9 min of audio, 4.6 MB); in headless Chrome with the Pages URL served from that output, the player picks the audio, seeks, skips by paragraph with the highlight following, resumes in place, sets lock-screen metadata, falls back to browser speech when the hash is stale or the file fails, and has no CSP violations. Generator `--plan`, carry-over, and removal checked against a local stand-in for Pages.
+- [x] Per-paragraph regeneration: paragraphs are stored as segments named by what they sound like, and each post's MP3 is its segments joined (valid MP3 frames, no re-encoding), so an edit regenerates only the changed paragraphs. Tested: one edited paragraph regenerated 1 of 4 in 3 s; Chrome plays the joined file to the end with the exact manifest duration; carry-over from a published site is byte-identical.
+- [ ] After merge: the first workflow run generates all posts (~25 min each on GitHub's runners, about 2 hours); confirm audio plays on the live site.
+- [x] `docs/FRONTMATTER.md`: every post and section field.
+
+### PR 13: Audio heads-up and agent docs
+
+- [ ] PR check summary: which posts will get audio generated or regenerated after merge.
+- [ ] `AGENTS.md` (and `CLAUDE.md` pointing to it): repo conventions, the frontmatter reference, and the audio pipeline, so AI agents know what to keep in sync.
+
+### PR 14: Newsletter (pending decision)
 
 - [ ] Decide provider and placement (see Open questions).
 

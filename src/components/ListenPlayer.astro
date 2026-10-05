@@ -1,16 +1,17 @@
 ---
-// Reads the post aloud (ROADMAP D14, PR 11). Browser speech is the only source for now;
-// PR 12 adds pre-generated audio behind the same Source interface.
+// Reads the post aloud (ROADMAP D14, D17). Plays the generated audio when it matches the
+// page's text, and falls back to the browser's speech otherwise (docs/AUDIO.md).
 import { getListeningMinutes } from '../lib/speech'
 
 interface Props {
+  slug: string
   words: number
 }
 
-const { words } = Astro.props
+const { slug, words } = Astro.props
 ---
 
-<section class="listen-slot" data-listen data-words={words} aria-label="Listen to this post" hidden>
+<section class="listen-slot" data-listen data-slug={slug} data-words={words} aria-label="Listen to this post" hidden>
   <div class="listen-bar" data-listen-bar>
     <button type="button" class="listen-play" data-listen-play aria-label="Listen to this post">
       <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
@@ -21,7 +22,7 @@ const { words } = Astro.props
       <p class="listen-title">
         Listen to this post <span class="listen-duration" data-listen-duration>~{getListeningMinutes(words, 1)} min</span>
       </p>
-      <div class="listen-progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" data-listen-progress>
+      <div class="listen-progress" role="progressbar" aria-label="Listening progress" aria-valuemin="0" data-listen-progress>
         <div class="listen-progress-fill" data-listen-fill></div>
       </div>
       <p class="listen-status" data-listen-status></p>
@@ -57,21 +58,31 @@ const { words } = Astro.props
 </section>
 
 <script>
-  import { getListeningMinutes, normalizeForSpeech, rankVoices } from '../lib/speech'
+  import { getListeningMinutes, rankVoices } from '../lib/speech'
+  import { AUDIO_BASE_URL, getSpokenBlocks, hashSpokenText, type AudioManifest, type AudioManifestEntry } from '../lib/listen-text'
 
   type State = 'idle' | 'playing' | 'paused'
 
-  /** What the player drives. PR 12 adds an audio-file implementation. */
+  interface Events {
+    onIndex: (index: number) => void
+    onEnd: () => void
+  }
+
+  /** What the player drives: generated audio or the browser's speech. */
   interface Source {
     readonly length: number
+    rate: number
+    /** Start reading at a block. */
     play(index: number): void
+    /** Continue after a pause. */
+    resume(): void
     pause(): void
     stop(): void
   }
 
-  const READABLE = 'p, h2, h3, h4, h5, h6, li, blockquote'
   const RATE_KEY = 'listen-rate'
   const VOICE_KEY = 'listen-voice'
+  const SEEK_STEP = 10
 
   const storage = {
     get: (key: string) => {
@@ -88,23 +99,8 @@ const { words } = Astro.props
     },
   }
 
-  function readableText(element: Element) {
-    const clone = element.cloneNode(true) as Element
-    clone.querySelectorAll('.sr-only, pre, .video-embed').forEach((node) => node.remove())
-    return (clone.textContent ?? '').replace(/\s+/g, ' ').trim()
-  }
-
-  function collectBlocks(title: Element, article: Element) {
-    const blocks = [title]
-    for (const element of article.querySelectorAll(READABLE)) {
-      // Read nested blocks (a paragraph inside a list item) once, through the outer one.
-      if (element.parentElement?.closest(READABLE) || element.closest('pre, .video-embed')) continue
-      blocks.push(element)
-    }
-    return blocks
-      .map((element) => ({ element, text: normalizeForSpeech(readableText(element)) }))
-      .filter((block) => block.text)
-  }
+  const formatTime = (seconds: number) =>
+    `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 
   /**
    * Whole paragraphs keep the voice's natural rhythm. Desktop Chrome stops long utterances
@@ -113,6 +109,7 @@ const { words } = Astro.props
   class SpeechSource implements Source {
     rate = 1
     voice: SpeechSynthesisVoice | undefined
+    private index = 0
     // Cancelling fires `end` on the old utterance in some browsers; only the newest may advance.
     private generation = 0
     private keepAlive: number | undefined
@@ -120,8 +117,7 @@ const { words } = Astro.props
 
     constructor(
       private readonly texts: string[],
-      private readonly onIndex: (index: number) => void,
-      private readonly onEnd: () => void,
+      private readonly events: Events,
     ) {}
 
     get length() {
@@ -133,8 +129,9 @@ const { words } = Astro.props
       const current = ++this.generation
       synth.cancel()
       this.clearKeepAlive()
-      if (index >= this.texts.length) return this.onEnd()
+      if (index >= this.texts.length) return this.events.onEnd()
 
+      this.index = index
       const utterance = new SpeechSynthesisUtterance(this.texts[index])
       utterance.lang = document.documentElement.lang || 'en'
       utterance.rate = this.rate
@@ -143,9 +140,9 @@ const { words } = Astro.props
         if (current === this.generation) this.play(index + 1)
       }
       utterance.onerror = (event) => {
-        if (current === this.generation && event.error !== 'interrupted' && event.error !== 'canceled') this.onEnd()
+        if (current === this.generation && event.error !== 'interrupted' && event.error !== 'canceled') this.events.onEnd()
       }
-      this.onIndex(index)
+      this.events.onIndex(index)
       synth.speak(utterance)
 
       if (this.needsKeepAlive) {
@@ -158,7 +155,11 @@ const { words } = Astro.props
       }
     }
 
-    // Native pause/resume is unreliable on Android, so pausing cancels and resuming restarts the paragraph.
+    // Native pause/resume is unreliable on Android, so resuming restarts the paragraph.
+    resume() {
+      this.play(this.index)
+    }
+
     pause() {
       this.stop()
     }
@@ -175,11 +176,87 @@ const { words } = Astro.props
     }
   }
 
+  /** The generated recording; `starts` maps each spoken block to its time in the file. */
+  class AudioSource implements Source {
+    readonly audio = new Audio()
+    private index = -1
+
+    constructor(
+      readonly entry: AudioManifestEntry,
+      private readonly events: Events & { onTime: () => void; onError: () => void },
+    ) {
+      this.audio.preload = 'none'
+      this.audio.src = new URL(entry.file, AUDIO_BASE_URL).href
+      this.audio.addEventListener('timeupdate', () => {
+        const index = this.indexAt(this.audio.currentTime)
+        if (index !== this.index) {
+          this.index = index
+          events.onIndex(index)
+        }
+        events.onTime()
+      })
+      this.audio.addEventListener('ended', () => events.onEnd())
+      this.audio.addEventListener('error', () => events.onError())
+    }
+
+    get length() {
+      return this.entry.starts.length
+    }
+
+    get rate() {
+      return this.audio.playbackRate
+    }
+
+    set rate(rate: number) {
+      this.audio.playbackRate = rate
+    }
+
+    indexAt(time: number) {
+      let index = 0
+      while (index + 1 < this.entry.starts.length && this.entry.starts[index + 1] <= time + 0.05) index++
+      return index
+    }
+
+    play(index: number) {
+      this.seek(this.entry.starts[index] ?? 0)
+      this.resume()
+    }
+
+    seek(time: number) {
+      this.audio.currentTime = Math.min(Math.max(time, 0), this.entry.duration)
+    }
+
+    resume() {
+      this.audio.play().catch(() => this.events.onError())
+    }
+
+    pause() {
+      this.audio.pause()
+    }
+
+    stop() {
+      this.audio.pause()
+      this.audio.currentTime = 0
+      this.index = -1
+    }
+  }
+
+  async function findAudio(slug: string, texts: string[]) {
+    try {
+      const response = await fetch(new URL('manifest.json', AUDIO_BASE_URL))
+      if (!response.ok) return undefined
+      const entry = ((await response.json()) as AudioManifest).posts[slug]
+      return entry && entry.hash === (await hashSpokenText(texts)) ? entry : undefined
+    } catch {
+      return undefined
+    }
+  }
+
   function setUp() {
     const slot = document.querySelector<HTMLElement>('[data-listen]')
-    const title = document.querySelector('.post-header h1')
-    const article = document.querySelector('.post-content')
-    if (!slot || !title || !article) return
+    if (!slot) return
+    const blocks = getSpokenBlocks(document)
+    if (blocks.length === 0) return
 
     const query = <T extends Element>(selector: string) => slot.querySelector<T>(selector)!
     const bar = query<HTMLElement>('[data-listen-bar]')
@@ -189,27 +266,31 @@ const { words } = Astro.props
     const nextButton = query<HTMLButtonElement>('[data-listen-next]')
     const rateSelect = query<HTMLSelectElement>('[data-listen-rate]')
     const voiceSelect = query<HTMLSelectElement>('[data-listen-voice]')
+    const voiceSetting = query<HTMLElement>('.listen-voice')
     const progress = query<HTMLElement>('[data-listen-progress]')
     const fill = query<HTMLElement>('[data-listen-fill]')
     const status = query<HTMLElement>('[data-listen-status]')
     const duration = query<HTMLElement>('[data-listen-duration]')
     const words = Number(slot.dataset.words)
+    const texts = blocks.map((block) => block.text)
 
-    const blocks = collectBlocks(title, article)
     let state: State = 'idle'
     let index = 0
     let highlighted: Element | undefined
     let slotVisible = true
 
-    const source = new SpeechSource(
-      blocks.map((block) => block.text),
-      (current) => {
+    const events: Events = {
+      onIndex: (current) => {
         index = current
-        highlight(blocks[current].element)
+        highlight(blocks[current]?.element)
         render()
       },
-      () => stop(),
-    )
+      onEnd: () => stop(),
+    }
+
+    const speech = 'speechSynthesis' in window ? new SpeechSource(texts, events) : undefined
+    let audio: AudioSource | undefined
+    let source: Source | undefined = speech
 
     function highlight(element: Element | undefined) {
       highlighted?.classList.remove('is-being-read')
@@ -221,86 +302,182 @@ const { words } = Astro.props
     }
 
     function render() {
+      if (!source) return
+      const active = state !== 'idle'
+      const rate = source.rate
       playButton.classList.toggle('is-playing', state === 'playing')
       playButton.setAttribute('aria-label', state === 'playing' ? 'Pause' : state === 'paused' ? 'Resume' : 'Listen to this post')
-      bar.classList.toggle('is-active', state !== 'idle')
-      bar.classList.toggle('is-floating', state !== 'idle' && !slotVisible)
-      progress.setAttribute('aria-valuemax', String(source.length))
-      progress.setAttribute('aria-valuenow', String(state === 'idle' ? 0 : index + 1))
-      fill.style.width = state === 'idle' ? '0%' : `${((index + 1) / source.length) * 100}%`
-      status.textContent = state === 'idle' ? '' : `Paragraph ${index + 1} of ${source.length}`
-      duration.textContent = `~${getListeningMinutes(words, source.rate)} min`
+      bar.classList.toggle('is-active', active)
+      bar.classList.toggle('is-floating', active && !slotVisible)
+      voiceSetting.hidden = source !== speech || voiceSelect.options.length < 2
+
+      if (source === audio) {
+        const { currentTime } = audio.audio
+        const total = audio.entry.duration
+        duration.textContent = `~${Math.max(1, Math.round(total / 60 / rate))} min`
+        fill.style.width = active ? `${(currentTime / total) * 100}%` : '0%'
+        status.textContent = active ? `${formatTime(currentTime)} / ${formatTime(total)}` : ''
+        progress.setAttribute('role', 'slider')
+        progress.tabIndex = 0
+        progress.setAttribute('aria-valuemax', String(Math.round(total)))
+        progress.setAttribute('aria-valuenow', String(Math.round(currentTime)))
+        progress.setAttribute('aria-valuetext', status.textContent)
+      } else {
+        progress.setAttribute('role', 'progressbar')
+        progress.removeAttribute('tabindex')
+        progress.removeAttribute('aria-valuetext')
+        duration.textContent = `~${getListeningMinutes(words, rate)} min`
+        fill.style.width = active ? `${((index + 1) / source.length) * 100}%` : '0%'
+        status.textContent = active ? `Paragraph ${index + 1} of ${source.length}` : ''
+        progress.setAttribute('aria-valuemax', String(source.length))
+        progress.setAttribute('aria-valuenow', String(active ? index + 1 : 0))
+      }
+      if ('mediaSession' in navigator && source === audio) {
+        navigator.mediaSession.playbackState = state === 'playing' ? 'playing' : state === 'paused' ? 'paused' : 'none'
+      }
       // Reserve the in-place height so the article doesn't jump when the player floats.
       if (!bar.classList.contains('is-floating')) slot.style.minHeight = `${bar.offsetHeight}px`
     }
 
     function play(from = index) {
+      if (!source) return
+      if (state === 'paused' && from === index) source.resume()
+      else source.play(from)
       state = 'playing'
-      source.play(from)
       render()
     }
 
     function pause() {
       state = 'paused'
-      source.pause()
+      source?.pause()
       render()
     }
 
     function stop() {
       state = 'idle'
       index = 0
-      source.stop()
+      source?.stop()
       highlight(undefined)
       render()
     }
 
     function jump(offset: number) {
+      if (!source) return
       const target = Math.min(Math.max(index + offset, 0), source.length - 1)
-      if (state === 'playing') play(target)
-      else {
-        index = target
-        highlight(blocks[target].element)
-        if (state === 'idle') state = 'paused'
-        render()
+      if (state === 'playing') return play(target)
+      index = target
+      highlight(blocks[target].element)
+      if (source === audio) audio.seek(audio.entry.starts[target])
+      if (state === 'idle') state = 'paused'
+      render()
+    }
+
+    function seekBy(seconds: number) {
+      if (source !== audio) return
+      audio.seek(audio.audio.currentTime + seconds)
+      render()
+    }
+
+    function useAudio(entry: AudioManifestEntry) {
+      audio = new AudioSource(entry, {
+        ...events,
+        onTime: render,
+        // Unreachable or broken audio: keep listening with the browser voice.
+        onError: () => {
+          const resumeAt = index
+          const wasPlaying = state === 'playing'
+          audio?.pause()
+          source = speech
+          if (!speech) return stop()
+          speech.rate = Number(rateSelect.value)
+          if (wasPlaying) speech.play(resumeAt)
+          render()
+        },
+      })
+      audio.rate = Number(rateSelect.value)
+      source = audio
+      setUpMediaSession()
+      slot.hidden = false
+      render()
+    }
+
+    function setUpMediaSession() {
+      if (!('mediaSession' in navigator)) return
+      // Same-origin path: the absolute og:image URL points at production, which the CSP blocks elsewhere.
+      const ogImage = document.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.content
+      const artwork = ogImage && new URL(ogImage).pathname
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: blocks[0].element.textContent?.trim() ?? document.title,
+        artist: 'Moriel Writes Tech',
+        artwork: artwork ? [{ src: artwork }] : [],
+      })
+      const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [
+        ['play', () => play()],
+        ['pause', () => pause()],
+        ['stop', () => stop()],
+        ['previoustrack', () => jump(-1)],
+        ['nexttrack', () => jump(1)],
+        ['seekbackward', () => seekBy(-SEEK_STEP)],
+        ['seekforward', () => seekBy(SEEK_STEP)],
+        ['seekto', (details) => {
+          if (details.seekTime !== undefined) audio?.seek(details.seekTime)
+        }],
+      ]
+      for (const [action, handler] of handlers) {
+        try {
+          navigator.mediaSession.setActionHandler(action, handler)
+        } catch {}
       }
     }
 
-    // Settings apply from the start of the current paragraph; speech can't change mid-utterance.
-    function applySettings() {
-      if (state === 'playing') play(index)
+    // Settings apply from the start of the current paragraph for speech; audio changes instantly.
+    function applyRate() {
+      if (!source) return
+      source.rate = Number(rateSelect.value)
+      storage.set(RATE_KEY, rateSelect.value)
+      if (source === speech && state === 'playing') play(index)
       else render()
     }
 
     function populateVoices() {
+      if (!speech) return
       const voices = rankVoices(window.speechSynthesis.getVoices(), document.documentElement.lang || 'en')
       if (voices.length === 0) return
       const saved = storage.get(VOICE_KEY)
       voiceSelect.replaceChildren(
         ...voices.map((voice) => new Option(voice.name, voice.voiceURI, false, voice.voiceURI === saved)),
       )
-      source.voice = voices.find((voice) => voice.voiceURI === voiceSelect.value) ?? voices[0]
-      query<HTMLElement>('.listen-voice').hidden = voices.length < 2
+      speech.voice = voices.find((voice) => voice.voiceURI === voiceSelect.value) ?? voices[0]
       slot.hidden = false
       render()
     }
 
     const savedRate = storage.get(RATE_KEY)
     if (savedRate && [...rateSelect.options].some((option) => option.value === savedRate)) rateSelect.value = savedRate
-    source.rate = Number(rateSelect.value)
+    if (speech) speech.rate = Number(rateSelect.value)
 
     playButton.addEventListener('click', () => (state === 'playing' ? pause() : play()))
     stopButton.addEventListener('click', stop)
     prevButton.addEventListener('click', () => jump(-1))
     nextButton.addEventListener('click', () => jump(1))
-    rateSelect.addEventListener('change', () => {
-      source.rate = Number(rateSelect.value)
-      storage.set(RATE_KEY, rateSelect.value)
-      applySettings()
-    })
+    rateSelect.addEventListener('change', applyRate)
     voiceSelect.addEventListener('change', () => {
-      source.voice = window.speechSynthesis.getVoices().find((voice) => voice.voiceURI === voiceSelect.value)
+      if (!speech) return
+      speech.voice = window.speechSynthesis.getVoices().find((voice) => voice.voiceURI === voiceSelect.value)
       storage.set(VOICE_KEY, voiceSelect.value)
-      applySettings()
+      if (source === speech && state === 'playing') play(index)
+    })
+    progress.addEventListener('click', (event) => {
+      if (source !== audio) return
+      const { left, width } = progress.getBoundingClientRect()
+      audio.seek(((event.clientX - left) / width) * audio.entry.duration)
+      render()
+    })
+    progress.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault()
+        seekBy(event.key === 'ArrowRight' ? SEEK_STEP : -SEEK_STEP)
+      }
     })
     window.addEventListener('pagehide', stop)
 
@@ -310,12 +487,17 @@ const { words } = Astro.props
       render()
     }).observe(slot)
 
-    populateVoices()
-    window.speechSynthesis.addEventListener('voiceschanged', populateVoices)
-    render()
+    if (speech) {
+      populateVoices()
+      window.speechSynthesis.addEventListener('voiceschanged', populateVoices)
+    }
+    findAudio(slot.dataset.slug!, texts).then((entry) => {
+      // Don't swap sources under someone already listening with the browser voice.
+      if (entry && state === 'idle') useAudio(entry)
+    })
   }
 
-  if ('speechSynthesis' in window) setUp()
+  setUp()
 </script>
 
 <style>
@@ -390,6 +572,18 @@ const { words } = Astro.props
     border-radius: 2px;
     background: var(--outline);
     overflow: hidden;
+  }
+
+  /* With generated audio the bar seeks: click, or arrow keys when focused. */
+  .listen-progress[role='slider'] {
+    height: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .listen-progress:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
   }
 
   .listen-progress-fill {
