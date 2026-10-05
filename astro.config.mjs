@@ -91,7 +91,7 @@ export default defineConfig({
         "img-src 'self' data:",
         "font-src 'self'",
         "connect-src 'self' https://plausible.io",
-        "frame-src https://giscus.app https://www.youtube.com https://www.youtube-nocookie.com",
+        "frame-src https://giscus.app https://www.youtube-nocookie.com",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
