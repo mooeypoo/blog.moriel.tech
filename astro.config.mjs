@@ -42,12 +42,29 @@ const openExternalLinksInNewTab = {
   },
 }
 
+// Post images never render wider than the article (`.post-detail` max-width). Without
+// this, browsers assume full viewport width and download larger files than needed.
+/** @type {import('satteri').HastPluginEntry} */
+const sizePostImagesToColumn = {
+  name: 'size-post-images-to-column',
+  element: {
+    filter: ['img'],
+    visit(node, ctx) {
+      ctx.setProperty(node, 'sizes', '(min-width: 800px) 800px, 100vw')
+    },
+  },
+}
+
 // https://astro.build/config
 export default defineConfig({
   site: SITE,
   output: 'static',
   // Astro 7 defaults to JSX-style whitespace stripping, which can glue inline words together.
   compressHTML: true,
+  image: {
+    // Gives Markdown images a srcset instead of one full-size file.
+    layout: 'constrained',
+  },
   // Downloaded at build time and served from this site: no third-party requests, and
   // generated fallback metrics keep text from shifting while fonts load.
   fonts: [
@@ -90,7 +107,7 @@ export default defineConfig({
   ],
   markdown: {
     processor: satteri({
-      hastPlugins: [openExternalLinksInNewTab],
+      hastPlugins: [openExternalLinksInNewTab, sizePostImagesToColumn],
     }),
   },
   integrations: [sitemap(), vue()],
