@@ -1,13 +1,15 @@
 ---
-import { Image } from 'astro:assets'
+import { Picture } from 'astro:assets'
 import type { PostImage } from '../lib/content'
 
 interface Props {
   href: string
   image?: PostImage
+  /** Rendered widths measured on /posts; pages with another card layout pass their own. */
+  sizes?: string
 }
 
-const { href, image } = Astro.props
+const { href, image, sizes = '(max-width: 720px) calc(100vw - 82px), 220px' } = Astro.props
 
 const imageSrc = typeof image === 'string' ? image : undefined
 const imageMeta = typeof image === 'string' ? undefined : image
@@ -16,14 +18,16 @@ const imageMeta = typeof image === 'string' ? undefined : image
 {image && (
   <a class="post-image-link" href={href} aria-hidden="true" tabindex="-1">
     {imageMeta ? (
-      <Image
+      <Picture
         class="post-image"
         src={imageMeta}
         alt=""
         loading="lazy"
         decoding="async"
-        widths={[480, 720, 960, 1280]}
-        sizes="(max-width: 800px) 100vw, 50vw"
+        formats={['avif']}
+        fallbackFormat="webp"
+        widths={[320, 480, 640, 960, 1280].filter((width) => width <= imageMeta.width)}
+        sizes={sizes}
       />
     ) : (
       <img

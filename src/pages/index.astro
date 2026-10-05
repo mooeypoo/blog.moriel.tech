@@ -33,7 +33,11 @@ const recentPosts = await Promise.all(
         <div class="posts-grid">
           {recentPosts.map(({ post, section, itemLabel }) => (
             <article class="post-card">
-              <PostPreviewImage href={getPostPath(post)} image={getPostDisplayImage(post)} />
+              <PostPreviewImage
+                href={getPostPath(post)}
+                image={getPostDisplayImage(post)}
+                sizes="(max-width: 670px) calc(100vw - 82px), (max-width: 1035px) calc(50vw - 90px), 265px"
+              />
               {section && <SectionLabel section={section} label={itemLabel} />}
               <h3 class="post-title">
                 <a href={getPostPath(post)}>{post.data.title}</a>
