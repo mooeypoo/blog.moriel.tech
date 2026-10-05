@@ -17,7 +17,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D5 | Post URLs don't depend on the section: `/posts/<slug>`. | Moving a post to another section never breaks links or comments. |
 | D6 | Giscus threads are keyed to the post slug (`mapping="specific"`, strict matching), not the URL path. | Comments survive URL and layout changes. Done now, while there are no comments to lose. |
 | D7 | All posts appear in `/posts` and the main RSS, whatever their section. Sections also get their own RSS. | Sections are categories, not separate audiences. |
-| D8 | The order of posts within a section lives in frontmatter (`order`), never in the URL. Posts are sorted by `order`, and posts without one follow by date. | Reordering chapters must not change URLs, and an episode's blog post can be published long after the episode (or out of sequence) and still land in episode order. See [Ordering](#ordering-and-previousnext). |
+| D8 | The order of posts within a section lives in frontmatter (`order`), never in the URL. Posts are sorted by `order`, and posts without one follow by date. `order` never changes the post's displayed `date`. | Reordering chapters must not change URLs, and an episode's blog post can be published long after the episode (or out of sequence) and still land in episode order. See [Ordering](#ordering-and-previousnext). |
 | D9 | Sections with no published posts don't appear in the nav, but their landing page still builds (a "coming soon" state). | Lets the book page exist before the first post. |
 | D10 | Physics of Software landing page lists posts only (no list of episodes pulled from YouTube). | Keep it simple; revisit later. |
 | D11 | Landing pages are top-level (`/physics-of-software/`), protected by a build check against reserved route names. | Shortest URLs for YouTube descriptions and the book. The build check makes a clash impossible. See [URL options](#url-options). |
@@ -132,6 +132,7 @@ order: 4          # the episode number
 **One rule for every section:** posts with `order` come first, sorted by `order`, and posts without `order` follow, sorted by date. This means:
 
 - An episode post can be published at any time and in any sequence; `order: 4` puts it at episode 4 no matter when it was published.
+- `order` only controls position within the section. The post's frontmatter `date` stays the date shown on the post and the date used everywhere else (`/posts`, tags, RSS). A post written today about an old episode shows today's date and appears as new in the feed, while sitting at its episode number on the landing page.
 - `order` is the displayed number ("Episode 4", "Chapter 3"), so it should match the real episode or chapter number. Prev/next skips gaps: if only episodes 2 and 5 have posts, "Next" from 2 goes to 5. Inserting a chapter means renumbering the chapters after it, which is safe because URLs don't change.
 - Posts without `order` get no number label. In Physics of Software they're a fallback: they still join the sequence, after the numbered episodes.
 - **`unordered: exclude`** (set on the book section) keeps posts without `order` out of the sequence entirely. Announcements and behind-the-scenes posts show under **Updates** on the landing page and have no prev/next, so they never interrupt chapter-to-chapter reading.
