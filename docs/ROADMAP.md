@@ -120,9 +120,10 @@ See [Video embeds](#video-embeds) for how placement works (D15).
 
 ### PR 8: Performance polish
 
-- [ ] Long-lived caching for `/_astro/*` (hashed filenames): `Cache-Control: public, max-age=31536000, immutable`. Netlify otherwise revalidates every asset on every visit.
-- [ ] Post card images: AVIF with WebP fallback, and `sizes` matching the measured rendered widths (the home page loaded ~0.5 MB of card images on mobile).
-- [ ] Measure before/after bytes on the home page and `/posts` (same method as PR 3).
+- [x] Long-lived caching for `/_astro/*` (hashed filenames): `Cache-Control: public, max-age=31536000, immutable`. Netlify otherwise revalidates every asset on every visit.
+- [x] Post card images: AVIF with WebP fallback, and `sizes` matching the measured rendered widths (the home page loaded ~0.5 MB of card images on mobile).
+- [x] Measure before/after bytes on the home page and `/posts` (same method as PR 3): card images 493 → 238 KB on mobile, 292 → 107 KB on desktop.
+- [ ] Preview: `curl -I` on a `/_astro/` file shows the immutable `Cache-Control`; cards look unchanged.
 
 ### PR 9: Listen, phase 1 (browser speech)
 
