@@ -23,6 +23,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D11 | Landing pages are top-level (`/physics-of-software/`), protected by a build check against reserved route names. | Shortest URLs for YouTube descriptions and the book. The build check makes a clash impossible. See [URL options](#url-options). |
 | D12 | Post URLs carry no date. Dated filenames are fine; the date prefix is stripped from the slug. The already-published dated URLs get 301 redirects. | Uniqueness is enforced by a build check instead, and evergreen posts don't look dated. |
 | D13 | The CSP allows inline `style` attributes (`style-src-attr 'unsafe-inline'`); `<style>` elements and all scripts stay hash-locked. | Shiki colors code blocks with style attributes. Style attributes can't run script, and only Moriel writes content, so this is negligible risk versus losing syntax highlighting or maintaining a Prism theme. |
+| D14 | Read-aloud is free and phased: browser speech first, then Kokoro-generated audio for flagship posts, optionally Moriel's own recordings. No paid text-to-speech service. | Browser speech costs nothing and ships quickly; pre-generated audio gives every reader the same good voice once there's a storage plan. See [Listen (read aloud)](#listen-read-aloud). |
 
 ## Open questions
 
@@ -96,7 +97,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 ### PR 6: Reading time
 
-- [ ] Calculate the word count at build time and show "N min read" on post cards and post headers.
+- [x] Calculate the word count at build time and show "N min read" on post cards and post headers (230 words per minute, just below Brysbaert's 2019 meta-analysis average of 238 for non-fiction; plus Medium's image allowance of 12s for the first image down to 3s; link targets and HTML tags aren't counted).
 
 ### PR 7: YouTube integration
 
@@ -114,11 +115,12 @@ Before the image and sections work, so neither is built against APIs that are ab
 - [ ] Section hero images (`hero` on section files, rendered like the post hero).
 - [ ] Pagefind static search.
 - [ ] OG image generated per post at build time.
-- [ ] "Listen" button using the browser's speech API (Web Speech API).
+- [ ] Listen, phase 1: a "Listen" button using the browser's built-in speech (see [Listen (read aloud)](#listen-read-aloud)).
 - [ ] Newsletter signup, starting on the Delivery Engineering "coming soon" page.
 - [ ] MDX for interactive Physics of Software diagrams.
 - [ ] Book home page (`layout: book` on the section).
-- [ ] Audio generated ahead of time or recorded per post, possibly as a podcast feed.
+- [ ] Listen, phase 2: audio generated ahead of time with an open-source voice model (Kokoro) for flagship posts. Needs a storage plan first.
+- [ ] Listen, phase 3 (optional): Moriel's own recordings for selected posts, in the same player; possibly a podcast feed.
 - [ ] Re-evaluate comments (D2) if the audience outgrows Giscus.
 - [ ] Section page lists episodes that don't have posts yet (D10).
 - [ ] Apply the internal/external link rule beyond Markdown links: raw HTML `<a>` tags inside posts (the Markdown plugin doesn't see them) and template links (nav, footer, post cards).
@@ -179,6 +181,28 @@ links:
 ---
 Intro text, in Markdown…
 ```
+
+---
+
+### Listen (read aloud)
+
+Three free options, used in phases (D14). None needs a paid service.
+
+| Phase | Approach | Pros | Cons |
+|---|---|---|---|
+| 1 | **Browser speech** (Web Speech API): a "Listen" button hands the article text to the reader's browser | Free, no server or files, no CSP change, small PR | Voice quality depends on the device: good on Safari (Mac/iOS), very good on Edge, decent on Chrome, robotic on Linux and some Android. Edge and Chrome's best voices are cloud voices, so Microsoft or Google receive the text. |
+| 2 | **Pre-generated audio** with an open-source model: Kokoro (Apache 2.0) for quality, Piper (MIT) as a lighter fallback | Same good voice for every reader; seeking and speed controls; can feed a podcast | A manual step at publish time (run locally, not in the Netlify build: too slow and heavy); ~5 MB per 10-minute post, so MP3s need storage outside git |
+| 3 | **Moriel's own recordings** | Best experience; ties the blog to the YouTube channel | Recording time per post |
+
+**Phase 1 notes:**
+- Chrome stops long utterances after about 15 seconds, so feed the text one paragraph at a time; this also makes highlighting the current paragraph straightforward.
+- Pause/resume is unreliable on some Android browsers; test there.
+- Read only the article body (skip code blocks and image captions, or announce them), and hide the button where speech synthesis isn't available.
+
+**Phase 2 notes:**
+- Check Kokoro's state before building; this space changes quickly.
+- Decide storage before the first file: e.g. a separate bucket or release assets, not the repo. Any new origin must be added to the CSP (`media-src`).
+- Avoid `edge-tts`: it uses Microsoft Edge's voices without an official license.
 
 ---
 

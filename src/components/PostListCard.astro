@@ -2,7 +2,7 @@
 import { getEntry, type CollectionEntry } from 'astro:content'
 import PostPreviewImage from './PostPreviewImage.astro'
 import SectionLabel from './SectionLabel.astro'
-import { getPostDisplayImage, getPostPath } from '../lib/content'
+import { formatPostDate, getPostDisplayImage, getPostPath, getReadingMinutes } from '../lib/content'
 import { getItemLabel } from '../lib/sections'
 
 interface Props {
@@ -25,7 +25,7 @@ const itemLabel = section ? getItemLabel(section, post) : undefined
       <a href={getPostPath(post)}>{post.data.title}</a>
     </h2>
     {post.data.date && (
-      <p class="post-date">{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+      <p class="post-date">{formatPostDate(post.data.date)} · {getReadingMinutes(post)} min read</p>
     )}
     {post.data.description && (
       <p class="post-desc">{post.data.description}</p>

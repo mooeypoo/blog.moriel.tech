@@ -40,6 +40,34 @@ export async function getPostSocialImage(entry: { data: { display?: PostImage; i
   }
 }
 
+export function formatPostDate(date: Date) {
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+// Brysbaert (2019) meta-analysis: adults read non-fiction silently at ~238 wpm.
+// Rounded down because these posts are technical and denser than the studied texts.
+const WORDS_PER_MINUTE = 230
+
+// Medium's convention: 12s for the first image, one second less for each next one, down to 3s.
+function imageSeconds(count: number) {
+  let seconds = 0
+  for (let i = 0; i < count; i++) seconds += Math.max(12 - i, 3)
+  return seconds
+}
+
+/** Counts prose plus time spent on images; link targets and HTML tags aren't read. */
+export function getReadingMinutes(post: { body?: string }) {
+  const body = post.body ?? ''
+  const images = (body.match(/!\[[^\]]*\]\([^)]*\)/g) ?? []).length + (body.match(/<img\b/gi) ?? []).length
+  const prose = body
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\]\([^)]*\)/g, ']')
+    .replace(/<[^>]+>/g, ' ')
+  const words = prose.split(/\s+/).filter((word) => /\w/.test(word)).length
+  const seconds = (words / WORDS_PER_MINUTE) * 60 + imageSeconds(images)
+  return Math.max(1, Math.round(seconds / 60))
+}
+
 export function getPostSlug(entry: { id: string; slug?: string }) {
   return entry.slug ?? entry.id.replace(/\.(md|mdx)$/i, '')
 }
