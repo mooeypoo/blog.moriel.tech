@@ -7,6 +7,15 @@ import SectionLabel from '../../components/SectionLabel.astro'
 import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, normalizeImageUrl } from '../../lib/content'
 import { getItemLabel, getPostSectionContext, getSectionPath } from '../../lib/sections'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
+import { getVideoTitle } from '../../lib/videos'
+import {
+  findStandaloneVideoIds,
+  getVideoEmbedUrl,
+  getVideoThumbnailPath,
+  getVideoWatchUrl,
+  renderVideoEmbed,
+  YOUTUBE_CHANNEL_URL,
+} from '../../lib/youtube.mjs'
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => data.draft !== true)
@@ -54,6 +63,10 @@ const heroWidths = typeof heroImage === 'object'
   ? [640, 960, 1280, 1920, 2560].filter((width) => width < heroImage.width).concat(heroImage.width)
   : []
 const displayImageAlt = `${title} social preview image`
+const video = post.data.video
+const videoTitle = video ? await getVideoTitle(video) : undefined
+// A bare URL for the same video in the body places it there instead (ROADMAP D15).
+const showTopVideo = Boolean(video && post.data.videoEmbed && !findStandaloneVideoIds(post.body ?? '').includes(video))
 
 const jsonLd = generateBlogPostingSchema({
   title,
@@ -62,6 +75,12 @@ const jsonLd = generateBlogPostingSchema({
   datePublished: post.data.date || new Date(),
   image: socialImage?.src,
   tags: post.data.tags,
+  video: video && {
+    name: videoTitle!,
+    thumbnailUrl: `${SITE_URL}${getVideoThumbnailPath(video)}`,
+    embedUrl: getVideoEmbedUrl(video),
+    url: getVideoWatchUrl(video),
+  },
 })
 
 ---
@@ -112,10 +131,21 @@ const jsonLd = generateBlogPostingSchema({
             ))}
           </div>
         )}
+        {video && (
+          <div class="post-video-links">
+            <a href={getVideoWatchUrl(video)} target="_blank" rel="noopener noreferrer" class="external-link">
+              Watch on YouTube<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+            <a href={`${YOUTUBE_CHANNEL_URL}?sub_confirmation=1`} target="_blank" rel="noopener noreferrer" class="external-link">
+              Subscribe<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </div>
+        )}
       </div>
     </header>
 
     <div class="post-content blog-prose">
+      {showTopVideo && <Fragment set:html={renderVideoEmbed(video!, { title: videoTitle })} />}
       <Content />
     </div>
 
@@ -146,6 +176,25 @@ const jsonLd = generateBlogPostingSchema({
     <Comments client:load term={post.data.commentsId ?? getPostSlug(post)} />
   </article>
 </BaseLayout>
+
+<script>
+  import { getVideoEmbedUrl } from '../../lib/youtube.mjs'
+
+  // Swap a video thumbnail for the player on click. Modified clicks keep normal link behavior.
+  document.addEventListener('click', (event) => {
+    const facade = (event.target as Element | null)?.closest<HTMLAnchorElement>('.video-facade')
+    if (!facade || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
+    event.preventDefault()
+
+    const iframe = document.createElement('iframe')
+    iframe.src = `${getVideoEmbedUrl(facade.dataset.videoId!)}?autoplay=1`
+    iframe.title = facade.dataset.videoTitle ?? 'YouTube video'
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'
+    iframe.allowFullscreen = true
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin'
+    facade.replaceWith(iframe)
+  })
+</script>
 
 <style>
   .post-detail {
@@ -202,6 +251,27 @@ const jsonLd = generateBlogPostingSchema({
     margin: 1rem 0;
     font-size: 1.1rem;
     opacity: 0.9;
+  }
+
+  .post-video-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .post-video-links a {
+    padding: 0.4rem 0.9rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    color: inherit;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .post-video-links a:hover {
+    background: rgba(255, 255, 255, 0.15);
   }
 
   .post-tags {
@@ -417,11 +487,66 @@ const jsonLd = generateBlogPostingSchema({
     background: rgba(255, 255, 255, 0.05);
   }
 
-  .blog-prose .youtube {
-    margin: 1.5rem 0;
+  .blog-prose .video-embed {
+    margin: 2rem 0;
   }
 
-  .blog-prose .youtube iframe,
+  .blog-prose .video-facade,
+  .blog-prose .video-embed iframe {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  /* Undo the framed style post images get. */
+  .blog-prose .video-facade img {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    object-fit: cover;
+  }
+
+  .blog-prose .video-play {
+    position: absolute;
+    inset: 0;
+    width: 68px;
+    height: 48px;
+    margin: auto;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.75);
+    transition: background 0.2s;
+  }
+
+  .blog-prose .video-play::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-40%, -50%);
+    border-style: solid;
+    border-width: 10px 0 10px 18px;
+    border-color: transparent transparent transparent #fff;
+  }
+
+  .blog-prose .video-facade:hover .video-play,
+  .blog-prose .video-facade:focus-visible .video-play {
+    background: #f00;
+  }
+
+  .blog-prose .video-facade:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+  }
+
   .blog-prose iframe {
     display: block;
     width: 100%;
