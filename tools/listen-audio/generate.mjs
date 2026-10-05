@@ -26,6 +26,8 @@ const PAUSE_AFTER_TITLE = 0.9
 const PAUSE_BETWEEN_BLOCKS = 0.55
 // Kokoro silently truncates input past ~510 phoneme tokens, so long paragraphs are generated in parts.
 const MAX_PART_LENGTH = 300
+// Rough cost on GitHub's 4-core runners, for the PR heads-up.
+const SECONDS_PER_PARAGRAPH_ON_CI = 35
 
 const { values: options, positionals: onlySlugs } = parseArgs({
   allowPositionals: true,
@@ -146,6 +148,7 @@ for (const slug of selected) {
   const regenerate = forced.has('all') || forced.has(slug)
   const segments = texts.map((text, index) => ({ text, isTitle: index === 0, name: segmentName(text, index === 0) }))
   let generatedCount = 0
+  const started = Date.now()
 
   for (const segment of segments) {
     const path = join(segmentsDir, segment.name)
@@ -159,9 +162,15 @@ for (const slug of selected) {
       }
     }
     generatedCount++
-    if (!options.plan) writeFileSync(path, await synthesizeSegment(segment.text, segment.isTitle))
+    if (options.plan) continue
+    writeFileSync(path, await synthesizeSegment(segment.text, segment.isTitle))
+    // Long runs otherwise print nothing for hours.
+    if (generatedCount % 10 === 0) console.log(`${slug}: ${generatedCount} paragraphs generated so far`)
   }
-  if (generatedCount > 0) report.push(`${slug} (${generatedCount} of ${segments.length} paragraphs)`)
+  if (generatedCount > 0 && !options.plan) {
+    console.log(`${slug}: generated ${generatedCount} of ${segments.length} paragraphs in ${Math.round((Date.now() - started) / 1000)}s`)
+  }
+  if (generatedCount > 0) report.push({ slug, generatedCount, total: segments.length })
   if (options.plan) continue
 
   const buffers = segments.map((segment) => readFileSync(join(segmentsDir, segment.name)))
@@ -185,9 +194,27 @@ for (const slug of selected) {
 
 const removed = onlySlugs.length > 0 ? [] : Object.keys(published.posts).filter((slug) => !posts.has(slug))
 
+const describe = ({ slug, generatedCount, total }) => `${slug} (${generatedCount} of ${total} paragraphs)`
+
 if (options.plan) {
-  console.log(`Would generate: ${report.join(', ') || 'nothing'}. Would remove: ${removed.join(', ') || 'none'}.`)
+  console.log(`Would generate: ${report.map(describe).join(', ') || 'nothing'}. Would remove: ${removed.join(', ') || 'none'}.`)
+  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, planSummary())
   process.exit(0)
+}
+
+function planSummary() {
+  if (report.length === 0 && removed.length === 0) return '### Listen audio\n\nNo audio changes after merge: every post\'s audio is already published.\n'
+  const paragraphs = report.reduce((sum, item) => sum + item.generatedCount, 0)
+  const minutes = Math.max(1, Math.round((paragraphs * SECONDS_PER_PARAGRAPH_ON_CI) / 60))
+  return [
+    '### Listen audio after merge',
+    '',
+    ...report.map((item) => `- Generate **${item.slug}**: ${item.generatedCount} of ${item.total} paragraphs`),
+    ...removed.map((slug) => `- Remove **${slug}**`),
+    '',
+    paragraphs > 0 ? `About ${minutes} min on GitHub's runners; until then, these posts use the browser voice.` : '',
+    '',
+  ].join('\n')
 }
 
 // Keep only what the manifest references; the deployed site is exactly this folder.
@@ -203,5 +230,5 @@ writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`)
 writeFileSync(join(outDir, 'index.html'), '<!doctype html><meta charset="utf-8"><title>Listen audio</title><p>Audio for the Listen player on <a href="https://blog.moriel.tech">blog.moriel.tech</a>.</p>\n')
 
 const changed = JSON.stringify(manifest.posts) !== JSON.stringify(published.posts)
-console.log(`Generated: ${report.join(', ') || 'nothing'}. Removed: ${removed.join(', ') || 'none'}.`)
+console.log(`Generated: ${report.map(describe).join(', ') || 'nothing'}. Removed: ${removed.join(', ') || 'none'}.`)
 if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`)
