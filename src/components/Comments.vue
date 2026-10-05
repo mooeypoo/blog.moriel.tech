@@ -5,6 +5,11 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 
+const props = defineProps<{
+  // Keyed to a stable id rather than the URL so threads survive URL changes.
+  term: string
+}>()
+
 const GISCUS_ORIGIN = 'https://giscus.app'
 
 let themeObserver: MutationObserver | null = null
@@ -36,8 +41,10 @@ onMounted(() => {
   script.setAttribute('data-repo-id', 'R_kgDORdwSNA')
   script.setAttribute('data-category', 'Announcements')
   script.setAttribute('data-category-id', 'DIC_kwDORdwSNM4C3oOm')
-  script.setAttribute('data-mapping', 'pathname')
-  script.setAttribute('data-strict', '0')
+  script.setAttribute('data-mapping', 'specific')
+  script.setAttribute('data-term', props.term)
+  // Without strict matching, Giscus fuzzy-searches titles: "intro" could load the "dddnd-intro" thread.
+  script.setAttribute('data-strict', '1')
   script.setAttribute('data-reactions-enabled', '1')
   script.setAttribute('data-emit-metadata', '1')
   script.setAttribute('data-input-position', 'top')

@@ -96,7 +96,7 @@ function formatDate(d: Date | undefined) {
       <a href="/posts">← Back to all posts</a>
     </footer>
 
-    <Comments client:load />
+    <Comments client:load term={post.data.commentsId ?? getPostSlug(post)} />
   </article>
 </BaseLayout>
 
