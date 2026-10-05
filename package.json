@@ -18,7 +18,7 @@
     "@giscus/vue": "^3.1.1",
     "astro": "^7.3.5",
     "sharp": "^0.35.5",
-    "vue": "^3.5.29"
+    "vue": "^3.5.43"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,
