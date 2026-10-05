@@ -28,6 +28,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D16 | Header nav links open in the same tab, including About and Contact on moriel.tech; the new-tab rule applies to links in content and the footer. | The nav moves between Moriel's own sites; opening a new tab there would feel like leaving rather than navigating. |
 | D17 | Generated audio is deployed by GitHub Actions to this repo's GitHub Pages site (`mooeypoo.github.io/blog.moriel.tech`), never committed to git, and tied to a hash of each post's spoken text; it's regenerated automatically after merge when that text or the voice changes. | No second repo, deploy key, or DNS; no binaries in git history; free; stale audio can never play over an edited post. |
 | D18 | Every post gets audio by default; `listen: false` opts out. | Generation is cheap and automatic, so opting in per post would only be something to forget. |
+| D19 | Every page's social preview (`og:image`) is a generated branded card: title, section and episode, and site name, over the page's hero image when it has one. Feeds and structured data keep the original photos. | A consistent, readable preview in every feed; the photos stay where full images are expected. |
 
 ## Open questions
 
@@ -182,13 +183,27 @@ See [docs/AUDIO.md](AUDIO.md) (D17, D18).
 - [x] Resumable runs: generated paragraphs are saved to the Actions cache even when a run fails or times out; progress is logged per post. Timeout raised to 350 minutes (the first full run is ~375 paragraphs, about 3.5 hours).
 - [x] `AGENTS.md` (and `CLAUDE.md` pointing to it): repo conventions, the frontmatter reference, and the audio pipeline, so AI agents know what to keep in sync.
 
+### PR 14: Social preview cards
+
+Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×630 (D19).
+
+- [ ] A branded card for every post: section and episode, title, and site name over the post's hero image (darkened); posts without an image get the same card on a branded background.
+- [ ] Matching cards for the home page, `/posts`, tag pages, and section pages.
+- [ ] `og:image` / `twitter:image` use the card; RSS, JSON-LD, and `latest-posts.json` keep the post's photo.
+- [ ] Fonts from `@fontsource` (Satori can't read WOFF2); dependencies pinned and `npm audit` clean.
+
+### PR 15: Section hero images
+
+- [ ] `hero` on section files (an image in `src/assets`), rendered like the post hero; sections without one keep the plain header.
+- [ ] Share the hero rendering between post and section pages.
+- [ ] Section social cards use the hero image when present.
+- [ ] Document `hero` in `docs/FRONTMATTER.md`. Images to come from Moriel.
+
 ### Later (not yet split into PRs)
 
 - [ ] **Newsletter (parked 2026-10-05; revisit later).** Options considered: Buttondown (small, privacy-friendly, Markdown, can email new posts from the RSS feed; small free tier) or Kit/ConvertKit (generous free tier, heavier tracking); not Substack (owns the audience) or Mailchimp (heavy, tracking). Open choices: an on-site form (needs a CSP `form-action` change) or a link to the provider's page, and placement (end of posts, the Delivery Engineering page, the footer).
 - [ ] Real titles for in-body video players: the Markdown plugin is synchronous, so players placed in the body are labeled "Play video" instead of the video title (the top embed and JSON-LD use the real title).
-- [ ] Section hero images (`hero` on section files, rendered like the post hero).
 - [ ] Pagefind static search.
-- [ ] OG image generated per post at build time.
 - [ ] MDX for interactive Physics of Software diagrams.
 - [ ] Book home page (`layout: book` on the section).
 - [ ] Listen: "read from here", starting from a chosen paragraph (a play icon on hover).
