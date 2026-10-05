@@ -104,20 +104,22 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 See [Video embeds](#video-embeds) for how placement works (D15).
 
-- [ ] Post frontmatter `video:` (a YouTube URL or ID) adds "Watch on YouTube" and "Subscribe" buttons to the post header and embeds the video at the top of the post body.
-- [ ] `videoEmbed: false` keeps the buttons but skips the embed (default `true`).
-- [ ] A bare YouTube URL on its own line in the Markdown becomes a player in place. If it's the frontmatter video, the top embed is dropped.
-- [ ] Click-to-load player: a thumbnail and play button until clicked, then the `youtube-nocookie.com` player. Works as a plain link without JavaScript.
-- [ ] Thumbnails downloaded at build time and served from this site (no YouTube request before clicking).
-- [ ] Replace the raw `<iframe>` in `genai-localization-experiment-intro.md`.
-- [ ] `VideoObject` JSON-LD on posts with `video`.
-- [ ] YouTube channel link in the footer.
-- [ ] Update the CSP: `youtube-nocookie.com` replaces `youtube.com` in `frame-src`.
+- [x] Post frontmatter `video:` (a YouTube URL or ID) adds "Watch on YouTube" and "Subscribe" buttons to the post header and embeds the video at the top of the post body.
+- [x] `videoEmbed: false` keeps the buttons but skips the embed (default `true`).
+- [x] A bare YouTube URL on its own line in the Markdown becomes a player in place. If it's the frontmatter video, the top embed is dropped.
+- [x] Click-to-load player: a thumbnail and play button until clicked, then the `youtube-nocookie.com` player. Works as a plain link without JavaScript.
+- [x] Thumbnails downloaded at build time and served from this site (no YouTube request before clicking).
+- [x] Replace the raw `<iframe>` in `genai-localization-experiment-intro.md`.
+- [x] `VideoObject` JSON-LD on posts with `video`.
+- [x] YouTube channel link in the footer.
+- [x] Update the CSP: `youtube-nocookie.com` replaces `youtube.com` in `frame-src`.
+- [ ] Preview: play both videos (Conservation at the top, localization in the body); check mobile tap-to-play.
 
 ### Later (not yet split into PRs)
 
 - [ ] Post card images on list pages: add AVIF and tighten `sizes` (the home page still loads ~0.5 MB of card images on mobile).
 - [ ] Long-lived caching for hashed assets: `Cache-Control: public, max-age=31536000, immutable` on `/_astro/*` (Netlify currently revalidates every asset on every visit).
+- [ ] Real titles for in-body video players: the Markdown plugin is synchronous, so players placed in the body are labeled "Play video" instead of the video title (the top embed and JSON-LD use the real title).
 - [ ] Section hero images (`hero` on section files, rendered like the post hero).
 - [ ] Pagefind static search.
 - [ ] OG image generated per post at build time.
