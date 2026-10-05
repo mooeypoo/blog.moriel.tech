@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostListCard from '../../components/PostListCard.astro'
 import { getSectionPath, getSectionSequence, getSections } from '../../lib/sections'
 import { SITE_URL } from '../../lib/seo'
+import { getCardUrl } from '../../lib/social-cards'
 
 export async function getStaticPaths() {
   const sections = await getSections()
@@ -19,7 +20,12 @@ const feedPath = `${path}/rss.xml`
 const isExternal = (href: string) => new URL(href).hostname !== new URL(SITE_URL).hostname
 ---
 
-<BaseLayout title={section.data.title} description={section.data.description} canonical={`${SITE_URL}${path}`}>
+<BaseLayout
+  title={section.data.title}
+  description={section.data.description}
+  canonical={`${SITE_URL}${path}`}
+  ogImage={getCardUrl(`sections/${section.id}`)}
+>
   <Fragment slot="head">
     <link rel="alternate" type="application/rss+xml" title={`${section.data.title} RSS`} href={`${SITE_URL}${feedPath}`} />
   </Fragment>
