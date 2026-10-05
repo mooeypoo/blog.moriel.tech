@@ -148,13 +148,15 @@ See [Listen (read aloud)](#listen-read-aloud) (D14).
 
 Phase 1 sounded poor on Android: curly quotes and apostrophes made the voice pause mid-sentence ("they’d “gotten" stopped at "they’d"), and 220-character pieces broke the rhythm.
 
-- [ ] Normalize text before speaking (the page keeps its typography): curly apostrophes → `'`, quotation marks removed, dashes → commas, common abbreviations expanded.
-- [ ] Speak whole paragraphs. Desktop Chrome's ~15 s cutoff is handled with its keep-alive workaround instead of splitting.
-- [ ] Pick the best installed voice automatically (prefers "Natural", "Enhanced", "Premium", "Google" voices).
-- [ ] Dedicated player between the header and the article: large play/pause, "Listen to this post" with estimated listening time, paragraph progress, previous/next paragraph, speed (0.75×–1.5×) and voice pickers remembered between visits.
-- [ ] While a session is active (playing or paused) and the player has scrolled away, a compact version sticks to the bottom of the screen; stopped or finished, it stays in place.
-- [ ] Player built around a source (browser speech now), so PR 12 can plug in audio files.
-- [ ] Remove the header Listen button.
+- [x] Normalize text before speaking (the page keeps its typography): curly apostrophes → `'`, quotation marks removed, dashes → commas, common abbreviations expanded.
+- [x] Speak whole paragraphs. Desktop Chrome's ~15 s cutoff is handled with its keep-alive workaround instead of splitting.
+- [x] Pick the best installed voice automatically (prefers "Natural", "Enhanced", "Premium", "Google" voices).
+- [x] Dedicated player between the header and the article: large play/pause, "Listen to this post" with estimated listening time, paragraph progress, previous/next paragraph, speed (0.75×–1.5×) and voice pickers remembered between visits.
+- [x] While a session is active (playing or paused) and the player has scrolled away, a compact version sticks to the bottom of the screen; stopped or finished, it stays in place.
+- [x] Player built around a source (browser speech now), so PR 12 can plug in audio files.
+- [x] Remove the header Listen button.
+- [x] Tested with a scripted speech engine: normalized text (no curly characters reach the engine), whole paragraphs (43 instead of 88 pieces on Conservation), voice ranking, previous/next, pause/resume, speed and voice remembered, floating only while active and scrolled away.
+- [ ] Preview: listen on Android (the quote pause), iPhone, and desktop Chrome (a paragraph longer than 15 seconds keeps going).
 
 ### PR 12: Listen, phase 2 (Kokoro audio)
 
