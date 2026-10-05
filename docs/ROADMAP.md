@@ -96,7 +96,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 ### PR 6: Reading time
 
-- [x] Calculate the word count at build time and show "N min read" on post cards and post headers (230 words per minute; image syntax, link targets and HTML tags aren't counted).
+- [x] Calculate the word count at build time and show "N min read" on post cards and post headers (230 words per minute, just below Brysbaert's 2019 meta-analysis average of 238 for non-fiction; plus Medium's image allowance of 12s for the first image down to 3s; link targets and HTML tags aren't counted).
 
 ### PR 7: YouTube integration
 
