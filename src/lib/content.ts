@@ -40,6 +40,23 @@ export async function getPostSocialImage(entry: { data: { display?: PostImage; i
   }
 }
 
+export function formatPostDate(date: Date) {
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+// A common average for adult silent reading of non-fiction.
+const WORDS_PER_MINUTE = 230
+
+/** Counts prose only: image syntax, link targets, and HTML tags aren't read. */
+export function getReadingMinutes(post: { body?: string }) {
+  const prose = (post.body ?? '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\]\([^)]*\)/g, ']')
+    .replace(/<[^>]+>/g, ' ')
+  const words = prose.split(/\s+/).filter((word) => /\w/.test(word)).length
+  return Math.max(1, Math.round(words / WORDS_PER_MINUTE))
+}
+
 export function getPostSlug(entry: { id: string; slug?: string }) {
   return entry.slug ?? entry.id.replace(/\.(md|mdx)$/i, '')
 }

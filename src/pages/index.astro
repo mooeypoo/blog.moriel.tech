@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import PostPreviewImage from '../components/PostPreviewImage.astro'
 import SectionLabel from '../components/SectionLabel.astro'
 import { getEntry } from 'astro:content'
-import { getPostDisplayImage, getPublishedPosts, getPostPath } from '../lib/content'
+import { formatPostDate, getPostDisplayImage, getPublishedPosts, getPostPath, getReadingMinutes } from '../lib/content'
 import { getItemLabel } from '../lib/sections'
 import { SITE_URL } from '../lib/seo'
 
@@ -39,7 +39,7 @@ const recentPosts = await Promise.all(
                 <a href={getPostPath(post)}>{post.data.title}</a>
               </h3>
               {post.data.date && (
-                <p class="post-date">{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                <p class="post-date">{formatPostDate(post.data.date)} · {getReadingMinutes(post)} min read</p>
               )}
               {post.data.description && (
                 <p class="post-desc">{post.data.description}</p>

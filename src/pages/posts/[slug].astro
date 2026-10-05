@@ -4,7 +4,7 @@ import { getCollection, getEntry, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
 import SectionLabel from '../../components/SectionLabel.astro'
-import { getPostPath, getPostSlug, getPostSocialImage, normalizeImageUrl } from '../../lib/content'
+import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, normalizeImageUrl } from '../../lib/content'
 import { getItemLabel, getPostSectionContext, getSectionPath } from '../../lib/sections'
 import { generateBlogPostingSchema, SITE_URL } from '../../lib/seo'
 
@@ -64,10 +64,6 @@ const jsonLd = generateBlogPostingSchema({
   tags: post.data.tags,
 })
 
-function formatDate(d: Date | undefined) {
-  if (!d) return ''
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-}
 ---
 
 <BaseLayout
@@ -107,7 +103,7 @@ function formatDate(d: Date | undefined) {
       <div class="post-header-content">
         {sectionContext && <SectionLabel section={sectionContext.section} label={sectionContext.label} />}
         <h1>{title}</h1>
-        {post.data.date && <p class="post-date">{formatDate(post.data.date)}</p>}
+        <p class="post-date">{formatPostDate(post.data.date)} · {getReadingMinutes(post)} min read</p>
         {post.data.description && <p class="post-description">{post.data.description}</p>}
         {post.data.tags && post.data.tags.length > 0 && (
           <div class="post-tags">
