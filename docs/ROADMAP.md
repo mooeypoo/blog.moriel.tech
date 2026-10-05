@@ -38,11 +38,23 @@ Ordered by urgency. PR 1 comes first because the comment mapping only stays free
 - [x] Decide on dates in slugs (D12).
 - [x] Generate the post ID with the glob loader's `generateId` (drop the `YYYY-MM[-DD]-` filename prefix), allow an optional `slug` frontmatter override, and add 301 redirects in `public/_redirects` for the two published dated URLs.
 - [x] Build fails on duplicate slugs.
+- [x] Stop tracking the generated `.astro/` folder; replace the leftover Nuxt `.gitignore` with one for Astro.
+- [x] Import `z` from `astro/zod` (the `astro:content` export is deprecated and removed in Astro 7).
 - [x] Giscus: `data-mapping="specific"`, `data-term` = post slug (overridable with an optional `commentsId` frontmatter field, so a renamed post keeps its thread), `data-strict="1"`. Strict matters: with fuzzy matching, `intro` could pick up the `dddnd-intro` thread.
 - [ ] Delete any empty discussions already auto-created in `mooeypoo/blog.moriel.tech-discussion` (as of 2026-10-05: #2, `posts/genai-localization-experiment-intro/`, empty).
 - [ ] Preview: old URLs redirect, each post loads its own (empty) thread, and posting a test comment creates a discussion titled with the slug (then delete it).
 
-### PR 2: Image performance
+### PR 2: Upgrade to Astro 7
+
+Before the image and sections work, so neither is built against APIs that are about to change.
+
+- [ ] Upgrade `astro` 6 → 7 and `@astrojs/vue` 6 → 7 together (`@astrojs/vue` 7 requires Astro 7); bump `@astrojs/sitemap`.
+- [ ] Work through the official Astro 7 upgrade guide for breaking changes that affect this site (content collections, images, Markdown/rehype plugins, Vue islands).
+- [ ] `z` already comes from `astro/zod` (done in PR 1), since `astro:content`'s `z` is removed in 7.
+- [ ] Bump `engines.node`, `.nvmrc`, `netlify.toml` and CI if Astro 7 needs a newer Node.
+- [ ] Preview: compare every page type against production (home, `/posts`, pagination, tags, a post with images, RSS, `latest-posts.json`, sitemap, theme toggle, comments).
+
+### PR 3: Image performance
 
 - [ ] Post hero: stop using the raw source PNG as a CSS background (currently 4.6–7.3 MB). Serve resized AVIF/WebP through `getImage()` / `<Image>`.
 - [ ] OG/Twitter image: a resized 1200×630 JPEG instead of the source PNG (also used in RSS `media:content`).
@@ -50,16 +62,16 @@ Ordered by urgency. PR 1 comes first because the comment mapping only stays free
 - [ ] Consider self-hosting fonts instead of Google Fonts: one less third-party request, simpler CSP.
 - [ ] Preview: compare page weight before and after, and run Lighthouse on a post with a hero image.
 
-### PR 3: Security baseline
+### PR 4: Security baseline
 
 - [ ] Security headers in `netlify.toml`: CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`.
-- [ ] CSP allows only what's used: Giscus, Plausible, fonts (unless self-hosted in PR 2), and later YouTube (nocookie). Check whether Astro's built-in CSP support can produce hashes for the inline scripts.
+- [ ] CSP allows only what's used: Giscus, Plausible, fonts (unless self-hosted in PR 3), and later YouTube (nocookie). Check whether Astro's built-in CSP support can produce hashes for the inline scripts.
 - [ ] Dependabot (or Renovate) for npm and GitHub Actions; bump the outdated `actions/*@v3` in CI.
 - [ ] CI uses `npm ci` instead of `npm install`.
 - [ ] Preview: no CSP violations in the console on the home page, a post, tags, RSS, and comments with the theme toggled.
 - [ ] **From now on, every PR that adds a third-party origin updates the CSP.**
 
-### PR 4: Sections and landing pages
+### PR 5: Sections and landing pages
 
 - [x] Decide on the URL scheme (D11).
 - [ ] `sections` content collection: one Markdown file per section with `title`, `description`, `hero`, `links[]`, `itemLabel` (e.g. "Episode" or "Chapter"), `unordered: include | exclude` (default `include`), and the intro as the body.
@@ -74,11 +86,11 @@ Ordered by urgency. PR 1 comes first because the comment mapping only stays free
 - [ ] Delivery Engineering section file (can ship as "coming soon"; intro from Moriel).
 - [ ] Preview: both landing pages, prev/next links on the Physics of Software post, nav, RSS feeds, and the redirected tag URL.
 
-### PR 5: Reading time
+### PR 6: Reading time
 
 - [ ] Calculate the word count at build time and show "N min read" on post cards and post headers.
 
-### PR 6: YouTube integration
+### PR 7: YouTube integration
 
 - [ ] Post frontmatter `video: <youtubeId>`: a click-to-load player at the top of the post (`youtube-nocookie`, no YouTube JS until clicked), plus "Watch on YouTube" and "Subscribe" links.
 - [ ] Remark plugin: a bare YouTube URL on its own line becomes the same click-to-load player.
