@@ -22,6 +22,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D10 | Physics of Software landing page lists posts only (no list of episodes pulled from YouTube). | Keep it simple; revisit later. |
 | D11 | Landing pages are top-level (`/physics-of-software/`), protected by a build check against reserved route names. | Shortest URLs for YouTube descriptions and the book. The build check makes a clash impossible. See [URL options](#url-options). |
 | D12 | Post URLs carry no date. Dated filenames are fine; the date prefix is stripped from the slug. The already-published dated URLs get 301 redirects. | Uniqueness is enforced by a build check instead, and evergreen posts don't look dated. |
+| D13 | The CSP allows inline `style` attributes (`style-src-attr 'unsafe-inline'`); `<style>` elements and all scripts stay hash-locked. | Shiki colors code blocks with style attributes. Style attributes can't run script, and only Moriel writes content, so this is negligible risk versus losing syntax highlighting or maintaining a Prism theme. |
 
 ## Open questions
 
@@ -67,12 +68,14 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 ### PR 4: Security baseline
 
-- [ ] Security headers in `netlify.toml`: CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`.
-- [ ] CSP allows only what's used: `data:` in `img-src` (the external-link icon is an inline SVG mask), Giscus, Plausible, and later YouTube (nocookie). Fonts are self-hosted since PR 3. Check whether Astro's built-in CSP support can produce hashes for the inline scripts.
-- [ ] Dependabot (or Renovate) for npm and GitHub Actions; bump the outdated `actions/*@v3` in CI.
-- [ ] CI uses `npm ci` instead of `npm install`.
-- [ ] Preview: no CSP violations in the console on the home page, a post, tags, RSS, and comments with the theme toggled.
-- [ ] **From now on, every PR that adds a third-party origin updates the CSP.**
+- [x] Security headers in `netlify.toml`: `frame-ancestors` (header-only CSP directive), `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. HSTS is already sent by Netlify.
+- [x] CSP via Astro's built-in `security.csp`: a per-page `<meta>` with hashes for Astro's inline scripts and styles. Third-party allowances: Plausible (script, connect), Giscus (script, style, frame), YouTube (frame; switches to nocookie in PR 7), `data:` images (external-link icon). See D13 for style attributes.
+- [x] Dependabot for npm and GitHub Actions, weekly, with a 7-day cooldown on new releases (security updates aren't delayed). Actions bumped to v7 and pinned to commit SHAs.
+- [x] CI uses `npm ci`, reads the Node version from `.nvmrc`, and runs with read-only repository permissions.
+- [x] `npm audit fix` (all findings were build/dev tooling; nothing ships to readers). Build output unchanged.
+- [x] No CSP violations in headless Chrome on home, `/posts`, pagination, tags, posts with comments and the YouTube embed, a code block, and RSS, with the theme toggled. Injected inline and unlisted-origin scripts are blocked.
+- [ ] Preview: same check on the Netlify deploy preview (Netlify's own preview toolbar may log violations there; production doesn't load it), and confirm the headers with `curl -I`.
+- [x] **From now on, every PR that adds a third-party origin updates the CSP** (`security.csp` in `astro.config.mjs`).
 
 ### PR 5: Sections and landing pages
 
@@ -105,6 +108,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 ### Later (not yet split into PRs)
 
 - [ ] Post card images on list pages: add AVIF and tighten `sizes` (the home page still loads ~0.5 MB of card images on mobile).
+- [ ] Long-lived caching for hashed assets: `Cache-Control: public, max-age=31536000, immutable` on `/_astro/*` (Netlify currently revalidates every asset on every visit).
 - [ ] Pagefind static search.
 - [ ] OG image generated per post at build time.
 - [ ] "Listen" button using the browser's speech API (Web Speech API).
