@@ -58,6 +58,8 @@ const posts = defineCollection({
       })
       .optional(),
     videoEmbed: z.boolean().default(true),
+    // false removes the Listen player and skips audio generation (docs/AUDIO.md).
+    listen: z.boolean().default(true),
   }),
 })
 
