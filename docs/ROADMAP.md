@@ -26,7 +26,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 
 ## Open questions
 
-- [ ] Delivery Engineering section: intro text and hero image (from Moriel). It can ship as "coming soon" without them.
+- [ ] Section intros and the Physics of Software playlist URL (see PR 5).
 
 ---
 
@@ -80,16 +80,18 @@ Before the image and sections work, so neither is built against APIs that are ab
 ### PR 5: Sections and landing pages
 
 - [x] Decide on the URL scheme (D11).
-- [ ] `sections` content collection: one Markdown file per section with `title`, `description`, `hero`, `links[]`, `itemLabel` (e.g. "Episode" or "Chapter"), `unordered: include | exclude` (default `include`), and the intro as the body.
-- [ ] Posts: optional `section: reference('sections')` and optional `order` (positive integer).
-- [ ] Landing page: intro, links, the section's posts in sequence order, then (for `unordered: exclude` sections) the remaining posts by date under **Updates**.
-- [ ] Previous/next navigation within a section (see [Ordering](#ordering-and-previousnext)).
-- [ ] Section label on post cards and post headers, linking to the landing page.
-- [ ] Per-section RSS; the main RSS gains a `<category>` for the section.
-- [ ] Nav lists only sections with at least one published post. Sections with no posts render a "coming soon" landing page.
-- [ ] Build fails on: a section slug that clashes with a reserved route, a duplicate `order` within a section, or a section that doesn't exist (handled by `reference()`).
-- [ ] Migration: Physics of Software post gets `section: physics-of-software`, the tag is removed and replaced with other tags, and a 301 redirect goes from `/tags/physics-of-software` to the landing page.
-- [ ] Delivery Engineering section file (can ship as "coming soon"; intro from Moriel).
+- [x] `sections` content collection: one Markdown file per section with `title`, `description`, `links[]`, `itemLabel` (e.g. "Episode" or "Chapter"), `unordered: include | exclude` (default `include`), and the intro as the body. (`hero` deferred; see Later.)
+- [x] Posts: optional `section: reference('sections')` and optional `order` (positive integer).
+- [x] Landing page: intro, links, the section's posts in sequence order, then (for `unordered: exclude` sections) the remaining posts by date under **Updates**.
+- [x] Previous/next navigation within a section (see [Ordering](#ordering-and-previousnext)).
+- [x] Section label on post cards and post headers, linking to the landing page. (List cards extracted into `PostListCard.astro` first.)
+- [x] Per-section RSS at `/<section>/rss.xml`; the main RSS gains a `<category>` for the section.
+- [x] Nav lists only sections with at least one published post. Sections with no posts render a "coming soon" landing page.
+- [x] Build fails on: a section slug that clashes with a reserved route, a duplicate `order` within a section, or a section that doesn't exist (handled by `reference()`).
+- [x] Migration: Physics of Software post gets `section: physics-of-software`, the tag is removed, and a 301 redirect goes from `/tags/Physics%20of%20Software` to the landing page.
+- [ ] Moriel: add more tags to the Conservation of Complexity post if wanted (only `Architecture` is left), and set its `order` to its episode number.
+- [x] Delivery Engineering section file (ships as "coming soon", out of the nav until it has a post).
+- [ ] Moriel: review both section intros (drafted by Claude) and replace the Physics of Software YouTube link with the playlist URL.
 - [ ] Preview: both landing pages, prev/next links on the Physics of Software post, nav, RSS feeds, and the redirected tag URL.
 
 ### PR 6: Reading time
@@ -109,6 +111,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 - [ ] Post card images on list pages: add AVIF and tighten `sizes` (the home page still loads ~0.5 MB of card images on mobile).
 - [ ] Long-lived caching for hashed assets: `Cache-Control: public, max-age=31536000, immutable` on `/_astro/*` (Netlify currently revalidates every asset on every visit).
+- [ ] Section hero images (`hero` on section files, rendered like the post hero).
 - [ ] Pagefind static search.
 - [ ] OG image generated per post at build time.
 - [ ] "Listen" button using the browser's speech API (Web Speech API).
@@ -168,7 +171,6 @@ order: 4          # the episode number
 ---
 title: The Physics of Software
 description: Real physics, and what it says about your codebase.
-hero: ../../assets/images/sections/physics-of-software.png
 itemLabel: Episode
 # unordered: exclude   # used by the book section; the default is include
 links:
