@@ -19,6 +19,8 @@ Publishing always goes through the workflow. To listen to a post's generated aud
 npm run build
 npm run audio:install          # once; installs the generator's own dependencies
 npm run audio -- <post-slug>   # writes tools/listen-audio/out/<slug>-<hash>.mp3
+npm run audio -- --plan --from https://mooeypoo.github.io/blog.moriel.tech/
+                               # lists what the workflow would generate or remove
 ```
 
 The first run downloads the voice model (~330 MB) into `tools/listen-audio/.cache`.

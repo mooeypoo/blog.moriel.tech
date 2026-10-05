@@ -166,12 +166,14 @@ See [docs/AUDIO.md](AUDIO.md) (D17, D18).
 
 - [x] Decide storage: this repo's GitHub Pages, deployed by Actions (D17). Pages source set to GitHub Actions.
 - [x] Voice: Kokoro `af_heart`.
-- [ ] Shared spoken-text extraction and fingerprint (SHA-256) in `src/lib/listen-text.ts`, used by the player and the generator.
-- [ ] Generator (`tools/listen-audio`, its own dependencies so Netlify builds don't install them): reads the built pages, generates per paragraph with Kokoro (model revision pinned), encodes mono MP3 in Node (no ffmpeg), writes `<slug>-<hash>.mp3` and `manifest.json` (hash, voice, duration, paragraph start times). Skips posts whose hash and voice already match; drops posts that no longer exist or opted out.
-- [ ] **Listen audio** workflow: on push to `main` and by hand (optionally forcing posts or `all`); downloads the published audio, generates what's missing, deploys to Pages. Pinned actions, read-only repo access, Pages write only in the deploy job.
-- [ ] Player: an audio-file source when the manifest's hash matches the page; seeking, background play, lock-screen controls (Media Session); paragraph highlight and prev/next follow the audio. Browser speech stays the fallback.
-- [ ] `listen: false` frontmatter opts a post out (no player, no audio).
-- [ ] CSP: `media-src` and `connect-src` allow `https://mooeypoo.github.io/blog.moriel.tech/`.
+- [x] Shared spoken-text extraction and fingerprint (SHA-256) in `src/lib/listen-text.ts`, used by the player and the generator.
+- [x] Generator (`tools/listen-audio`, its own dependencies so Netlify builds don't install them): reads the built pages, generates per paragraph with Kokoro (model revision pinned), encodes mono MP3 in Node (no ffmpeg), writes `<slug>-<hash>.mp3` and `manifest.json` (hash, voice, duration, paragraph start times). Skips posts whose hash and voice already match; drops posts that no longer exist or opted out.
+- [x] **Listen audio** workflow: on push to `main` and by hand (optionally forcing posts or `all`); downloads the published audio, generates what's missing, deploys to Pages. Pinned actions, read-only repo access, Pages write only in the deploy job.
+- [x] Player: an audio-file source when the manifest's hash matches the page; seeking, background play, lock-screen controls (Media Session); paragraph highlight and prev/next follow the audio. Browser speech stays the fallback.
+- [x] `listen: false` frontmatter opts a post out (no player, no audio).
+- [x] CSP: `media-src` and `connect-src` allow `https://mooeypoo.github.io/blog.moriel.tech/`.
+- [x] Tested locally: Conservation generated (12.9 min of audio, 4.6 MB); in headless Chrome with the Pages URL served from that output, the player picks the audio, seeks, skips by paragraph with the highlight following, resumes in place, sets lock-screen metadata, falls back to browser speech when the hash is stale or the file fails, and has no CSP violations. Generator `--plan`, carry-over, and removal checked against a local stand-in for Pages.
+- [ ] After merge: the first workflow run generates all posts (~25 min each on GitHub's runners, about 2 hours); confirm audio plays on the live site.
 - [x] `docs/FRONTMATTER.md`: every post and section field.
 
 ### PR 13: Audio heads-up and agent docs
