@@ -36,10 +36,10 @@ Ordered by urgency. PR 1 comes first because the comment mapping only stays free
 ### PR 1: Stable post identity (slugs, comments, redirects)
 
 - [x] Decide on dates in slugs (D12).
-- [ ] Generate the post ID with the glob loader's `generateId` (drop the `YYYY-MM[-DD]-` filename prefix), allow an optional `slug` frontmatter override, and add 301 redirects in `public/_redirects` for the two published dated URLs.
-- [ ] Build fails on duplicate slugs.
-- [ ] Giscus: `data-mapping="specific"`, `data-term` = post slug (overridable with an optional `commentsId` frontmatter field, so a renamed post keeps its thread), `data-strict="1"`. Strict matters: with fuzzy matching, `intro` could pick up the `dddnd-intro` thread.
-- [ ] Delete any empty discussions already auto-created in `mooeypoo/blog.moriel.tech-discussion`.
+- [x] Generate the post ID with the glob loader's `generateId` (drop the `YYYY-MM[-DD]-` filename prefix), allow an optional `slug` frontmatter override, and add 301 redirects in `public/_redirects` for the two published dated URLs.
+- [x] Build fails on duplicate slugs.
+- [x] Giscus: `data-mapping="specific"`, `data-term` = post slug (overridable with an optional `commentsId` frontmatter field, so a renamed post keeps its thread), `data-strict="1"`. Strict matters: with fuzzy matching, `intro` could pick up the `dddnd-intro` thread.
+- [ ] Delete any empty discussions already auto-created in `mooeypoo/blog.moriel.tech-discussion` (as of 2026-10-05: #2, `posts/genai-localization-experiment-intro/`, empty).
 - [ ] Preview: old URLs redirect, each post loads its own (empty) thread, and posting a test comment creates a discussion titled with the slug (then delete it).
 
 ### PR 2: Image performance
