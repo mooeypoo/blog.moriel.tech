@@ -187,10 +187,11 @@ See [docs/AUDIO.md](AUDIO.md) (D17, D18).
 
 Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×630 (D19).
 
-- [ ] A branded card for every post: section and episode, title, and site name over the post's hero image (darkened); posts without an image get the same card on a branded background.
-- [ ] Matching cards for the home page, `/posts`, tag pages, and section pages.
-- [ ] `og:image` / `twitter:image` use the card; RSS, JSON-LD, and `latest-posts.json` keep the post's photo.
-- [ ] Fonts from `@fontsource` (Satori can't read WOFF2); dependencies pinned and `npm audit` clean.
+- [x] A branded card for every post: section and episode, title, and site name over the post's hero image (darkened); posts without an image get the same card on a branded background.
+- [x] Matching cards for the home page, `/posts`, tag pages, and section pages.
+- [x] `og:image` / `twitter:image` use the card; RSS, JSON-LD, and `latest-posts.json` keep the post's photo.
+- [x] Fonts from `@fontsource` (Satori can't read WOFF2); dependencies pinned and `npm audit` clean; WOFF is unwrapped to TrueType with `zlib` because Satori's WOFF path needs a vulnerable `fflate`.
+- [ ] Preview: paste a post URL into a social preview tool (e.g. opengraph.xyz) and check the card.
 
 ### PR 15: Section hero images
 
