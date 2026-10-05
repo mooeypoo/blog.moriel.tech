@@ -55,16 +55,22 @@ function imageSeconds(count: number) {
   return seconds
 }
 
-/** Counts prose plus time spent on images; link targets and HTML tags aren't read. */
-export function getReadingMinutes(post: { body?: string }) {
-  const body = post.body ?? ''
-  const images = (body.match(/!\[[^\]]*\]\([^)]*\)/g) ?? []).length + (body.match(/<img\b/gi) ?? []).length
-  const prose = body
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+const IMAGE_SYNTAX = /!\[[^\]]*\]\([^)]*\)/g
+
+/** Words of prose; image syntax, link targets, and HTML tags aren't read. */
+export function getWordCount(post: { body?: string }) {
+  const prose = (post.body ?? '')
+    .replace(IMAGE_SYNTAX, ' ')
     .replace(/\]\([^)]*\)/g, ']')
     .replace(/<[^>]+>/g, ' ')
-  const words = prose.split(/\s+/).filter((word) => /\w/.test(word)).length
-  const seconds = (words / WORDS_PER_MINUTE) * 60 + imageSeconds(images)
+  return prose.split(/\s+/).filter((word) => /\w/.test(word)).length
+}
+
+/** Prose at reading speed plus time spent on images. */
+export function getReadingMinutes(post: { body?: string }) {
+  const body = post.body ?? ''
+  const images = (body.match(IMAGE_SYNTAX) ?? []).length + (body.match(/<img\b/gi) ?? []).length
+  const seconds = (getWordCount(post) / WORDS_PER_MINUTE) * 60 + imageSeconds(images)
   return Math.max(1, Math.round(seconds / 60))
 }
 
