@@ -156,6 +156,8 @@ export default defineConfig({
   ],
   markdown: {
     processor: satteri({
+      // Parse raw HTML in posts into elements so plugins (like the link rule) see it too.
+      features: { rawHtml: true },
       hastPlugins: [embedStandaloneVideos, openExternalLinksInNewTab, sizePostImagesToColumn],
     }),
   },
