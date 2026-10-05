@@ -1,14 +1,10 @@
-# Nuxt
-.nuxt
-.output
-.data
-dist
-*.log
-.nitro
-.cache
+# Build output and generated types (recreated by `astro dev`/`astro build`)
+dist/
+.astro/
 
 # Node
-node_modules
+node_modules/
+*.log
 
 # Env
 .env

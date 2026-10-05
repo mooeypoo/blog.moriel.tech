@@ -1,4 +1,8 @@
 # Redirect old pagination query parameter format to new URL structure
 /posts?page=:page  /posts/page/:page  301
 
+# Post URLs no longer carry dates (docs/ROADMAP.md D12)
+/posts/2026-05-junior-dev-collapse          /posts/junior-dev-collapse          301
+/posts/2026-06-conservation-of-complexity   /posts/conservation-of-complexity   301
+
 # Catch-all (optional, for any additional future redirects)
