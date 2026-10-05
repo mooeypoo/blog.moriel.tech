@@ -58,16 +58,17 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 ### PR 3: Image performance
 
-- [ ] Post hero: stop using the raw source PNG as a CSS background (currently 4.6–7.3 MB). Serve resized AVIF/WebP through `getImage()` / `<Image>`.
-- [ ] OG/Twitter image: a resized 1200×630 JPEG instead of the source PNG (also used in RSS `media:content`).
-- [ ] Check that inline Markdown images are emitted as optimized formats at sensible widths.
-- [ ] Consider self-hosting fonts instead of Google Fonts: one less third-party request, simpler CSP.
-- [ ] Preview: compare page weight before and after, and run Lighthouse on a post with a hero image.
+- [x] Post hero: stop using the raw source PNG as a CSS background (currently 4.6–7.3 MB). Now a `<picture>` with AVIF (WebP fallback), loaded eagerly at high priority.
+- [x] OG/Twitter image: a resized JPEG (max 1200px wide) instead of the source PNG, also used in JSON-LD, RSS `media:content` and `latest-posts.json`. Not cropped to 1200×630: some preview images are panoramic (e.g. 807×344) and would need upscaling.
+- [x] Inline Markdown images: `srcset` via `image.layout: 'constrained'`, with `sizes` matching the 800px article column. Post images in `public/` moved to `src/assets` so they're optimized.
+- [x] Self-host fonts with Astro's Fonts API (same families and weights, upright only).
+- [x] Measure page weight and LCP before and after (headless Chrome, throttled to 150 ms RTT / 1.6 Mbps): Junior Developer Collapse 8.0 MB → 0.4 MB, LCP 39 s → 1.7 s on mobile.
+- [ ] Preview: hero, inline images and fonts look the same as production; share a post URL in a social preview tool to check the card image.
 
 ### PR 4: Security baseline
 
 - [ ] Security headers in `netlify.toml`: CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`.
-- [ ] CSP allows only what's used: `data:` in `img-src` (the external-link icon is an inline SVG mask), Giscus, Plausible, fonts (unless self-hosted in PR 3), and later YouTube (nocookie). Check whether Astro's built-in CSP support can produce hashes for the inline scripts.
+- [ ] CSP allows only what's used: `data:` in `img-src` (the external-link icon is an inline SVG mask), Giscus, Plausible, and later YouTube (nocookie). Fonts are self-hosted since PR 3. Check whether Astro's built-in CSP support can produce hashes for the inline scripts.
 - [ ] Dependabot (or Renovate) for npm and GitHub Actions; bump the outdated `actions/*@v3` in CI.
 - [ ] CI uses `npm ci` instead of `npm install`.
 - [ ] Preview: no CSP violations in the console on the home page, a post, tags, RSS, and comments with the theme toggled.
@@ -103,6 +104,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 
 ### Later (not yet split into PRs)
 
+- [ ] Post card images on list pages: add AVIF and tighten `sizes` (the home page still loads ~0.5 MB of card images on mobile).
 - [ ] Pagefind static search.
 - [ ] OG image generated per post at build time.
 - [ ] "Listen" button using the browser's speech API (Web Speech API).
