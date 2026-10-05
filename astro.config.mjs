@@ -61,6 +61,35 @@ export default defineConfig({
   output: 'static',
   // Astro 7 defaults to JSX-style whitespace stripping, which can glue inline words together.
   compressHTML: true,
+  security: {
+    // Astro hashes its own inline scripts and styles into a per-page <meta> CSP.
+    // Anything third-party must be listed here (docs/ROADMAP.md PR 4).
+    csp: {
+      directives: [
+        "default-src 'self'",
+        // data: is the external-link icon (an inline SVG mask).
+        "img-src 'self' data:",
+        "font-src 'self'",
+        "connect-src 'self' https://plausible.io",
+        "frame-src https://giscus.app https://www.youtube.com",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+      ],
+      scriptDirective: {
+        resources: ["'self'", 'https://plausible.io', 'https://giscus.app'],
+      },
+      styleDirective: {
+        resources: [
+          { resource: "'self'", kind: 'element' },
+          { resource: 'https://giscus.app', kind: 'element' },
+          // Shiki colors code blocks with style attributes. Attributes can't run script,
+          // and <style> elements stay hash-locked. (Astro still warns about Shiki.)
+          { resource: "'unsafe-inline'", kind: 'attribute' },
+        ],
+      },
+    },
+  },
   image: {
     // Gives Markdown images a srcset instead of one full-size file.
     layout: 'constrained',
