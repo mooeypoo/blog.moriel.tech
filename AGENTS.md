@@ -31,7 +31,7 @@ npm run audio -- --plan --from https://mooeypoo.github.io/blog.moriel.tech/
 ## Things that are easy to break
 
 - **The spoken text is shared and hashed.** `src/lib/listen-text.ts` (what's read) and `normalizeForSpeech` in `src/lib/speech.ts` (how it's cleaned) feed the hash every post's audio is tied to. Changing them, or the generator's voice, model revision, bitrate, or pauses, invalidates audio for **every** post: hours of regeneration on CI, with the browser voice in the meantime. Only do it deliberately, and say so in the PR.
-- **CSP.** `security.csp` in `astro.config.mjs` lists every allowed origin. Any new third-party script, style, frame, image, media, or fetch origin must be added there, or it's silently blocked in production. Test with `npm run build && npm run preview` (dev mode doesn't apply it).
+- **CSP.** `security.csp` in `astro.config.mjs` lists every allowed origin. Any new third-party script, style, frame, image, media, or fetch origin must be added there, or it's silently blocked in production. Test with `npm run build && npm run preview` (dev mode doesn't apply it). Astro doesn't hash `is:inline` scripts; list their hashes the way `src/lib/theme-init.mjs` does.
 - **Post URLs** are `/posts/<slug>`, with the date stripped from the filename. Never change a published slug without a redirect in `public/_redirects`; comment threads are keyed to the slug (`commentsId` pins one).
 - **Links.** Markdown and raw HTML links get target/icon handling from a Sätteri plugin; template links follow the same rule by hand (internal: same tab; external: new tab, `external-link` class, screen-reader text). Header nav is the exception (D16).
 - **Images** go in `src/assets` (optimized), not `public/`.

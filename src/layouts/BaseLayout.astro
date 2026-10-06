@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro'
 import { resolveSocialImage } from '../lib/seo'
 import { CARD_HEIGHT, CARD_WIDTH, getCardUrl } from '../lib/social-cards'
 import { getNavSections, getSectionPath } from '../lib/sections'
+import { themeInitScript } from '../lib/theme-init.mjs'
 
 interface Props {
   title?: string
@@ -32,6 +33,8 @@ const navSections = (await getNavSections()).map((section) => ({ title: section.
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
+    {/* First in <head>: it runs before any stylesheet loads, so it never waits on one. */}
+    <script is:inline set:html={themeInitScript} />
     <meta name="description" content={description} />
     <meta name="author" content="Moriel Schottlender" />
     <meta name="generator" content={Astro.generator} />

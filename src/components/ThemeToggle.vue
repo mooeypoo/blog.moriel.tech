@@ -90,10 +90,8 @@ onMounted(() => {
   updateMobileState()
   window.addEventListener('resize', updateMobileState)
 
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  const stored = localStorage.getItem('theme-dark')
-  isDark.value = stored !== null ? stored === 'true' : prefersDark
-  applyTheme()
+  // The inline head script (lib/theme-init.mjs) has already chosen the theme.
+  isDark.value = !document.documentElement.classList.contains('light-theme')
 })
 
 function toggleTheme() {
