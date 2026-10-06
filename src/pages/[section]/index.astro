@@ -2,7 +2,7 @@
 import { render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import HeroImage from '../../components/HeroImage.astro'
-import PostListCard from '../../components/PostListCard.astro'
+import PostList from '../../components/PostList.astro'
 import '../../styles/hero.css'
 import { getSectionPath, getSectionSequence, getSections } from '../../lib/sections'
 import { SITE_URL } from '../../lib/seo'
@@ -66,18 +66,12 @@ const isExternal = (href: string) => new URL(href).hostname !== new URL(SITE_URL
       </p>
     )}
 
-    {sequence.length > 0 && (
-      <div class="posts-grid">
-        {sequence.map((post) => <PostListCard post={post} inSection />)}
-      </div>
-    )}
+    {sequence.length > 0 && <PostList posts={sequence} inSection headingLevel={2} />}
 
     {updates.length > 0 && (
       <>
         <h2>Updates</h2>
-        <div class="posts-grid">
-          {updates.map((post) => <PostListCard post={post} inSection />)}
-        </div>
+        <PostList posts={updates} inSection />
       </>
     )}
 
@@ -89,7 +83,7 @@ const isExternal = (href: string) => new URL(href).hostname !== new URL(SITE_URL
 
 <style>
   .section-container {
-    max-width: 900px;
+    max-width: 860px;
     margin: 0 auto;
   }
 
@@ -149,12 +143,6 @@ const isExternal = (href: string) => new URL(href).hostname !== new URL(SITE_URL
     max-width: 85ch;
     margin: 0 auto 2.5rem;
     line-height: 1.7;
-  }
-
-  .posts-grid {
-    display: grid;
-    gap: 2rem;
-    margin: 2rem 0;
   }
 
   .coming-soon {

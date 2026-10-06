@@ -1,24 +1,14 @@
 ---
 import { getCardUrl, tagCardPath } from '../../lib/social-cards'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import PostListCard from '../../components/PostListCard.astro'
-import { getPublishedPosts } from '../../lib/content'
+import BrowseLinks from '../../components/BrowseLinks.astro'
+import PostList from '../../components/PostList.astro'
+import { filterEntriesByTag, getPublishedPosts, getUniqueTags } from '../../lib/content'
 import { SITE_URL } from '../../lib/seo'
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts()
-  const tags = new Set<string>()
-
-  for (const post of posts) {
-    for (const tag of post.data.tags || []) {
-      tags.add(tag)
-    }
-  }
-
-  return Array.from(tags).map((tag) => ({
-    params: { tag },
-    props: { tag, posts },
-  }))
+  return getUniqueTags(posts).map((tag) => ({ params: { tag }, props: { tag, posts } }))
 }
 
 interface Props {
@@ -27,7 +17,7 @@ interface Props {
 }
 
 const { tag, posts } = Astro.props
-const filteredPosts = posts.filter((p: (typeof posts)[number]) => (p.data.tags || []).includes(tag))
+const filteredPosts = filterEntriesByTag(posts, tag)
 
 const canonical = `${SITE_URL}/tags/${encodeURIComponent(tag)}`
 const title = `Posts tagged with "${tag}"`
@@ -36,57 +26,55 @@ const description = `All posts tagged with ${tag} on Moriel's Blog.`
 
 <BaseLayout title={title} description={description} canonical={canonical} ogImage={getCardUrl(tagCardPath(tag))}>
   <section class="tag-posts-container">
-    <h1>Posts tagged <em>#{tag}</em></h1>
+    <header class="tag-header">
+      <h1>Posts tagged <em>#{tag}</em></h1>
+      <p class="tag-count">{filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}</p>
+    </header>
 
-    {filteredPosts.length > 0 ? (
-      <div class="posts-grid">
-        {filteredPosts.map((post: (typeof filteredPosts)[number]) => (
-          <PostListCard post={post} />
-        ))}
-      </div>
-    ) : (
-      <p>No posts found for this tag.</p>
-    )}
+    <BrowseLinks posts={posts} current={`/tags/${encodeURIComponent(tag)}`} />
+
+    <PostList posts={filteredPosts} groupByYear />
 
     <p class="back-link">
-      <a href="/tags">← Back to all tags</a>
+      <a href="/tags">All tags</a>
     </p>
   </section>
 </BaseLayout>
 
 <style>
   .tag-posts-container {
-    max-width: 900px;
+    max-width: 860px;
     margin: 0 auto;
   }
 
-  .tag-posts-container h1 {
+  .tag-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .tag-header h1 {
+    margin: 0;
     word-break: break-word;
   }
 
-  .tag-posts-container em {
+  .tag-header em {
     color: var(--primary);
     font-style: normal;
   }
 
-  .posts-grid {
-    display: grid;
-    gap: 2rem;
-    margin: 2rem 0;
+  .tag-count {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
   }
-
 
   .back-link {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .back-link a {
-    text-decoration: none;
-  }
-
-  .back-link a:hover {
-    text-decoration: underline;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--divider);
   }
 </style>
