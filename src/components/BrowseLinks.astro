@@ -1,0 +1,77 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { getNavSections, getSectionPath } from '../lib/sections'
+
+interface Props {
+  posts: CollectionEntry<'posts'>[]
+  /** Path of the page being viewed, marked as current. */
+  current: string
+}
+
+// Enough to show the main topics in one or two lines; the rest are a click away on /tags.
+const MAX_TAGS = 8
+
+const { posts, current } = Astro.props
+const sections = await getNavSections()
+
+const tagCounts = new Map<string, number>()
+for (const post of posts) {
+  for (const tag of post.data.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)
+}
+const tags = [...tagCounts].sort(([a, countA], [b, countB]) => countB - countA || a.localeCompare(b))
+
+const links = [
+  { href: '/posts', label: 'All posts' },
+  ...sections.map((section) => ({ href: getSectionPath(section), label: section.data.title })),
+  ...tags.slice(0, MAX_TAGS).map(([tag]) => ({ href: `/tags/${encodeURIComponent(tag)}`, label: `#${tag}` })),
+]
+---
+
+<nav class="browse-links" aria-label="Browse posts">
+  <ul>
+    {links.map((link) => (
+      <li><a href={link.href} aria-current={link.href === current ? 'page' : undefined}>{link.label}</a></li>
+    ))}
+    {tags.length > MAX_TAGS && <li><a href="/tags" class="browse-more">All tags →</a></li>}
+  </ul>
+</nav>
+
+<style>
+  .browse-links ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0 0 1rem 0;
+  }
+
+  .browse-links a {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--outline);
+    border-radius: 999px;
+    background: var(--tint);
+    color: inherit;
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+
+  .browse-links a:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    opacity: 1;
+  }
+
+  .browse-links a[aria-current='page'] {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--bg);
+  }
+
+  .browse-links .browse-more {
+    border-color: transparent;
+    background: transparent;
+    color: var(--primary);
+  }
+</style>

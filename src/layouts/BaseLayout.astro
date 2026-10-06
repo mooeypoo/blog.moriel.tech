@@ -91,6 +91,10 @@ const navSections = (await getNavSections()).map((section) => ({ title: section.
     --text: #ffffff;
     --primary: #90caf9;
     --outline: rgba(255, 255, 255, 0.2);
+    --divider: rgba(255, 255, 255, 0.1);
+    /* Translucent fills that lift a card or chip off the background in either theme. */
+    --tint: rgba(255, 255, 255, 0.05);
+    --tint-strong: rgba(255, 255, 255, 0.1);
   }
 
   html.light-theme {
@@ -100,6 +104,9 @@ const navSections = (await getNavSections()).map((section) => ({ title: section.
     --text: #212121;
     --primary: #1976d2;
     --outline: rgba(0, 0, 0, 0.2);
+    --divider: rgba(0, 0, 0, 0.1);
+    --tint: rgba(0, 0, 0, 0.03);
+    --tint-strong: rgba(0, 0, 0, 0.06);
   }
 
   /* A mask lets the icon follow the link color in both themes. */

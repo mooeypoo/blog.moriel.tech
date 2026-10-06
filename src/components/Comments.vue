@@ -95,6 +95,6 @@ onUnmounted(() => {
 .giscus-container {
   margin-top: 3rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--divider);
 }
 </style>

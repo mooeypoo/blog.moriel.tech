@@ -2,8 +2,6 @@ import { getImage } from 'astro:assets'
 import { getCollection } from 'astro:content'
 import type { ImageMetadata } from 'astro'
 
-export const PAGE_SIZE = 10
-
 export type PostImage = ImageMetadata | string
 
 export function normalizeImageUrl(image?: string) {
@@ -104,20 +102,4 @@ export function getUniqueTags<T extends { data: { tags?: string[] } }>(entries: 
 
 export function filterEntriesByTag<T extends { data: { tags?: string[] } }>(entries: T[], tag: string) {
   return entries.filter((entry) => (entry.data.tags || []).includes(tag))
-}
-
-export function paginateEntries<T>(entries: T[], page: number, pageSize = PAGE_SIZE) {
-  const safePage = Math.max(1, page)
-  const totalItems = entries.length
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
-  const normalizedPage = Math.min(safePage, totalPages)
-  const start = (normalizedPage - 1) * pageSize
-
-  return {
-    page: normalizedPage,
-    pageSize,
-    totalItems,
-    totalPages,
-    items: entries.slice(start, start + pageSize),
-  }
 }

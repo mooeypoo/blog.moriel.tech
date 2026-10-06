@@ -1,0 +1,201 @@
+---
+import { getEntry, type CollectionEntry } from 'astro:content'
+import PostPreviewImage from './PostPreviewImage.astro'
+import SectionLabel from './SectionLabel.astro'
+import { formatPostDate, getPostDisplayImage, getPostPath, getReadingMinutes } from '../lib/content'
+import { getItemLabel } from '../lib/sections'
+
+interface Props {
+  post: CollectionEntry<'posts'>
+  /** On a section's own landing page the section name is redundant; the order shows as a large number. */
+  inSection?: boolean
+  headingLevel?: 2 | 3
+}
+
+const { post, inSection = false, headingLevel = 3 } = Astro.props
+const section = post.data.section ? await getEntry(post.data.section) : undefined
+const itemLabel = section ? getItemLabel(section, post) : undefined
+const number = inSection && post.data.order !== undefined ? String(post.data.order).padStart(2, '0') : undefined
+const image = getPostDisplayImage(post)
+const href = getPostPath(post)
+const Heading = `h${headingLevel}` as const
+---
+
+<article class:list={['post-row', { 'has-image': Boolean(image), 'has-number': Boolean(number) }]}>
+  {number && (
+    <p class="post-row-number"><span class="sr-only">{itemLabel}</span><span aria-hidden="true">{number}</span></p>
+  )}
+  <PostPreviewImage href={href} image={image} sizes="(max-width: 600px) 88px, 160px" />
+  <div class="post-row-body">
+    {section && !inSection && <SectionLabel section={section} label={itemLabel} />}
+    <Heading class="post-row-title">
+      <a href={href}>{post.data.title}</a>
+    </Heading>
+    <p class="post-row-meta">
+      <span>{formatPostDate(post.data.date)} · {getReadingMinutes(post)} min read</span>
+      {post.data.video && (
+        <span class="post-row-video">
+          <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
+          Video
+        </span>
+      )}
+    </p>
+    <p class="post-row-desc">{post.data.description}</p>
+  </div>
+</article>
+
+<style>
+  .post-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    padding: 1rem;
+    margin: 0 -1rem;
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+
+  .post-row.has-image {
+    grid-template-columns: 160px 1fr;
+  }
+
+  .post-row.has-number {
+    grid-template-columns: 3.25rem 1fr;
+  }
+
+  .post-row.has-number.has-image {
+    grid-template-columns: 3.25rem 160px 1fr;
+  }
+
+  .post-row:hover,
+  .post-row:focus-within {
+    background: var(--tint);
+  }
+
+  .post-row-number {
+    margin: 0;
+    font-family: var(--font-merriweather);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--primary);
+    opacity: 0.7;
+  }
+
+  .post-row :global(.post-image) {
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--outline);
+  }
+
+  .post-row-body {
+    min-width: 0;
+  }
+
+  .post-row-title {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.2rem;
+    line-height: 1.35;
+  }
+
+  .post-row-title a {
+    text-decoration: none;
+  }
+
+  /* Stretch the title link over the row, so the whole row is one click target and one tab stop. */
+  .post-row-title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .post-row:hover .post-row-title a {
+    text-decoration: underline;
+  }
+
+  .post-row-title a:focus-visible {
+    outline: none;
+  }
+
+  .post-row-title a:focus-visible::after {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* The section link sits above the stretched title link so it stays clickable. */
+  .post-row :global(.section-label a) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .post-row :global(.section-label) {
+    margin-bottom: 0.35rem;
+  }
+
+  .post-row-meta {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.5rem;
+    margin: 0 0 0.4rem 0;
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+
+  /* The icon doubles as the separator, so a wrap never leaves a stray "·" or indent. */
+  .post-row-video {
+    white-space: nowrap;
+  }
+
+  .post-row-video svg {
+    vertical-align: -1px;
+  }
+
+  .post-row-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  /* Phones: a small square thumbnail beside the title instead of a column of its own. */
+  @media (max-width: 600px) {
+    .post-row {
+      gap: 0.75rem;
+    }
+
+    .post-row.has-image {
+      grid-template-columns: 1fr 88px;
+    }
+
+    .post-row.has-number,
+    .post-row.has-number.has-image {
+      grid-template-columns: 2.25rem 1fr;
+    }
+
+    .post-row.has-number.has-image {
+      grid-template-columns: 2.25rem 1fr 88px;
+    }
+
+    .post-row :global(.post-image-link) {
+      order: 1;
+    }
+
+    .post-row :global(.post-image) {
+      aspect-ratio: 1;
+    }
+
+    .post-row-number {
+      font-size: 1.4rem;
+    }
+
+    .post-row-title {
+      font-size: 1.1rem;
+    }
+  }
+</style>

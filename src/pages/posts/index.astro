@@ -1,17 +1,13 @@
 ---
 import { getCardUrl } from '../../lib/social-cards'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import PostListCard from '../../components/PostListCard.astro'
-import { getPublishedPosts, PAGE_SIZE } from '../../lib/content'
+import BrowseLinks from '../../components/BrowseLinks.astro'
+import PostList from '../../components/PostList.astro'
+import { getPublishedPosts } from '../../lib/content'
 import { SITE_URL } from '../../lib/seo'
 
+// One page, grouped by year: a list this compact stays quick to scan well past a hundred posts.
 const posts = await getPublishedPosts()
-const page = 1
-const pageSize = PAGE_SIZE
-const totalItems = posts.length
-const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
-const start = (page - 1) * pageSize
-const paginatedPosts = posts.slice(start, start + pageSize)
 
 const canonical = `${SITE_URL}/posts`
 const title = 'All Posts'
@@ -20,94 +16,41 @@ const description = 'Browse all blog posts on Moriel\'s Blog about human-centere
 
 <BaseLayout title={title} description={description} canonical={canonical} ogImage={getCardUrl('posts')}>
   <section class="posts-container">
-    <h1>All posts</h1>
-    
-    {paginatedPosts.length > 0 ? (
-      <div class="posts-grid">
-        {paginatedPosts.map((post) => (
-          <PostListCard post={post} />
-        ))}
-      </div>
-    ) : (
-      <p>No posts yet.</p>
-    )}
+    <header class="posts-header">
+      <h1>All posts</h1>
+      <p class="posts-count">
+        {posts.length} {posts.length === 1 ? 'post' : 'posts'} · <a href="/rss.xml">RSS feed</a>
+      </p>
+    </header>
 
-    {totalPages > 1 && (
-      <nav class="pagination" aria-label="Post pagination">
-        <ul>
-          {page > 1 && (
-            <li>
-              <a href="/posts">First</a>
-            </li>
-          )}
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <li>
-              {p === page ? (
-                <span class="current">{p}</span>
-              ) : (
-                <a href={p === 1 ? '/posts' : `/posts/page/${p}`}>{p}</a>
-              )}
-            </li>
-          ))}
-          {page < totalPages && (
-            <li>
-              <a href={`/posts/page/${totalPages}`}>Last</a>
-            </li>
-          )}
-        </ul>
-      </nav>
-    )}
+    <BrowseLinks posts={posts} current="/posts" />
+
+    {posts.length > 0 ? <PostList posts={posts} groupByYear /> : <p>No posts yet.</p>}
   </section>
 </BaseLayout>
 
 <style>
   .posts-container {
-    max-width: 900px;
+    max-width: 860px;
     margin: 0 auto;
   }
 
-  .posts-grid {
-    display: grid;
-    gap: 2rem;
-    margin: 2rem 0;
-  }
-
-
-  .pagination {
-    margin: 3rem 0;
-    text-align: center;
-  }
-
-  .pagination ul {
-    list-style: none;
-    padding: 0;
+  .posts-header {
     display: flex;
-    gap: 0.5rem;
-    justify-content: center;
     flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
   }
 
-  .pagination li {
-    display: inline-block;
+  .posts-header h1 {
+    margin: 0;
   }
 
-  .pagination a,
-  .pagination .current {
-    display: inline-block;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-
-  .pagination a:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .pagination .current {
-    background: var(--primary);
-    color: #000;
-    border-color: var(--primary);
+  .posts-count {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
   }
 </style>

@@ -1,5 +1,5 @@
-# Redirect old pagination query parameter format to new URL structure
-/posts?page=:page  /posts/page/:page  301
+# /posts is one page now; the numbered pages it used to have are gone.
+/posts/page/*  /posts  301
 
 # Post URLs no longer carry dates (docs/ROADMAP.md D12)
 /posts/2026-05-junior-dev-collapse          /posts/junior-dev-collapse          301
