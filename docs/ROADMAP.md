@@ -220,6 +220,16 @@ Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×6
 - [x] Tested in headless Chrome with the production build: saved light, saved dark, and no choice with OS light and dark all have the right background and icon on the first frame (post, `/posts`, `/tags`); tabs stay in sync; no console or CSP errors.
 - [ ] Preview: choose light mode and click between pages on desktop and a phone; no dark flash.
 
+### PR 18: Compact post lists
+
+- [x] Theme tokens `--divider`, `--tint`, and `--tint-strong` replace hard-coded translucent white, which was invisible in light mode (card borders, tag cards, inline code, image frames, dividers).
+- [x] `PostRow` / `PostList`: compact rows (16:9 thumbnail, square beside the title on phones; section label; date, reading time, video marker; description clamped to three lines). The title link covers the row, so there's one click target and one tab stop; no "Read more".
+- [x] `/posts`: every post on one page, grouped by year, with browse links (sections and the eight most-used tags) above. Pagination dropped (there was never a second page); `/posts/page/*` redirects to `/posts`.
+- [x] Tag pages: the same list, a post count, and the browse links with the current tag highlighted.
+- [x] Section pages: the sequence with a large episode or chapter number beside each row.
+- [x] Tested in headless Chrome with the production build: `/posts`, a tag page, and a section page in light and dark at desktop and phone widths; row and section-label clicks go to the right place; no console or CSP errors.
+- [ ] Preview: `/posts`, a tag page, and The Physics of Software on a phone and on desktop, in both themes.
+
 ### Later (not yet split into PRs)
 
 - [ ] **Newsletter (parked 2026-10-05; revisit later).** Options considered: Buttondown (small, privacy-friendly, Markdown, can email new posts from the RSS feed; small free tier) or Kit/ConvertKit (generous free tier, heavier tracking); not Substack (owns the audience) or Mailchimp (heavy, tracking). Open choices: an on-site form (needs a CSP `form-action` change) or a link to the provider's page, and placement (end of posts, the Delivery Engineering page, the footer).
