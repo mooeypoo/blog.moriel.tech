@@ -211,6 +211,15 @@ Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×6
 - [x] Tested in headless Chrome with the production build: pill on hero headers (light and dark, desktop and mobile), generated audio starts from the beginning, speed changes and is remembered, the bar fits at 320px, stop hides the bar, no console or CSP errors.
 - [ ] Preview: listen on a phone and on desktop; check that the pill is noticeable without competing with the title.
 
+### PR 17: No theme flash
+
+- [x] A tiny inline script at the top of `<head>` (`src/lib/theme-init.mjs`) sets the saved or OS theme before the first paint; previously it waited for the header to hydrate, so light-mode readers saw dark first on every page load.
+- [x] CSP: the script's hash is computed from the same string in `astro.config.mjs` (Astro doesn't hash `is:inline` scripts), so editing it can't silently break it.
+- [x] The toggle icon follows the theme class in CSS, so it's right before hydration too; `color-scheme` makes scrollbars and form controls match the theme.
+- [x] Toggling in one tab updates other open tabs (and their Giscus comments).
+- [x] Tested in headless Chrome with the production build: saved light, saved dark, and no choice with OS light and dark all have the right background and icon on the first frame (post, `/posts`, `/tags`); tabs stay in sync; no console or CSP errors.
+- [ ] Preview: choose light mode and click between pages on desktop and a phone; no dark flash.
+
 ### Later (not yet split into PRs)
 
 - [ ] **Newsletter (parked 2026-10-05; revisit later).** Options considered: Buttondown (small, privacy-friendly, Markdown, can email new posts from the RSS feed; small free tier) or Kit/ConvertKit (generous free tier, heavier tracking); not Substack (owns the audience) or Mailchimp (heavy, tracking). Open choices: an on-site form (needs a CSP `form-action` change) or a link to the provider's page, and placement (end of posts, the Delivery Engineering page, the footer).

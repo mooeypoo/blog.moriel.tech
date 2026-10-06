@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap'
 import vue from '@astrojs/vue'
 import { satteri } from '@astrojs/markdown-satteri'
 import { parseYouTubeId, renderVideoEmbed } from './src/lib/youtube.mjs'
+import { themeInitHash } from './src/lib/theme-init.mjs'
 
 const SITE = 'https://blog.moriel.tech'
 
@@ -100,6 +101,8 @@ export default defineConfig({
       ],
       scriptDirective: {
         resources: ["'self'", 'https://plausible.io', 'https://giscus.app'],
+        // Astro doesn't hash is:inline scripts.
+        hashes: [themeInitHash],
       },
       styleDirective: {
         resources: [
