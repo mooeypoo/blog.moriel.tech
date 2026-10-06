@@ -30,6 +30,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D18 | Every post gets audio by default; `listen: false` opts out. | Generation is cheap and automatic, so opting in per post would only be something to forget. |
 | D19 | Every page's social preview (`og:image`) is a generated branded card: title, section and episode, and site name, over the page's hero image when it has one. Feeds and structured data keep the original photos. | A consistent, readable preview in every feed; the photos stay where full images are expected. |
 | D20 | Listen is secondary to the text: a small pill beside the date and reading time starts it, and the full controls appear only while listening, in a bar at the bottom of the screen. | The dedicated player between the header and the article read as if audio were the main way to take in the post. Readers know this pattern from news sites and Medium, and the article starts right after the header. |
+| D21 | The home page shows every section as a card, including sections without posts ("Coming soon", with their RSS feed); the nav still hides those (D9). The latest post is featured automatically, with no `featured` field until one is needed. | Sections are the blog's most distinctive content, and a coming-soon card lets the book build an audience before its first chapter. Featuring the latest post needs no upkeep. |
 
 ## Open questions
 
@@ -229,6 +230,16 @@ Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×6
 - [x] Section pages: the sequence with a large episode or chapter number beside each row.
 - [x] Tested in headless Chrome with the production build: `/posts`, a tag page, and a section page in light and dark at desktop and phone widths; row and section-label clicks go to the right place; no console or CSP errors.
 - [ ] Preview: `/posts`, a tag page, and The Physics of Software on a phone and on desktop, in both themes.
+
+### PR 19: Front page
+
+- [x] A short personal intro (with YouTube, RSS, and About links) replaces the large site title, which repeated the header.
+- [x] The latest post is featured in a large card: image beside the text on desktop, stacked on phones.
+- [x] **Series**: a card per section (D21), with its hero image when it has one, description, post count, "Start with Episode 1", and its links; sections without posts say "Coming soon" and link to their RSS feed.
+- [x] **Recent writing**: the next five posts in the compact list from PR 18, then **Topics**: every tag with its post count.
+- [x] Tested in headless Chrome with the production build: light and dark at desktop and phone widths, a section with and without a hero image, no console or CSP errors.
+- [ ] Moriel: review the intro text (drafted by Claude).
+- [ ] Preview: the home page on a phone and on desktop, in both themes.
 
 ### Later (not yet split into PRs)
 

@@ -5,11 +5,14 @@ import type { PostImage } from '../lib/content'
 interface Props {
   href: string
   image?: PostImage
-  /** Rendered widths measured on /posts; pages with another card layout pass their own. */
-  sizes?: string
+  /** The rendered widths in this layout, so phones don't download desktop-sized images. */
+  sizes: string
+  /** For an image above the fold, which shouldn't wait for layout to start loading. */
+  eager?: boolean
 }
 
-const { href, image, sizes = '(max-width: 720px) calc(100vw - 82px), 220px' } = Astro.props
+const { href, image, sizes, eager = false } = Astro.props
+const loading = eager ? 'eager' : 'lazy'
 
 const imageSrc = typeof image === 'string' ? image : undefined
 const imageMeta = typeof image === 'string' ? undefined : image
@@ -22,7 +25,7 @@ const imageMeta = typeof image === 'string' ? undefined : image
         class="post-image"
         src={imageMeta}
         alt=""
-        loading="lazy"
+        loading={loading}
         decoding="async"
         formats={['avif']}
         fallbackFormat="webp"
@@ -34,7 +37,7 @@ const imageMeta = typeof image === 'string' ? undefined : image
         class="post-image"
         src={imageSrc}
         alt=""
-        loading="lazy"
+        loading={loading}
         decoding="async"
       />
     )}

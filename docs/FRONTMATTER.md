@@ -69,10 +69,10 @@ Intro text, in Markdown…
 | Field | Required | What it does |
 |---|---|---|
 | `title` | yes | Section name, used in the nav, labels, and feed. |
-| `description` | yes | Shown under the title on the landing page. |
-| `hero` | no | Image behind the landing page header and its social card. Put it in `src/assets` so it's optimized. Without one, the header is plain. |
+| `description` | yes | Shown under the title on the landing page and on the section's card on the home page. |
+| `hero` | no | Image behind the landing page header, at the top of the section's card on the home page, and behind its social card. Put it in `src/assets` so it's optimized. Without one, the header and card are plain. |
 | `itemLabel` | yes | Word for numbered posts: `Episode`, `Chapter`. |
 | `unordered` | no (`include`) | `exclude` keeps posts without `order` out of the reading sequence; they're listed under **Updates** instead. |
-| `links` | no | Buttons on the landing page. |
+| `links` | no | Buttons on the landing page; also listed on the section's home page card. |
 
-A section appears in the nav once it has a published post; until then its page shows "coming soon".
+A section appears in the nav once it has a published post; until then its page shows "coming soon", and its home page card says "Coming soon" and links to its RSS feed.

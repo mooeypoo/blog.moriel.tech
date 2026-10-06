@@ -1,19 +1,45 @@
 ---
+import { Picture } from 'astro:assets'
+import { getEntry } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
+import PostList from '../components/PostList.astro'
 import PostPreviewImage from '../components/PostPreviewImage.astro'
 import SectionLabel from '../components/SectionLabel.astro'
-import { getEntry } from 'astro:content'
-import { formatPostDate, getPostDisplayImage, getPublishedPosts, getPostPath, getReadingMinutes } from '../lib/content'
-import { getItemLabel } from '../lib/sections'
+import { formatPostDate, getPostDisplayImage, getPostPath, getPublishedPosts, getReadingMinutes } from '../lib/content'
+import { getItemLabel, getSectionPath, getSectionSequence, getSections } from '../lib/sections'
 import { SITE_URL } from '../lib/seo'
 
-const allPosts = await getPublishedPosts()
-const recentPosts = await Promise.all(
-  allPosts.slice(0, 5).map(async (post) => {
-    const section = post.data.section ? await getEntry(post.data.section) : undefined
-    return { post, section, itemLabel: section ? getItemLabel(section, post) : undefined }
-  }),
-)
+const RECENT_COUNT = 5
+
+const posts = await getPublishedPosts()
+const [featured, ...rest] = posts
+const recent = rest.slice(0, RECENT_COUNT)
+const featuredSection = featured?.data.section ? await getEntry(featured.data.section) : undefined
+
+// Every section, including ones without posts yet (ROADMAP D21); those with posts come first.
+const series = (
+  await Promise.all(
+    (await getSections()).map(async (section) => {
+      const { sequence, updates } = await getSectionSequence(section)
+      const first = sequence[0]
+      return {
+        section,
+        count: sequence.length + updates.length,
+        first,
+        firstLabel: first ? getItemLabel(section, first) : undefined,
+      }
+    }),
+  )
+).sort((a, b) => Number(b.count > 0) - Number(a.count > 0))
+
+const tagCounts = new Map<string, number>()
+for (const post of posts) {
+  for (const tag of post.data.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)
+}
+const tags = [...tagCounts].sort(([a, countA], [b, countB]) => countB - countA || a.localeCompare(b))
+
+const isExternal = (href: string) => new URL(href).hostname !== new URL(SITE_URL).hostname
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`
 ---
 
 <BaseLayout
@@ -21,136 +47,337 @@ const recentPosts = await Promise.all(
   description="A blog about human-centered software development, experiences, thoughts, and learnings."
   canonical={SITE_URL}
 >
-  <section class="home-container">
-    <div class="hero">
-      <h1>Moriel Writes Tech</h1>
-      <p>A blog about human-centered software development, experiences, thoughts, and learnings.</p>
-    </div>
+  <div class="home">
+    <header class="intro">
+      <h1>Hi, I'm Moriel.</h1>
+      <p class="intro-text">
+        I write about human-centered software development: how teams really build and ship software, and the
+        experiences, thoughts, and learnings along the way.
+      </p>
+      <ul class="intro-links">
+        <li>
+          <a href="https://www.youtube.com/@MorielTech" target="_blank" rel="noopener noreferrer" class="external-link">YouTube<span class="sr-only"> (opens in a new tab)</span></a>
+        </li>
+        <li><a href="/rss.xml">RSS feed</a></li>
+        <li>
+          <a href="https://moriel.tech" target="_blank" rel="noopener noreferrer" class="external-link">About me<span class="sr-only"> (opens in a new tab)</span></a>
+        </li>
+      </ul>
+    </header>
 
-    {recentPosts.length > 0 && (
-      <section class="recent-posts">
-        <h2>Recent posts</h2>
-        <div class="posts-grid">
-          {recentPosts.map(({ post, section, itemLabel }) => (
-            <article class="post-card">
-              <PostPreviewImage
-                href={getPostPath(post)}
-                image={getPostDisplayImage(post)}
-                sizes="(max-width: 670px) calc(100vw - 82px), (max-width: 1035px) calc(50vw - 90px), 265px"
-              />
-              {section && <SectionLabel section={section} label={itemLabel} />}
-              <h3 class="post-title">
-                <a href={getPostPath(post)}>{post.data.title}</a>
-              </h3>
-              {post.data.date && (
-                <p class="post-date">{formatPostDate(post.data.date)} · {getReadingMinutes(post)} min read</p>
-              )}
-              {post.data.description && (
-                <p class="post-desc">{post.data.description}</p>
-              )}
-              <p>
-                <a href={getPostPath(post)} class="read-more">Read more →</a>
-              </p>
-            </article>
-          ))}
-        </div>
-        <p class="all-posts-link">
-          <a href="/posts">View all posts →</a>
-        </p>
+    {featured && (
+      <section class="featured" aria-labelledby="featured-heading">
+        <h2 id="featured-heading" class="eyebrow">Latest</h2>
+        <article class="featured-post">
+          <PostPreviewImage
+            href={getPostPath(featured)}
+            image={getPostDisplayImage(featured)}
+            sizes="(max-width: 720px) calc(100vw - 2rem), 500px"
+            eager
+          />
+          <div class="featured-body">
+            {featuredSection && <SectionLabel section={featuredSection} label={getItemLabel(featuredSection, featured)} />}
+            <h3 class="featured-title"><a href={getPostPath(featured)}>{featured.data.title}</a></h3>
+            <p class="featured-meta">
+              {formatPostDate(featured.data.date)} · {getReadingMinutes(featured)} min read{featured.data.video && ' · with video'}
+            </p>
+            <p class="featured-desc">{featured.data.description}</p>
+          </div>
+        </article>
       </section>
     )}
-  </section>
+
+    {series.length > 0 && (
+      <section class="series" aria-labelledby="series-heading">
+        <h2 id="series-heading">Series</h2>
+        <ul class="series-grid">
+          {series.map(({ section, count, first, firstLabel }) => (
+            <li class="series-card">
+              {section.data.hero && (
+                <Picture
+                  class="series-image"
+                  src={section.data.hero}
+                  alt=""
+                  loading="lazy"
+                  formats={['avif']}
+                  fallbackFormat="webp"
+                  widths={[480, 960].filter((width) => width <= section.data.hero!.width)}
+                  sizes="(max-width: 720px) calc(100vw - 2rem), 470px"
+                />
+              )}
+              <div class="series-body">
+                <h3 class="series-title"><a href={getSectionPath(section)}>{section.data.title}</a></h3>
+                <p class="series-desc">{section.data.description}</p>
+                <p class="series-meta">{count > 0 ? plural(count, 'post') : 'Coming soon'}</p>
+                <ul class="series-actions">
+                  {first ? (
+                    <li>
+                      <a href={getPostPath(first)} class="series-start">
+                        {firstLabel ? `Start with ${firstLabel}` : 'Start reading'} →
+                      </a>
+                    </li>
+                  ) : (
+                    <li><a href={`${getSectionPath(section)}/rss.xml`}>Follow along via RSS</a></li>
+                  )}
+                  {section.data.links.map((link) => (
+                    <li>
+                      {isExternal(link.href) ? (
+                        <a href={link.href} target="_blank" rel="noopener noreferrer" class="external-link">{link.label}<span class="sr-only"> (opens in a new tab)</span></a>
+                      ) : (
+                        <a href={link.href}>{link.label}</a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {recent.length > 0 && (
+      <section class="recent" aria-labelledby="recent-heading">
+        <h2 id="recent-heading">Recent writing</h2>
+        <PostList posts={recent} />
+        <p class="all-posts"><a href="/posts">All posts →</a></p>
+      </section>
+    )}
+
+    {tags.length > 0 && (
+      <section class="topics" aria-labelledby="topics-heading">
+        <h2 id="topics-heading">Topics</h2>
+        <ul class="topic-list">
+          {tags.map(([tag, count]) => (
+            <li>
+              <a href={`/tags/${encodeURIComponent(tag)}`}>
+                #{tag} <span class="topic-count">{count}<span class="sr-only"> {count === 1 ? 'post' : 'posts'}</span></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
 </BaseLayout>
 
 <style>
-  .home-container {
-    max-width: 1000px;
+  .home {
+    max-width: 960px;
     margin: 0 auto;
   }
 
-  .hero {
-    text-align: center;
-    margin-bottom: 4rem;
+  .home > section {
+    margin-top: 3rem;
   }
 
-  .hero h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+  .home h2 {
+    margin: 0 0 1rem 0;
   }
 
-  .hero p {
-    font-size: 1.1rem;
+  .intro h1 {
+    font-size: 2.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .intro-text {
+    max-width: 640px;
+    font-size: 1.15rem;
+    line-height: 1.6;
     opacity: 0.9;
-    max-width: 600px;
-    margin: 0 auto;
   }
 
-  .recent-posts h2 {
-    font-size: 1.75rem;
-    margin-bottom: 2rem;
+  .intro-links,
+  .series-actions,
+  .topic-list,
+  .series-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
   }
 
-  .posts-grid {
+  .intro-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+
+  .eyebrow {
+    font-family: var(--font-arimo);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .home .featured {
+    margin-top: 2.5rem;
+  }
+
+  .featured-post {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1.15fr 1fr;
     gap: 2rem;
-    margin-bottom: 2rem;
-  }
-
-  .post-card {
-    overflow: hidden;
-    padding: 1.5rem;
+    align-items: center;
+    padding: 1.25rem;
     border: 1px solid var(--outline);
-    border-radius: 8px;
+    border-radius: 12px;
     background: var(--tint);
   }
 
-  .post-title {
+  .featured-post :global(.post-image) {
+    aspect-ratio: 16 / 9;
+  }
+
+  .featured-title {
     margin: 0 0 0.5rem 0;
-    font-size: 1.25rem;
+    font-size: 1.6rem;
+    line-height: 1.3;
   }
 
-  .post-card :global(.post-image-link + .section-label) {
-    margin-top: 0.75rem;
-  }
-
-  .post-title a {
+  .featured-title a {
     text-decoration: none;
   }
 
-  .post-title a:hover {
+  .featured-title a:hover {
     text-decoration: underline;
   }
 
-  .post-date {
-    margin: 0.5rem 0;
+  .featured-meta {
+    margin: 0 0 0.75rem 0;
     font-size: 0.875rem;
     opacity: 0.7;
   }
 
-  .post-desc {
-    margin: 0.75rem 0 1rem 0;
+  .featured-desc {
+    margin: 0;
     line-height: 1.6;
   }
 
-  .read-more {
+  .series-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .series-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--outline);
+    border-top: 3px solid var(--primary);
+    border-radius: 12px;
+    background: var(--tint);
+  }
+
+  .series-card :global(.series-image) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .series-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 1.25rem;
+  }
+
+  .series-title {
+    margin: 0 0 0.4rem 0;
+    font-size: 1.3rem;
+  }
+
+  .series-title a {
+    color: inherit;
     text-decoration: none;
   }
 
-  .read-more:hover {
+  .series-title a:hover {
     text-decoration: underline;
   }
 
-  .all-posts-link {
-    text-align: center;
-    font-size: 1.1rem;
+  .series-desc {
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
   }
 
-  .all-posts-link a {
+  .series-meta {
+    margin: 0 0 1rem 0;
+    font-size: 0.85rem;
+    opacity: 0.7;
+  }
+
+  /* Pinned to the bottom so the actions line up across cards with descriptions of different lengths. */
+  .series-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: auto;
+    font-size: 0.95rem;
+  }
+
+  .series-start {
+    font-weight: 700;
+  }
+
+  .all-posts {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .all-posts a {
     text-decoration: none;
   }
 
-  .all-posts-link a:hover {
-    text-decoration: underline;
+  .topic-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .topic-list a {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--outline);
+    border-radius: 999px;
+    background: var(--tint);
+    color: inherit;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .topic-list a:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    opacity: 1;
+  }
+
+  .topic-count {
+    margin-left: 0.2rem;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 720px) {
+    .intro h1 {
+      font-size: 1.75rem;
+    }
+
+    .intro-text {
+      font-size: 1.05rem;
+    }
+
+    .featured-post {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .featured-title {
+      font-size: 1.35rem;
+    }
   }
 </style>
