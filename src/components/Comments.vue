@@ -13,12 +13,16 @@ const props = defineProps<{
 const GISCUS_ORIGIN = 'https://giscus.app'
 
 let themeObserver: MutationObserver | null = null
+// The lazy iframe sits on about:blank (our origin) until it scrolls into view, so posting to it
+// earlier throws an origin mismatch. Giscus messaging us is the sign it's there to listen.
+let giscusReady = false
 
 function getGiscusTheme() {
   return document.documentElement.classList.contains('light-theme') ? 'light' : 'dark'
 }
 
 function syncGiscusTheme() {
+  if (!giscusReady) return
   const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame')
   iframe?.contentWindow?.postMessage(
     {
@@ -32,7 +36,16 @@ function syncGiscusTheme() {
   )
 }
 
+// Syncing on the first message also catches a theme toggled before the iframe loaded.
+function onGiscusMessage(event: MessageEvent) {
+  if (event.origin !== GISCUS_ORIGIN || giscusReady) return
+  giscusReady = true
+  syncGiscusTheme()
+}
+
 onMounted(() => {
+  window.addEventListener('message', onGiscusMessage)
+
   const script = document.createElement('script')
   script.src = 'https://giscus.app/client.js'
   script.async = true
@@ -51,9 +64,6 @@ onMounted(() => {
   script.setAttribute('data-theme', getGiscusTheme())
   script.setAttribute('data-lang', 'en')
   script.setAttribute('data-loading', 'lazy')
-  script.addEventListener('load', () => {
-    requestAnimationFrame(syncGiscusTheme)
-  })
 
   const container = document.getElementById('giscus-comments')
   if (container) {
@@ -75,6 +85,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('message', onGiscusMessage)
   themeObserver?.disconnect()
   themeObserver = null
 })
