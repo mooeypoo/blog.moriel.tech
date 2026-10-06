@@ -92,6 +92,13 @@ onMounted(() => {
 
   // The inline head script (lib/theme-init.mjs) has already chosen the theme.
   isDark.value = !document.documentElement.classList.contains('light-theme')
+
+  // Keeps other open tabs in step when the theme is toggled in one.
+  window.addEventListener('storage', (event) => {
+    if (event.key !== 'theme-dark' || event.newValue === null) return
+    isDark.value = event.newValue === 'true'
+    applyTheme()
+  })
 })
 
 function toggleTheme() {
