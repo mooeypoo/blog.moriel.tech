@@ -1,6 +1,6 @@
 ---
 title: Delivery Engineering
-description: Writing from the Delivery Engineering book, as it takes shape.
+description: Writing from the Delivery Engineering collection, as it takes shape.
 itemLabel: Chapter
 unordered: exclude
 ---
