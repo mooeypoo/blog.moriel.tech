@@ -206,9 +206,9 @@ Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×6
 ### PR 16: Quieter Listen player
 
 - [x] A "Listen ~N min" pill next to the date and reading time replaces the player between the header and the article (D20); it switches to Pause and Resume while listening.
-- [x] The bottom bar appears only while listening (playing or paused): play/pause, progress and seeking, previous/next, stop. Speed and voice move behind a "1×" toggle in the bar.
-- [x] Stopping returns focus to the pill; Escape closes the settings; the page gets bottom padding while the bar is up.
-- [x] Tested in headless Chrome with the production build: pill on hero headers (light and dark, desktop and mobile), generated audio starts from the beginning, settings open and close, stop hides the bar, no console or CSP errors.
+- [x] The bottom bar appears only while listening (playing or paused): play/pause, progress and seeking, previous/next, speed, stop. The voice picker shows only for the browser voice, and not on narrow screens; on phones the progress bar sits above the buttons.
+- [x] Stopping returns focus to the pill; the page gets bottom padding while the bar is up.
+- [x] Tested in headless Chrome with the production build: pill on hero headers (light and dark, desktop and mobile), generated audio starts from the beginning, speed changes and is remembered, the bar fits at 320px, stop hides the bar, no console or CSP errors.
 - [ ] Preview: listen on a phone and on desktop; check that the pill is noticeable without competing with the title.
 
 ### Later (not yet split into PRs)
