@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Comments from '../../components/Comments.vue'
 import HeroImage from '../../components/HeroImage.astro'
 import '../../styles/hero.css'
+import ListenButton from '../../components/ListenButton.astro'
 import ListenPlayer from '../../components/ListenPlayer.astro'
 import SectionLabel from '../../components/SectionLabel.astro'
 import { formatPostDate, getPostPath, getPostSlug, getPostSocialImage, getReadingMinutes, getWordCount } from '../../lib/content'
@@ -101,7 +102,10 @@ const jsonLd = generateBlogPostingSchema({
       <div class:list={['post-header-content', { 'hero-content': Boolean(heroImage) }]}>
         {sectionContext && <SectionLabel section={sectionContext.section} label={sectionContext.label} />}
         <h1>{title}</h1>
-        <p class="post-date">{formatPostDate(post.data.date)} · {getReadingMinutes(post)} min read</p>
+        <div class="post-meta">
+          <p class="post-date">{formatPostDate(post.data.date)} · {getReadingMinutes(post)} min read</p>
+          {post.data.listen && <ListenButton words={getWordCount(post)} />}
+        </div>
         {post.data.description && <p class="post-description">{post.data.description}</p>}
         {post.data.tags && post.data.tags.length > 0 && (
           <div class="post-tags">
@@ -199,8 +203,17 @@ const jsonLd = generateBlogPostingSchema({
     font-size: 2rem;
   }
 
-  .post-date {
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 0.75rem;
     margin: 0.5rem 0;
+  }
+
+  .post-date {
+    margin: 0;
     opacity: 0.7;
     font-size: 0.95rem;
   }

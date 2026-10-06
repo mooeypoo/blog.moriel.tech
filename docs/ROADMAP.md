@@ -29,6 +29,7 @@ The living plan for blog.moriel.tech. Update the checkboxes as work merges, and 
 | D17 | Generated audio is deployed by GitHub Actions to this repo's GitHub Pages site (`mooeypoo.github.io/blog.moriel.tech`), never committed to git, and tied to a hash of each post's spoken text; it's regenerated automatically after merge when that text or the voice changes. | No second repo, deploy key, or DNS; no binaries in git history; free; stale audio can never play over an edited post. |
 | D18 | Every post gets audio by default; `listen: false` opts out. | Generation is cheap and automatic, so opting in per post would only be something to forget. |
 | D19 | Every page's social preview (`og:image`) is a generated branded card: title, section and episode, and site name, over the page's hero image when it has one. Feeds and structured data keep the original photos. | A consistent, readable preview in every feed; the photos stay where full images are expected. |
+| D20 | Listen is secondary to the text: a small pill beside the date and reading time starts it, and the full controls appear only while listening, in a bar at the bottom of the screen. | The dedicated player between the header and the article read as if audio were the main way to take in the post. Readers know this pattern from news sites and Medium, and the article starts right after the header. |
 
 ## Open questions
 
@@ -201,6 +202,14 @@ Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×6
 - [x] Section social cards use the hero image when present.
 - [x] Document `hero` in `docs/FRONTMATTER.md`.
 - [ ] Moriel: add hero images for The Physics of Software and Delivery Engineering.
+
+### PR 16: Quieter Listen player
+
+- [x] A "Listen ~N min" pill next to the date and reading time replaces the player between the header and the article (D20); it switches to Pause and Resume while listening.
+- [x] The bottom bar appears only while listening (playing or paused): play/pause, progress and seeking, previous/next, stop. Speed and voice move behind a "1×" toggle in the bar.
+- [x] Stopping returns focus to the pill; Escape closes the settings; the page gets bottom padding while the bar is up.
+- [x] Tested in headless Chrome with the production build: pill on hero headers (light and dark, desktop and mobile), generated audio starts from the beginning, settings open and close, stop hides the bar, no console or CSP errors.
+- [ ] Preview: listen on a phone and on desktop; check that the pill is noticeable without competing with the title.
 
 ### Later (not yet split into PRs)
 
