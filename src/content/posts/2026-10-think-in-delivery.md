@@ -1,5 +1,5 @@
 ---
-title: "The Old Habit That Separates Great Engineers in the AI Age"
+title: "The Old Habit That Makes Great Engineers in the AI Age"
 date: 2026-10-16
 tags:
   - Tech Industry
