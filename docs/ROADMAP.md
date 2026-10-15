@@ -98,7 +98,7 @@ Before the image and sections work, so neither is built against APIs that are ab
 - [x] Build fails on: a section slug that clashes with a reserved route, a duplicate `order` within a section, or a section that doesn't exist (handled by `reference()`).
 - [x] Migration: Physics of Software post gets `section: physics-of-software`, the tag is removed, and a 301 redirect goes from `/tags/Physics%20of%20Software` to the landing page.
 - [x] Moriel: add more tags to the Conservation of Complexity post if wanted (only `Architecture` is left), and set its `order` to its episode number.
-- [x] Delivery Engineering section file (ships as "coming soon", out of the nav until it has a post).
+- [x] Engineering at Speed section file (ships as "coming soon", out of the nav until it has a post).
 - [x] Moriel: review both section intros (drafted by Claude).
 - [x] Moriel: replace the Physics of Software YouTube link with the playlist URL (tracked in Open questions).
 - [x] Preview: both landing pages, prev/next links on the Physics of Software post, nav, RSS feeds, and the redirected tag URL.
@@ -202,7 +202,7 @@ Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×6
 - [x] Fixed along the way: the full-width hero (100vw) caused a sideways scroll on systems with visible scrollbars, on posts too; links over a hero are white for contrast.
 - [x] Section social cards use the hero image when present.
 - [x] Document `hero` in `docs/FRONTMATTER.md`.
-- [ ] Moriel: add hero images for The Physics of Software and Delivery Engineering.
+- [ ] Moriel: add hero images for The Physics of Software and Engineering at Speed.
 
 ### PR 16: Quieter Listen player
 
@@ -243,7 +243,7 @@ Generated at build time (Satori renders the layout, `sharp` rasterizes), 1200×6
 
 ### Later (not yet split into PRs)
 
-- [ ] **Newsletter (parked 2026-10-05; revisit later).** Options considered: Buttondown (small, privacy-friendly, Markdown, can email new posts from the RSS feed; small free tier) or Kit/ConvertKit (generous free tier, heavier tracking); not Substack (owns the audience) or Mailchimp (heavy, tracking). Open choices: an on-site form (needs a CSP `form-action` change) or a link to the provider's page, and placement (end of posts, the Delivery Engineering page, the footer).
+- [ ] **Newsletter (parked 2026-10-05; revisit later).** Options considered: Buttondown (small, privacy-friendly, Markdown, can email new posts from the RSS feed; small free tier) or Kit/ConvertKit (generous free tier, heavier tracking); not Substack (owns the audience) or Mailchimp (heavy, tracking). Open choices: an on-site form (needs a CSP `form-action` change) or a link to the provider's page, and placement (end of posts, the Engineering at Speed page, the footer).
 - [ ] Real titles for in-body video players: the Markdown plugin is synchronous, so players placed in the body are labeled "Play video" instead of the video title (the top embed and JSON-LD use the real title).
 - [ ] Pagefind static search.
 - [ ] MDX for interactive Physics of Software diagrams.
@@ -267,7 +267,7 @@ Posts stay at `/posts/<slug>` whatever we choose here (D5). The only question is
 |---|---|---|---|
 | **A. Top level** | `/physics-of-software/` | Shortest and easiest to share; reads like a destination | Shares a namespace with `/posts`, `/tags` and `/rss.xml`, so it needs the reserved-name build check |
 | **B. `/series/`** | `/series/physics-of-software/` | No clashes; fits both a video series and a book | A future section that isn't a "series" would be mislabeled |
-| **C. `/topics/` or `/sections/`** | `/sections/delivery-engineering/` | No clashes; neutral | "Topics" blurs with tags; "sections" sounds like site jargon |
+| **C. `/topics/` or `/sections/`** | `/sections/engineering-at-speed/` | No clashes; neutral | "Topics" blurs with tags; "sections" sounds like site jargon |
 
 Top-level URLs were chosen because the landing pages are what gets linked from YouTube descriptions and the book, so short URLs pay off. The build check makes a clash impossible rather than just unlikely.
 
