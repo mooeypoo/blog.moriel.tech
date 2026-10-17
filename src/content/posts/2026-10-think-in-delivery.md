@@ -1,12 +1,12 @@
 ---
-title: "The Old Habit That Makes Great Engineers in the AI Age"
+title: "The Old Habit That Makes Great Engineers, Even in the AI Age"
 date: 2026-10-16
 tags:
   - Tech Industry
   - Architecture
 section: engineering-at-speed
 order: 1
-description: The engineers I've most wanted to work with were never the fastest or the most careful. They were the ones who could do both at once, and that has always been the job.
+description: The industry has always rewarded engineers who can move fast and get it right at the same time. That hasn't changed, whether AI writes your code or you do.
 image: ../../assets/images/posts/think-in-delivery.jpg
 ---
 
