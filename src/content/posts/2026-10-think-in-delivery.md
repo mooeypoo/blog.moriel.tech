@@ -44,7 +44,7 @@ I'd bet they weren't the fastest typist in the room, and they weren't the one wh
 
 When I look back at the engineers who grew into the tech leads and architects people actually wanted to follow, that's the common thread. Not raw speed. Not perfectionism. Delivery.
 
-None of this is new, either. Fred Brooks was telling us to "plan to throw one away" back in 1975. John Gall observed around the same time that complex systems that work tend to grow out of simple systems that worked, not get designed whole from scratch. Engineers have been rediscovering the value of shipping working software early and often for decades.
+None of this is new, either. Fred Brooks was telling us to ["plan to throw one away"](https://en.wikipedia.org/wiki/The_Mythical_Man-Month) back in 1975. [John Gall observed](https://en.wikipedia.org/wiki/John_Gall_%28author%29) around the same time that complex systems that work tend to grow out of simple systems that worked, not get designed whole from scratch. Engineers have been rediscovering the value of shipping working software early and often for decades.
 
 The only thing that's changed is how fast the ground moves. Thinking in delivery used to be what set the best engineers apart. Increasingly, it's the job.
 
@@ -73,9 +73,6 @@ Every time you ship something, the world tells you things your design process co
 Getting something out there isn't giving up on quality. It's running the most important test you have.
 
 And it compounds. An engineer who ships something real every couple of weeks gets dozens of these lessons a year. An engineer who ships once a quarter gets four. Over a career, that difference is enormous. This is the engine underneath everything else on this list.
-
-![Four lessons a year vs dozens or more lessons a year. Over a career, the difference is enormous.](../../assets/images/posts/think-in-delivery-comparison.jpg)
-*Four lessons a year vs dozens or more lessons a year. Over a career, the difference is enormous.*
 
 ### You learn to read the shape of a problem
 
