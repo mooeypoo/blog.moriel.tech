@@ -1,6 +1,6 @@
 ---
 title: "The Old Habit That Makes Great Engineers, Even in the AI Age"
-date: 2026-10-16
+date: 2026-10-17
 tags:
   - Tech Industry
   - Architecture
