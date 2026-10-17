@@ -74,6 +74,9 @@ Getting something out there isn't giving up on quality. It's running the most im
 
 And it compounds. An engineer who ships something real every couple of weeks gets dozens of these lessons a year. An engineer who ships once a quarter gets four. Over a career, that difference is enormous. This is the engine underneath everything else on this list.
 
+![Four lessons a year vs dozens or more lessons a year. Over a career, the difference is enormous.](../../assets/images/posts/think-in-delivery-comparison.jpg)
+*Four lessons a year vs dozens or more lessons a year. Over a career, the difference is enormous.*
+
 ### You learn to read the shape of a problem
 
 If you need to ship something real soon, you can't afford to build one tangled thing and plan to untangle it later. You have to understand where the natural boundaries are: where a piece can come away cleanly, and where it can't. What's actually coupled, and what only looks that way because of a decision someone made years ago.
