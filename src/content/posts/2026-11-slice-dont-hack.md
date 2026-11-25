@@ -8,7 +8,7 @@ tags:
 section: engineering-at-speed
 order: 2
 description: You need to ship something big, and fast, whether you write the code yourself or direct an AI to write it. The real choice isn't between doing it right and doing it fast. It's between finding the real pieces inside the problem and hacking through it.
-image: ../../assets/images/posts/slice-dont-hack.png
+image: ../../assets/images/posts/slice-dont-hack.jpg
 ---
 
 You need to ship a feature fast. It's a complicated one, too big to solve in one go. There's a sense of urgency around you. Ship it. Ship something. There are real goals behind this, and everyone wants to see it working.
