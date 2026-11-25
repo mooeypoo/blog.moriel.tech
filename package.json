@@ -10,7 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "audio:install": "npm ci --prefix tools/listen-audio",
+    "audio:install": "node tools/listen-audio/install.mjs",
     "audio": "npm --prefix tools/listen-audio run generate --"
   },
   "dependencies": {
