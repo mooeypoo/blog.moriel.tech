@@ -25,6 +25,8 @@ npm run audio -- --plan --from https://mooeypoo.github.io/blog.moriel.tech/
                                # lists what the workflow would generate or remove
 ```
 
+The generator runs ONNX Runtime on CPU, so `audio:install` skips its optional CUDA provider download.
+
 The first run downloads the voice model (~330 MB) into `tools/listen-audio/.cache`.
 
 ## One-time setup
